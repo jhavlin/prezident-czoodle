@@ -1,0 +1,41 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prezidentský Czoodle</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <script src="js/vote.elm.js"></script>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/vote.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <meta property="og:title" content="Czoodle.cz" />
+    <meta property="og:image" content="https://czoodle.cz/og/czoodle_og_image.png?v2" />
+    <meta property="og:site_name" content="Czoodle.cz" />
+    <meta property="og:description" content="Jednoduché skupinové hlasování" />
+</head>
+
+<body>
+    <header>
+        <h1 class="header">
+            <div class="logo">
+                <span class="cz-start">Cz</span><span class="oo">oo</span><span class="d">d</span><span class="le">le</span>.<span class="cz-end">cz</span>
+                <div class="header-prezident">Prezidentský</div>
+            </div>
+        </h1>
+    </header>
+    <div class="color-separator"></div>
+    <div id="myapp"></div>
+    <script>
+        var app = Elm.Vote.init({
+            node: document.getElementById('myapp'),
+            flags: {
+                uuid: crypto.randomUUID(),
+            }
+        });
+    </script>
+</body>
+
+</html>

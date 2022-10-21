@@ -1,0 +1,106 @@
+:root {
+    --logo-gray: #646464;
+    --logo-border: #2c2c2c;
+
+    --czech-white: #ffffff;
+    --czech-red: #d80c13;
+    --czech-blue: #08437f;
+}
+
+body {
+    margin: 0 0;
+    padding: 0 0;
+    overflow: auto scroll;
+    background: #222222;
+}
+
+/*
+ * Header and logo
+ */
+header {
+    padding: 50px 0;
+}
+h1.header {
+    margin: 0 0;
+    padding: 0 0;
+    text-align: center;
+    color: var(--logo-gray);
+    font-size: 40pt;
+}
+@media (max-width: 400px) {
+    h1.header {
+        font-size: 32px;
+    }
+}
+.logo {
+    display: inline-block;
+    position: relative;
+}
+.logo .header-prezident {
+    background: white;
+    color: var(--logo-border);
+    border: 1px var(--logo-border) solid;
+    font-size: 55%;
+    padding: 0.2rem 0.5rem;
+    background: linear-gradient(to bottom, white, #dddddd);
+    transform: rotate(-10deg);
+    position: absolute;
+    top: -2rem;
+    left: -2rem;
+}
+.logo > .cz-start, .logo > .cz-end {
+    background: var(--logo-gray);
+    color: white;
+    padding: 0.5rem;
+    border: 1px var(--logo-border) solid;
+    border-radius: 0.2rem;
+    box-shadow: -0.2rem 0.2rem 4px var(--logo-border);
+}
+.logo > .oo {
+    background: white;
+    font-size: 80%;
+    color: var(--logo-gray);
+    padding: 0.1rem;
+    border: 1px var(--logo-border) solid;
+    border-radius: 4px;
+    box-shadow: -0.2rem 0.2rem 4px var(--logo-border);
+}
+.logo > .d {
+    background: var(--czech-red);
+    font-size: 110%;
+    color: white;
+    padding: 0.5rem;
+    border: 1px var(--logo-border) solid;
+    border-radius: 4px;
+    box-shadow: -0.2rem 0.2rem 4px var(--logo-border);
+}
+.logo > .le {
+    background: var(--czech-blue);
+    font-size: 60%;
+    color: white;
+    padding: 0.5rem;
+    border: 1px var(--logo-border) solid;
+    border-radius: 4px;
+    box-shadow: -0.2rem 0.2rem 4px var(--logo-border);
+}
+.width {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0.5rem;
+    position: relative;
+}
+@media (min-width: 600px) {
+    .width {
+        padding: 2rem;
+    }
+}
+
+/*
+ * Common UI elements
+ */
+
+ .color-separator {
+    height: 9px;
+    background: linear-gradient(to bottom, var(--czech-white) 3px, var(--czech-red) 3px, var(--czech-red) 6px, var(--czech-blue) 6px);
+    border-bottom: 1px var(--logo-border) solid;
+ }
