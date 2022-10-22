@@ -1,3 +1,7 @@
+/*
+ * Root and body
+ */
+
 :root {
     --logo-gray: #646464;
     --logo-border: #2c2c2c;
@@ -12,6 +16,8 @@ body {
     padding: 0 0;
     overflow: auto scroll;
     background: #222222;
+    /* System Fonts with system-ui */
+    font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 /*
@@ -19,6 +25,7 @@ body {
  */
 header {
     padding: 50px 0;
+    font-family: serif;
 }
 h1.header {
     margin: 0 0;
@@ -41,57 +48,61 @@ h1.header {
     color: var(--logo-border);
     border: 1px var(--logo-border) solid;
     font-size: 55%;
-    padding: 0.2rem 0.5rem;
+    padding: 0.2em 0.5em;
     background: linear-gradient(to bottom, white, #dddddd);
     transform: rotate(-10deg);
     position: absolute;
-    top: -2rem;
-    left: -2rem;
+    top: -1.3em;
+    left: -1.5em;
 }
 .logo > .cz-start, .logo > .cz-end {
     background: var(--logo-gray);
     color: white;
-    padding: 0.5rem;
+    padding: 0.17em;
     border: 1px var(--logo-border) solid;
-    border-radius: 0.2rem;
-    box-shadow: -0.2rem 0.2rem 4px var(--logo-border);
+    border-radius: 0.1em;
 }
 .logo > .oo {
     background: white;
     font-size: 80%;
     color: var(--logo-gray);
-    padding: 0.1rem;
+    padding: 0.05em;
     border: 1px var(--logo-border) solid;
     border-radius: 4px;
-    box-shadow: -0.2rem 0.2rem 4px var(--logo-border);
+    box-shadow: -0.1em 0.1em 4px var(--logo-border);
 }
 .logo > .d {
     background: var(--czech-red);
     font-size: 110%;
     color: white;
-    padding: 0.5rem;
+    padding: 0.1em;
     border: 1px var(--logo-border) solid;
     border-radius: 4px;
-    box-shadow: -0.2rem 0.2rem 4px var(--logo-border);
+    box-shadow: -0.1em 0.1em 4px var(--logo-border);
 }
 .logo > .le {
     background: var(--czech-blue);
     font-size: 60%;
     color: white;
-    padding: 0.5rem;
+    padding: 0.25em;
     border: 1px var(--logo-border) solid;
     border-radius: 4px;
-    box-shadow: -0.2rem 0.2rem 4px var(--logo-border);
+    box-shadow: -0.1em 0.1em 4px var(--logo-border);
 }
+
+/*
+ * Layout
+ */
+
 .width {
     max-width: 600px;
     margin: 0 auto;
-    padding: 0.5rem;
+    padding: 0.2em;
     position: relative;
 }
 @media (min-width: 600px) {
     .width {
-        padding: 2rem;
+        padding: 2em;
     }
 }
 
@@ -99,8 +110,24 @@ h1.header {
  * Common UI elements
  */
 
- .color-separator {
-    height: 9px;
-    background: linear-gradient(to bottom, var(--czech-white) 3px, var(--czech-red) 3px, var(--czech-red) 6px, var(--czech-blue) 6px);
+.color-separator {
+    height: 5px;
+    background: repeating-linear-gradient(to right, var(--czech-white), var(--czech-white) 5px, var(--czech-red) 5px, var(--czech-red) 10px, var(--czech-blue) 10px, var(--czech-blue) 15px, var(--czech-white) 15px);
     border-bottom: 1px var(--logo-border) solid;
- }
+}
+
+.candidate-photo {
+    width: 42px;
+    border-radius: 21px;
+    vertical-align: middle;
+    margin-right: 0.5em;
+}
+
+.candidate-first-name {
+    color: white;
+}
+
+.candidate-surname {
+    color: white;
+    font-weight: bold;
+}

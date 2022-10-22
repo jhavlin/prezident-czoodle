@@ -1,7 +1,10 @@
 module Vote exposing (..)
 
+import Array
 import Browser
-import Html exposing (Html, text)
+import Candidates
+import Html exposing (Html, div, img, span, text)
+import Html.Attributes exposing (class, src)
 import Json.Decode as D
 
 
@@ -57,8 +60,23 @@ update _ model =
 
 
 view : Model -> Html Msg
-view model =
-    text model.uuid
+view _ =
+    candidateList
+
+
+candidateList : Html Msg
+candidateList =
+    let
+        candidateToView : Candidates.Candidate -> Html Msg
+        candidateToView candidate =
+            div []
+                [ img [ class "candidate-photo", src <| String.concat [ "img/candidate/", candidate.imgName, ".jpg" ] ] []
+                , span [ class "candidate-first-name" ] [ text candidate.firstName ]
+                , text " "
+                , span [ class "candidate-surname" ] [ text candidate.surname ]
+                ]
+    in
+    div [ class "width" ] <| Array.toList <| Array.map candidateToView Candidates.all
 
 
 
