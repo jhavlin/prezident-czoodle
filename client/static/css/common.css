@@ -24,7 +24,7 @@ body {
  * Header and logo
  */
 header {
-    padding: 50px 0;
+    padding: 60px 0 50px 0;
     font-family: serif;
 }
 h1.header {
@@ -131,3 +131,18 @@ h1.header {
     color: white;
     font-weight: bold;
 }
+
+/*
+ * Star Poll
+ */
+ .star-poll-star {
+     fill: rgb(98, 98, 98);
+     stroke-width: 1;
+     stroke: gray;
+    }
+
+    .star-poll-star.enabled {
+     fill: yellow;
+     stroke: white;
+
+ }

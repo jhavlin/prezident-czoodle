@@ -3,9 +3,11 @@ module Vote exposing (..)
 import Array
 import Browser
 import Candidates
+import FeatherIcons
 import Html exposing (Html, div, img, span, text)
 import Html.Attributes exposing (class, src)
 import Json.Decode as D
+import Svg.Attributes as SAttr
 
 
 
@@ -61,7 +63,7 @@ update _ model =
 
 view : Model -> Html Msg
 view _ =
-    candidateList
+    div [] [ candidateList, starRankView ]
 
 
 candidateList : Html Msg
@@ -77,6 +79,23 @@ candidateList =
                 ]
     in
     div [ class "width" ] <| Array.toList <| Array.map candidateToView Candidates.all
+
+
+starRankView : Html Msg
+starRankView =
+    let
+        oneStar cls =
+            FeatherIcons.star
+                |> FeatherIcons.withSize 32
+                |> FeatherIcons.toHtml [ SAttr.class cls ]
+
+        oneStarDisabled =
+            oneStar "star-poll-star"
+
+        oneStarEnabled =
+            oneStar "star-poll-star enabled"
+    in
+    div [ class "width" ] [ oneStarEnabled, oneStarEnabled, oneStarDisabled, oneStarDisabled, oneStarDisabled ]
 
 
 
