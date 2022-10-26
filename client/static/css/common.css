@@ -116,20 +116,41 @@ h1.header {
     border-bottom: 1px var(--logo-border) solid;
 }
 
+.candidate {
+    display: inline-block;
+    width: 9em;
+}
+
 .candidate-photo {
     width: 42px;
     border-radius: 21px;
     vertical-align: middle;
-    margin-right: 0.5em;
+    margin: 0 0.5em;
+}
+
+.candidate-name {
+    display: inline-block;
+    color: white;
+    vertical-align: middle;
 }
 
 .candidate-first-name {
-    color: white;
+    display: block;
 }
 
 .candidate-surname {
-    color: white;
+    display: block;
     font-weight: bold;
+}
+
+
+.star-poll-row {
+    padding: 0.5em 0;
+}
+
+.star-poll-rank {
+    display: inline-block;
+    vertical-align: middle;
 }
 
 /*

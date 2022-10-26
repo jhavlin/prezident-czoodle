@@ -1,13 +1,11 @@
 module Vote exposing (..)
 
-import Array
 import Browser
 import Candidates
-import FeatherIcons
-import Html exposing (Html, div, img, span, text)
-import Html.Attributes exposing (class, src)
+import Html exposing (Html, div)
+import Html.Attributes exposing (class)
 import Json.Decode as D
-import Svg.Attributes as SAttr
+import Polls.StarPoll
 
 
 
@@ -30,6 +28,7 @@ main =
 
 type alias Model =
     { uuid : String
+    , starPoll : Polls.StarPoll.Model
     }
 
 
@@ -39,7 +38,9 @@ init jsonFlags =
         uuidResult =
             D.decodeValue (D.field "uuid" D.string) jsonFlags
     in
-    ( { uuid = Result.withDefault "" uuidResult }
+    ( { uuid = Result.withDefault "" uuidResult
+      , starPoll = Polls.StarPoll.init
+      }
     , Cmd.none
     )
 
@@ -50,11 +51,21 @@ init jsonFlags =
 
 type Msg
     = NoOp
+    | StarPollMsg Polls.StarPoll.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update _ model =
-    ( model, Cmd.none )
+update cmd model =
+    case cmd of
+        StarPollMsg inner ->
+            let
+                updated =
+                    Polls.StarPoll.update inner model.starPoll
+            in
+            ( { model | starPoll = updated }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 
@@ -62,40 +73,10 @@ update _ model =
 
 
 view : Model -> Html Msg
-view _ =
-    div [] [ candidateList, starRankView ]
-
-
-candidateList : Html Msg
-candidateList =
-    let
-        candidateToView : Candidates.Candidate -> Html Msg
-        candidateToView candidate =
-            div []
-                [ img [ class "candidate-photo", src <| String.concat [ "img/candidate/", candidate.imgName, ".jpg" ] ] []
-                , span [ class "candidate-first-name" ] [ text candidate.firstName ]
-                , text " "
-                , span [ class "candidate-surname" ] [ text candidate.surname ]
-                ]
-    in
-    div [ class "width" ] <| Array.toList <| Array.map candidateToView Candidates.all
-
-
-starRankView : Html Msg
-starRankView =
-    let
-        oneStar cls =
-            FeatherIcons.star
-                |> FeatherIcons.withSize 32
-                |> FeatherIcons.toHtml [ SAttr.class cls ]
-
-        oneStarDisabled =
-            oneStar "star-poll-star"
-
-        oneStarEnabled =
-            oneStar "star-poll-star enabled"
-    in
-    div [ class "width" ] [ oneStarEnabled, oneStarEnabled, oneStarDisabled, oneStarDisabled, oneStarDisabled ]
+view model =
+    div []
+        [ div [ class "width" ] [ Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view model.starPoll Candidates.all) ]
+        ]
 
 
 
