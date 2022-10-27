@@ -27,6 +27,7 @@ header {
     padding: 60px 0 50px 0;
     font-family: serif;
 }
+
 h1.header {
     margin: 0 0;
     padding: 0 0;
@@ -34,15 +35,18 @@ h1.header {
     color: var(--logo-gray);
     font-size: 40pt;
 }
+
 @media (max-width: 400px) {
     h1.header {
         font-size: 32px;
     }
 }
+
 .logo {
     display: inline-block;
     position: relative;
 }
+
 .logo .header-prezident {
     background: white;
     color: var(--logo-border);
@@ -55,14 +59,17 @@ h1.header {
     top: -1.3em;
     left: -1.5em;
 }
-.logo > .cz-start, .logo > .cz-end {
+
+.logo>.cz-start,
+.logo>.cz-end {
     background: var(--logo-gray);
     color: white;
     padding: 0.17em;
     border: 1px var(--logo-border) solid;
     border-radius: 0.1em;
 }
-.logo > .oo {
+
+.logo>.oo {
     background: white;
     font-size: 80%;
     color: var(--logo-gray);
@@ -71,7 +78,8 @@ h1.header {
     border-radius: 4px;
     box-shadow: -0.1em 0.1em 4px var(--logo-border);
 }
-.logo > .d {
+
+.logo>.d {
     background: var(--czech-red);
     font-size: 110%;
     color: white;
@@ -80,7 +88,8 @@ h1.header {
     border-radius: 4px;
     box-shadow: -0.1em 0.1em 4px var(--logo-border);
 }
-.logo > .le {
+
+.logo>.le {
     background: var(--czech-blue);
     font-size: 60%;
     color: white;
@@ -100,6 +109,7 @@ h1.header {
     padding: 0.2em;
     position: relative;
 }
+
 @media (min-width: 600px) {
     .width {
         padding: 2em;
@@ -156,14 +166,37 @@ h1.header {
 /*
  * Star Poll
  */
- .star-poll-star {
-     fill: rgb(98, 98, 98);
-     stroke-width: 1;
-     stroke: gray;
+.star-poll-star {
+    fill: #626262;
+    stroke-width: 1;
+    stroke: gray;
+}
+
+.star-poll-none {
+    stroke: #626262;
+    stroke-width: 1;
+}
+
+.star-poll-star.enabled {
+    fill: yellow;
+    stroke: white;
+}
+
+@media (hover: hover) {
+    .star-poll-rank:hover .star-poll-star {
+        fill: white;
     }
 
-    .star-poll-star.enabled {
-     fill: yellow;
-     stroke: white;
+    .star-poll-rank .star-poll-option:hover~.star-poll-star.enabled {
+        fill: #8f8a43
+    }
 
- }
+    .star-poll-rank .star-poll-option:hover~.star-poll-star.disabled {
+        fill: #626262;
+    }
+
+    .star-poll-rank .star-poll-none.enabled:hover {
+        stroke: lightcoral;
+        stroke-width: 3;
+    }
+}

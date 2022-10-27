@@ -65,25 +65,51 @@ view model candidates =
 starRankView : { candidateId : Int, value : Int } -> Html Msg
 starRankView { candidateId, value } =
     let
+        iconSize =
+            32
+
         oneStar cls points =
             FeatherIcons.star
-                |> FeatherIcons.withSize 32
-                |> FeatherIcons.toHtml [ SAttr.class cls, SEvent.onClick <| SetValue { id = candidateId, value = points } ]
+                |> FeatherIcons.withSize iconSize
+                |> FeatherIcons.toHtml
+                    [ SAttr.class "star-poll-option star-poll-star"
+                    , SAttr.class cls
+                    , SEvent.onClick <| SetValue { id = candidateId, value = points }
+                    ]
 
         oneStarDisabled points =
-            oneStar "star-poll-star" points
+            oneStar "disabled" points
 
         oneStarEnabled points =
-            oneStar "star-poll-star enabled" points
+            oneStar "enabled" points
+
+        noStarState =
+            if value > 0 then
+                "enabled"
+
+            else
+                "disabled"
+
+        noStars =
+            FeatherIcons.x
+                |> FeatherIcons.withSize iconSize
+                |> FeatherIcons.toHtml
+                    [ SAttr.class "star-poll-option star-poll-none"
+                    , SAttr.class noStarState
+                    , SEvent.onClick <| SetValue { id = candidateId, value = 0 }
+                    ]
 
         pointsToStar p =
-            if p <= value then
+            if p == 0 then
+                noStars
+
+            else if p <= value then
                 oneStarEnabled p
 
             else
                 oneStarDisabled p
 
         stars =
-            List.range 1 5 |> List.map pointsToStar
+            List.range 0 5 |> List.map pointsToStar
     in
     div [ class "star-poll-rank" ] stars
