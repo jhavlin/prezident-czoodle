@@ -16,6 +16,10 @@ body {
     padding: 0 0;
     overflow: auto scroll;
     background: #222222;
+}
+
+body,
+input {
     /* System Fonts with system-ui */
     font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
@@ -158,9 +162,10 @@ h1.header {
     padding: 0.5em 0;
 }
 
-.star-poll-rank {
-    display: inline-block;
+.star-poll-value {
+    position: relative;
     vertical-align: middle;
+    display: inline-block;
 }
 
 /*
@@ -199,4 +204,44 @@ h1.header {
         stroke: lightcoral;
         stroke-width: 3;
     }
+}
+
+.star-poll-edit {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: -1;
+    opacity: 0;
+    padding-left: 0.5em;
+    align-items: center;
+}
+
+.star-poll-input {
+    width: 4em;
+    font-size: 14pt;
+}
+
+.star-poll.custom .star-poll-edit,
+.star-poll:focus-within .star-poll-edit {
+    z-index: 1;
+    opacity: 100;
+}
+
+.star-poll.custom .star-poll-rank,
+.star-poll:focus-within .star-poll-rank {
+    z-index: -1;
+    opacity: 0;
+}
+
+.star-poll-progress-parent {
+    padding: 0 1em;
+    display: flex;
+    align-items: center;
+}
+
+.star-poll-progress-parent progress {
+    width: 100px;
 }
