@@ -184,6 +184,7 @@ rowValueView { candidateId, value } =
                 |> FeatherIcons.toHtml
                     [ SAttr.class "star-poll-option star-poll-star"
                     , SAttr.class cls
+                    , SAttr.title <| String.concat [ String.fromInt (points * 20), "%" ]
                     , SEvent.onClick <| SetStarValue { id = candidateId, value = points * 20 }
                     ]
 
@@ -212,6 +213,7 @@ rowValueView { candidateId, value } =
                     [ SAttr.class "star-poll-option star-poll-none"
                     , SAttr.class noStarState
                     , SEvent.onClick <| SetStarValue { id = candidateId, value = 0 }
+                    , SAttr.title "0%"
                     ]
 
         pointsToStar p =

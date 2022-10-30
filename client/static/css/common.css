@@ -138,6 +138,7 @@ h1.header {
 
 .candidate-photo {
     width: 42px;
+    height: 42px;
     border-radius: 21px;
     vertical-align: middle;
     margin: 0 0.5em 0 0;
