@@ -199,6 +199,12 @@ h1.header {
     flex: 0 1 auto;
 }
 
+.star-poll-option>svg {
+    fill: inherit;
+    stroke: inherit;
+    stroke-width: inherit;
+}
+
 .star-poll-none {
     stroke: #626262;
     stroke-width: 1;

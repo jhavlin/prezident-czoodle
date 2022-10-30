@@ -11,7 +11,7 @@ import Candidates exposing (Candidate)
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
-import Html exposing (Attribute, Html, button, div, h2, input, text)
+import Html exposing (Attribute, Html, button, div, h2, input, span, text)
 import Html.Attributes exposing (class, disabled, style, tabindex, title, type_)
 import Html.Events exposing (keyCode, on, onClick, onFocus, onInput)
 import Json.Decode as Decode
@@ -179,14 +179,18 @@ rowValueView { candidateId, value } =
             32
 
         oneStar cls points =
-            FeatherIcons.star
-                |> FeatherIcons.withSize iconSize
-                |> FeatherIcons.toHtml
-                    [ SAttr.class "star-poll-option star-poll-star"
-                    , SAttr.class cls
-                    , SAttr.title <| String.concat [ String.fromInt (points * 20), "%" ]
-                    , SEvent.onClick <| SetStarValue { id = candidateId, value = points * 20 }
-                    ]
+            span
+                [ title <| String.concat [ String.fromInt (points * 20), "%" ]
+                , class "star-poll-option star-poll-star"
+                , class cls
+                ]
+                [ FeatherIcons.star
+                    |> FeatherIcons.withSize iconSize
+                    |> FeatherIcons.toHtml
+                        [ SAttr.title <| String.concat [ String.fromInt (points * 20), "%" ]
+                        , SEvent.onClick <| SetStarValue { id = candidateId, value = points * 20 }
+                        ]
+                ]
 
         oneStarDisabled points =
             oneStar "disabled" points
@@ -207,14 +211,18 @@ rowValueView { candidateId, value } =
                     "disabled"
 
         noStars =
-            FeatherIcons.x
-                |> FeatherIcons.withSize iconSize
-                |> FeatherIcons.toHtml
-                    [ SAttr.class "star-poll-option star-poll-none"
-                    , SAttr.class noStarState
-                    , SEvent.onClick <| SetStarValue { id = candidateId, value = 0 }
-                    , SAttr.title "0%"
-                    ]
+            span
+                [ title "0%"
+                , class "star-poll-option star-poll-none"
+                , class noStarState
+                ]
+                [ FeatherIcons.x
+                    |> FeatherIcons.withSize iconSize
+                    |> FeatherIcons.toHtml
+                        [ SEvent.onClick <| SetStarValue { id = candidateId, value = 0 }
+                        , SAttr.title "0%"
+                        ]
+                ]
 
         pointsToStar p =
             if p == 0 then
