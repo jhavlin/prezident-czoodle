@@ -11,9 +11,10 @@ import Candidates exposing (Candidate)
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
-import Html exposing (Html, div, input, text)
-import Html.Attributes exposing (class, style, type_)
-import Html.Events exposing (onFocus, onInput)
+import Html exposing (Attribute, Html, button, div, h2, input, text)
+import Html.Attributes exposing (class, disabled, style, tabindex, title, type_)
+import Html.Events exposing (keyCode, on, onClick, onFocus, onInput)
+import Json.Decode as Decode
 import Svg.Attributes as SAttr
 import Svg.Events as SEvent
 import UserInputInt exposing (UserInputInt)
@@ -22,21 +23,20 @@ import UserInputInt exposing (UserInputInt)
 type Msg
     = SetStringValue Int String
     | SetStarValue { id : Int, value : Int }
-    | SetFocusable Bool
+    | SetEditMode Bool
+    | KeyPressed Int
 
 
 type alias Model =
     { values : Dict Int UserInputInt
-    , focusable : Bool
-    , explicitlyFocusable : Bool
+    , editMode : Bool
     }
 
 
 init : Model
 init =
     { values = Dict.empty
-    , focusable = False
-    , explicitlyFocusable = False
+    , editMode = False
     }
 
 
@@ -67,8 +67,20 @@ update msg model =
             in
             { model | values = updatedValues }
 
-        SetFocusable focusable ->
-            { model | focusable = focusable }
+        SetEditMode editMode ->
+            { model | editMode = editMode }
+
+        KeyPressed keyCode ->
+            if keyCode == 27 then
+                { model | editMode = False }
+
+            else
+                model
+
+
+onKeyUp : (Int -> msg) -> Attribute msg
+onKeyUp tagger =
+    on "keyup" (Decode.map tagger keyCode)
 
 
 view : Model -> Array Candidate -> Html Msg
@@ -96,17 +108,68 @@ view model candidates =
             Dict.values model.values |> List.any isCustomValue
 
         customClass =
-            if isCustomPoll then
+            if isCustomPoll || model.editMode then
                 "custom"
 
             else
                 ""
+
+        onKeyUpHandler =
+            if isCustomPoll then
+                []
+
+            else
+                [ onKeyUp KeyPressed ]
+    in
+    div []
+        [ headerView isCustomPoll model
+        , div
+            (onKeyUpHandler
+                ++ [ class "star-poll"
+                   , class customClass
+                   ]
+            )
+            (Array.toList candidates |> List.map row)
+        ]
+
+
+headerView : Bool -> Model -> Html Msg
+headerView isCustomPoll model =
+    let
+        heading =
+            h2 [] [ text "Hodnocení kandidátů" ]
+
+        icon =
+            if isCustomPoll || model.editMode then
+                FeatherIcons.star |> FeatherIcons.toHtml []
+
+            else
+                FeatherIcons.percent |> FeatherIcons.toHtml []
+
+        tooltip =
+            if not model.editMode then
+                "Přepnout do precentuálního režimu"
+
+            else if model.editMode && not isCustomPoll then
+                "Přepnout do hvězdičkového režimu"
+
+            else
+                "Nelze přepnout do hvězdičkového režimu, některé hodnoty nejsou dělitelné 20"
+
+        switchButton =
+            button
+                [ tabindex -1
+                , disabled isCustomPoll
+                , title tooltip
+                ]
+                [ icon
+                ]
     in
     div
-        [ class "star-poll"
-        , class customClass
+        [ class "star-poll-heading"
+        , onClick <| SetEditMode <| not model.editMode
         ]
-        (Array.toList candidates |> List.map row)
+        [ heading, switchButton ]
 
 
 rowValueView : { candidateId : Int, value : UserInputInt } -> Html Msg
@@ -193,7 +256,7 @@ inputView { candidateId, value } =
                 , Html.Attributes.min "0"
                 , Html.Attributes.max "100"
                 , onInput <| SetStringValue candidateId
-                , onFocus <| SetFocusable True
+                , onFocus <| SetEditMode True
                 ]
                 []
 
