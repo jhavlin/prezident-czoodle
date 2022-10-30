@@ -11,8 +11,8 @@ import Candidates exposing (Candidate)
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
-import Html exposing (Html, div, input, progress)
-import Html.Attributes exposing (class, type_)
+import Html exposing (Html, div, input, text)
+import Html.Attributes exposing (class, style, type_)
 import Html.Events exposing (onFocus, onInput)
 import Svg.Attributes as SAttr
 import Svg.Events as SEvent
@@ -200,14 +200,23 @@ inputView { candidateId, value } =
         progressView =
             case value of
                 UserInputInt.Valid v ->
-                    div [ class "star-poll-progress-parent" ]
-                        [ progress [ Html.Attributes.max "100", Html.Attributes.value <| String.fromInt <| v ] []
+                    div
+                        [ class "star-poll-percent-bar"
+                        , style "background" <|
+                            String.concat
+                                [ "linear-gradient(to right, yellow 0, yellow "
+                                , String.fromInt v
+                                , "%, #555 "
+                                , String.fromInt v
+                                , "%, #555 100%)"
+                                ]
                         ]
+                        []
 
                 _ ->
-                    div [] []
+                    div [ class "star-poll-percent-bar" ] [ text "Není %" ]
     in
     div [ class "star-poll-edit" ]
-        [ inputField
-        , progressView
+        [ progressView
+        , inputField
         ]

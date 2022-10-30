@@ -108,15 +108,15 @@ h1.header {
  */
 
 .width {
-    max-width: 600px;
+    max-width: 380px;
     margin: 0 auto;
-    padding: 0.2em;
+    padding: 0 0.5em;
     position: relative;
 }
 
 @media (min-width: 600px) {
     .width {
-        padding: 2em;
+        padding: 0 2em;
     }
 }
 
@@ -131,21 +131,24 @@ h1.header {
 }
 
 .candidate {
-    display: inline-block;
+    display: flex;
     width: 9em;
+    flex: 0 0 auto;
 }
 
 .candidate-photo {
     width: 42px;
     border-radius: 21px;
     vertical-align: middle;
-    margin: 0 0.5em;
+    margin: 0 0.5em 0 0;
 }
 
 .candidate-name {
-    display: inline-block;
+    display: flex;
     color: white;
     vertical-align: middle;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .candidate-first-name {
@@ -157,15 +160,27 @@ h1.header {
     font-weight: bold;
 }
 
+.star-poll {
+    margin: 1em 0;
+}
 
 .star-poll-row {
     padding: 0.5em 0;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
 }
 
 .star-poll-value {
     position: relative;
-    vertical-align: middle;
-    display: inline-block;
+    align-items: center;
+    display: flex;
+    flex: 1 1 150px;
+    justify-content: right;
+}
+
+.star-poll-rank {
+    display: flex;
 }
 
 /*
@@ -175,6 +190,7 @@ h1.header {
     fill: #626262;
     stroke-width: 1;
     stroke: gray;
+    flex: 0 1 auto;
 }
 
 .star-poll-none {
@@ -236,12 +252,11 @@ h1.header {
     opacity: 0;
 }
 
-.star-poll-progress-parent {
-    padding: 0 1em;
+.star-poll-percent-bar {
+    margin: 0 0.5em;
     display: flex;
     align-items: center;
-}
-
-.star-poll-progress-parent progress {
-    width: 100px;
+    height: 1.5em;
+    flex: 1 1 100px;
+    color: lightcoral;
 }
