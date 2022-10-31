@@ -11,7 +11,7 @@ import Candidates exposing (Candidate)
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
-import Html exposing (Attribute, Html, button, div, h2, input, span, text)
+import Html exposing (Attribute, Html, button, div, h1, h2, input, p, span, text)
 import Html.Attributes exposing (class, disabled, style, tabindex, title, type_)
 import Html.Events exposing (keyCode, on, onClick, onFocus, onInput)
 import Json.Decode as Decode
@@ -161,15 +161,30 @@ headerView isCustomPoll model =
                 [ tabindex -1
                 , disabled isCustomPoll
                 , title tooltip
+                , onClick <| SetEditMode <| not model.editMode
                 ]
                 [ icon
                 ]
     in
     div
-        [ class "star-poll-heading"
-        , onClick <| SetEditMode <| not model.editMode
+        []
+        [ h1 [ class "star-poll-heading" ] [ text "Hvězdičkové hlasování" ]
+        , div [ class "star-poll-info" ]
+            [ p []
+                [ text <|
+                    String.concat
+                        [ "V tomto hlasování každému kandidátovi přidělíte určitý počet hvězdiček. "
+                        , "Jedna hvězdička představuje 20 % vaší důvěry. Můžete také přepnout do precentuálního režimu "
+                        , "a zadat hodnoty s přesností na procenta. Tento režim se zapne také automaticky "
+                        , "při ovládání klávesnicí."
+                        ]
+                ]
+            ]
+        , div
+            [ class "star-poll-title"
+            ]
+            [ heading, switchButton ]
         ]
-        [ heading, switchButton ]
 
 
 rowValueView : { candidateId : Int, value : UserInputInt } -> Html Msg

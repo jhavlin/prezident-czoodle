@@ -108,7 +108,7 @@ h1.header {
  */
 
 .width {
-    max-width: 380px;
+    max-width: 450px;
     margin: 0 auto;
     padding: 0 0.5em;
     position: relative;
@@ -272,15 +272,24 @@ h1.header {
 }
 
 .star-poll-heading {
+    color: white;
+}
+
+.star-poll-info {
+    color: white;
+    line-height: 1.25;
+}
+
+.star-poll-title {
     display: flex;
     align-items: center;
     color: white;
 }
 
-.star-poll-heading>h2 {
+.star-poll-title>h2 {
     flex: 1 1 auto;
 }
 
-.star-poll-heading>button {
+.star-poll-title>button {
     flex: 0 0 auto;
 }
