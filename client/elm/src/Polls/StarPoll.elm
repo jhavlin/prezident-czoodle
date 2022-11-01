@@ -174,8 +174,8 @@ headerView isCustomPoll model =
                 [ text <|
                     String.concat
                         [ "V tomto hlasování každému kandidátovi přidělíte určitý počet hvězdiček. "
-                        , "Jedna hvězdička představuje 20 % vaší důvěry. Můžete také přepnout do precentuálního režimu "
-                        , "a zadat hodnoty s přesností na procenta. Tento režim se zapne také automaticky "
+                        , "Jedna hvězdička představuje 20 % vaší důvěry. Můžete také přepnout do procentuálního režimu "
+                        , "a zadat hodnoty s přesností na jednotky procent. Tento režim se zapne také automaticky "
                         , "při ovládání klávesnicí."
                         ]
                 ]
