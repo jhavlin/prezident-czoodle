@@ -2,7 +2,7 @@ module Vote exposing (..)
 
 import Browser
 import Candidates
-import Html exposing (Html, div)
+import Html exposing (Html, div, p, text)
 import Html.Attributes exposing (class)
 import Json.Decode as D
 import Polls.StarPoll
@@ -75,7 +75,10 @@ update cmd model =
 view : Model -> Html Msg
 view model =
     div []
-        [ div [ class "width" ] [ Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view model.starPoll Candidates.all) ]
+        [ div [ class "wide" ]
+            [ p [] [ text "Zúčastněte se prosím malého experimentu. Porovnejte různé hlasovací systémy na příkladu volby prezidenta České republiky." ]
+            ]
+        , div [ class "" ] [ Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view model.starPoll Candidates.all) ]
         ]
 
 

@@ -11,7 +11,7 @@ import Candidates exposing (Candidate)
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
-import Html exposing (Attribute, Html, button, div, h1, h2, input, p, span, text)
+import Html exposing (Attribute, Html, button, div, h1, h2, input, p, section, span, text)
 import Html.Attributes exposing (class, disabled, style, tabindex, title, type_)
 import Html.Events exposing (keyCode, on, onClick, onFocus, onInput)
 import Json.Decode as Decode
@@ -121,15 +121,18 @@ view model candidates =
             else
                 [ onKeyUp KeyPressed ]
     in
-    div []
-        [ headerView isCustomPoll model
-        , div
-            (onKeyUpHandler
-                ++ [ class "star-poll"
-                   , class customClass
-                   ]
-            )
-            (Array.toList candidates |> List.map row)
+    section []
+        [ div [ class "wide" ]
+            [ headerView isCustomPoll model ]
+        , div [ class "narrow" ]
+            [ div
+                (onKeyUpHandler
+                    ++ [ class "star-poll"
+                       , class customClass
+                       ]
+                )
+                (Array.toList candidates |> List.map row)
+            ]
         ]
 
 

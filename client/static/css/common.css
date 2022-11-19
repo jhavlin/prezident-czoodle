@@ -16,6 +16,7 @@ body {
     padding: 0 0;
     overflow: auto scroll;
     background: #222222;
+    color: white;
 }
 
 body,
@@ -107,15 +108,25 @@ h1.header {
  * Layout
  */
 
-.width {
-    max-width: 450px;
+.wide,
+.narrow {
     margin: 0 auto;
     padding: 0 0.5em;
     position: relative;
 }
 
+.wide {
+    max-width: 600px;
+}
+
+.narrow {
+    max-width: 450px;
+}
+
 @media (min-width: 600px) {
-    .width {
+
+    .wide,
+    .narrow {
         padding: 0 2em;
     }
 }
