@@ -226,6 +226,13 @@ section h2 {
     top: 0.1em;
 }
 
+.poll-buttons button.no-chrome {
+    color: white;
+    background: transparent;
+    color: white;
+    border: none;
+}
+
 .poll-buttons button>svg {
     margin: 0.5em 0.5em 0.5em 0;
 }

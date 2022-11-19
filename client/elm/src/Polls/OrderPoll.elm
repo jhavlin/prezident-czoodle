@@ -23,6 +23,7 @@ type Msg
     | Reset
     | CompleteRandomly
     | SetRandomly (List Int)
+    | RevertLastAction
 
 
 type alias Model =
@@ -49,7 +50,7 @@ update msg model =
                 updatedValues =
                     Array.set order id model.values
             in
-            ( { model | values = updatedValues }, Cmd.none )
+            ( { model | values = updatedValues, toRevert = Nothing }, Cmd.none )
 
         Reset ->
             ( { model | values = Array.map (\_ -> Nothing) model.values, toRevert = Just model.values }, Cmd.none )
@@ -60,7 +61,8 @@ update msg model =
                     List.length <| freeCandidates Candidates.all model.values Nothing
 
                 counts =
-                    List.range 0 (n - 1) -- keep reversed here, it will be reversed back in randomList inner fn
+                    -- keep reversed here, it will be reversed back in randomList inner fn
+                    List.range 0 (n - 1)
 
                 randomList : Generator (List Int)
                 randomList =
@@ -102,6 +104,9 @@ update msg model =
                     Array.fromList <| List.reverse <| completedListReversed
             in
             ( { model | toRevert = Just model.values, values = completed }, Cmd.none )
+
+        RevertLastAction ->
+            ( { model | values = Maybe.withDefault model.values model.toRevert, toRevert = Nothing }, Cmd.none )
 
 
 takeNthFromList : Int -> List a -> ( Maybe a, List a )
@@ -197,27 +202,49 @@ view model candidates =
                     ]
                 ]
 
+        buttonSize =
+            16
+
         refreshButton =
             button
                 [ disabled <| Set.isEmpty assigned
                 , onClick Reset
                 ]
                 [ FeatherIcons.refreshCw
-                    |> FeatherIcons.withSize 16
+                    |> FeatherIcons.withSize buttonSize
                     |> FeatherIcons.toHtml []
                 , div [] [ text "Začít znovu" ]
                 ]
 
-        finishButton =
+        completeRandomlyButton =
             button
                 [ disabled <| Set.size assigned == Array.length candidates || Set.isEmpty assigned
                 , onClick CompleteRandomly
                 ]
                 [ FeatherIcons.skipForward
-                    |> FeatherIcons.withSize 16
+                    |> FeatherIcons.withSize buttonSize
                     |> FeatherIcons.toHtml []
                 , div [] [ text "Doplnit náhodně" ]
                 ]
+
+        revertButton =
+            button
+                [ onClick RevertLastAction
+                , class "no-chrome"
+                ]
+                [ FeatherIcons.arrowLeft
+                    |> FeatherIcons.withSize buttonSize
+                    |> FeatherIcons.toHtml []
+                , div [] [ text "Vzít zpět" ]
+                ]
+
+        buttons =
+            case model.toRevert of
+                Just _ ->
+                    [ revertButton ]
+
+                Nothing ->
+                    [ refreshButton, completeRandomlyButton ]
     in
     section [ class "poll" ]
         [ div [ class "wide" ]
@@ -226,7 +253,7 @@ view model candidates =
             (Array.toList model.values |> List.indexedMap row)
         , div [ class "narrow" ]
             [ div [ class "poll-buttons" ]
-                [ refreshButton, finishButton ]
+                buttons
             ]
         ]
 
