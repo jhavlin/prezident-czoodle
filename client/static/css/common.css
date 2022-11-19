@@ -28,6 +28,7 @@ input {
 /*
  * Header and logo
  */
+
 header {
     padding: 60px 0 50px 0;
     font-family: serif;
@@ -172,6 +173,10 @@ h1.header {
     font-weight: bold;
 }
 
+/*
+ * Star Poll
+ */
+
 .star-poll {
     margin: 1em 0;
 }
@@ -200,9 +205,6 @@ h1.header {
     display: flex;
 }
 
-/*
- * Star Poll
- */
 .star-poll-star {
     fill: #626262;
     stroke-width: 1;
@@ -303,4 +305,58 @@ h1.header {
 
 .star-poll-title>button {
     flex: 0 0 auto;
+}
+
+/*
+ * Order Poll
+ */
+
+.order-poll-row {
+    display: flex;
+    align-items: center;
+    margin: 1em 0;
+}
+
+.order-poll-row-order {
+    font-weight: bold;
+    font-size: 150%;
+    min-width: 2em;
+    text-align: right;
+    padding-right: 0.5em;
+}
+
+.order-poll-row-points {
+    font-size: 90%;
+    opacity: 0.9;
+    padding: 0 0.5em;
+    min-width: 3em;
+    text-align: right;
+}
+
+.order-poll-row-select {
+    padding-left: 0.5em;
+    flex: 1 1 auto;
+}
+
+.order-poll-row-select>select {
+    font-size: 120%;
+    width: 100%;
+    padding: 0.25em;
+}
+
+.order-poll-row-unset.disabled>svg {
+    stroke: gray;
+}
+
+.order-poll-row-photo-placeholder {
+    width: 42;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.order-poll-row-photo-placeholder>svg {
+    stroke: gray;
+    stroke-width: 1;
 }
