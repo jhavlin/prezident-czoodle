@@ -109,6 +109,18 @@ h1.header {
  * Layout
  */
 
+section.poll {
+    margin: 3em 0 5em 0;
+}
+
+section h1 {
+    font-size: 160%;
+}
+
+section h2 {
+    font-size: 120%;
+}
+
 .wide,
 .narrow {
     margin: 0 auto;
@@ -140,6 +152,28 @@ h1.header {
     height: 5px;
     background: repeating-linear-gradient(to right, var(--czech-white), var(--czech-white) 5px, var(--czech-red) 5px, var(--czech-red) 10px, var(--czech-blue) 10px, var(--czech-blue) 15px, var(--czech-white) 15px);
     border-bottom: 1px var(--logo-border) solid;
+}
+
+.action-unset>svg {
+    fill: inherit;
+    stroke: inherit;
+    stroke-width: inherit;
+}
+
+.action-unset {
+    stroke: #626262;
+    stroke-width: 1;
+}
+
+.action-unset.enabled {
+    stroke: white;
+}
+
+@media (hover: hover) {
+    .action-unset.enabled:hover {
+        stroke: lightcoral;
+        stroke-width: 3;
+    }
 }
 
 .candidate {
@@ -218,11 +252,6 @@ h1.header {
     stroke-width: inherit;
 }
 
-.star-poll-none {
-    stroke: #626262;
-    stroke-width: 1;
-}
-
 .star-poll-star.enabled {
     fill: yellow;
     stroke: white;
@@ -239,11 +268,6 @@ h1.header {
 
     .star-poll-rank .star-poll-option:hover~.star-poll-star.disabled {
         fill: #626262;
-    }
-
-    .star-poll-rank .star-poll-none.enabled:hover {
-        stroke: lightcoral;
-        stroke-width: 3;
     }
 }
 
@@ -354,6 +378,7 @@ h1.header {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-right: 0.5em;
 }
 
 .order-poll-row-photo-placeholder>svg {

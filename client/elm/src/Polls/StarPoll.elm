@@ -121,7 +121,7 @@ view model candidates =
             else
                 [ onKeyUp KeyPressed ]
     in
-    section []
+    section [ class "poll" ]
         [ div [ class "wide" ]
             [ headerView isCustomPoll model ]
         , div [ class "narrow" ]
@@ -231,7 +231,7 @@ rowValueView { candidateId, value } =
         noStars =
             span
                 [ title "0%"
-                , class "star-poll-option star-poll-none"
+                , class "star-poll-option action-unset"
                 , class noStarState
                 ]
                 [ FeatherIcons.x

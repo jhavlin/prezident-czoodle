@@ -111,7 +111,7 @@ view model candidates =
                     , text <| String.fromInt (Array.length candidates - index)
                     , text " b)"
                     ]
-                , div [ class "order-poll-row-unset", class unsetState ]
+                , div [ class "action-unset", class unsetState ]
                     [ FeatherIcons.x
                         |> FeatherIcons.withSize 32
                         |> FeatherIcons.toHtml
@@ -120,7 +120,7 @@ view model candidates =
                     ]
                 ]
     in
-    section []
+    section [ class "poll" ]
         [ div [ class "wide" ]
             [ headerView candidates ]
         , div [ class "narrow" ]
