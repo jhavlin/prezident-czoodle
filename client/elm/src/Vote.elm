@@ -63,10 +63,10 @@ update cmd model =
     case cmd of
         OrderPollMsg inner ->
             let
-                updated =
+                ( updated, innerCmd ) =
                     Polls.OrderPoll.update inner model.orderPoll
             in
-            ( { model | orderPoll = updated }, Cmd.none )
+            ( { model | orderPoll = updated }, Cmd.map OrderPollMsg innerCmd )
 
         StarPollMsg inner ->
             let

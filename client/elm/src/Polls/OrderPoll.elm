@@ -9,34 +9,36 @@ module Polls.OrderPoll exposing
 import Array exposing (Array)
 import Candidates exposing (Candidate)
 import Component
-import Dict exposing (Dict)
 import FeatherIcons
-import Html exposing (Attribute, Html, button, div, h1, h2, input, option, p, section, select, span, text)
-import Html.Attributes exposing (class, disabled, selected, style, tabindex, title, type_, value)
-import Html.Events exposing (onInput)
-import Json.Decode as Decode
-import Set
-import Svg.Attributes as SAttr
+import Html exposing (Html, button, div, h1, h2, option, p, section, select, text)
+import Html.Attributes exposing (class, disabled, selected, value)
+import Html.Events exposing (onClick, onInput)
+import Random exposing (Generator)
+import Set exposing (Set)
 import Svg.Events as SEvent
-import UserInputInt exposing (UserInputInt)
 
 
 type Msg
     = SetValue { order : Int, value : String }
+    | Reset
+    | CompleteRandomly
+    | SetRandomly (List Int)
 
 
 type alias Model =
     { values : Array (Maybe Int)
+    , toRevert : Maybe (Array (Maybe Int))
     }
 
 
 init : Array Candidate -> Model
 init candidates =
     { values = Array.map (\_ -> Nothing) candidates
+    , toRevert = Nothing
     }
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SetValue { order, value } ->
@@ -47,19 +49,90 @@ update msg model =
                 updatedValues =
                     Array.set order id model.values
             in
-            { model | values = updatedValues }
+            ( { model | values = updatedValues }, Cmd.none )
+
+        Reset ->
+            ( { model | values = Array.map (\_ -> Nothing) model.values, toRevert = Just model.values }, Cmd.none )
+
+        CompleteRandomly ->
+            let
+                n =
+                    List.length <| freeCandidates Candidates.all model.values Nothing
+
+                counts =
+                    List.range 0 (n - 1) -- keep reversed here, it will be reversed back in randomList inner fn
+
+                randomList : Generator (List Int)
+                randomList =
+                    let
+                        fn : Int -> Generator (List Int) -> Generator (List Int)
+                        fn limit acc =
+                            Random.andThen (\r -> Random.map (\i -> i :: r) (Random.int 0 limit)) acc
+                    in
+                    -- Random.andThen (\v -> Random.int 0 m)
+                    List.foldl fn (Random.constant []) counts
+
+                cmd =
+                    Random.generate SetRandomly randomList
+            in
+            ( model, cmd )
+
+        SetRandomly randomValues ->
+            let
+                freeIdList =
+                    freeCandidates Candidates.all model.values Nothing |> List.map (\c -> c.id)
+
+                fn : Maybe Int -> ( List Int, List Int, List (Maybe Int) ) -> ( List Int, List Int, List (Maybe Int) )
+                fn maybeValue ( random, remainingFree, values ) =
+                    case maybeValue of
+                        Just _ ->
+                            ( random, remainingFree, maybeValue :: values )
+
+                        Nothing ->
+                            let
+                                ( randomItem, newRemainingFree ) =
+                                    takeNthFromList (Maybe.withDefault 0 <| List.head random) remainingFree
+                            in
+                            ( List.drop 1 random, newRemainingFree, randomItem :: values )
+
+                ( _, _, completedListReversed ) =
+                    Array.foldl fn ( randomValues, freeIdList, [] ) model.values
+
+                completed =
+                    Array.fromList <| List.reverse <| completedListReversed
+            in
+            ( { model | toRevert = Just model.values, values = completed }, Cmd.none )
+
+
+takeNthFromList : Int -> List a -> ( Maybe a, List a )
+takeNthFromList n list =
+    let
+        before =
+            List.take n list
+
+        rest =
+            List.drop n list
+    in
+    ( List.head rest, before ++ List.drop 1 rest )
+
+
+assignedIds : Array (Maybe Int) -> Set Int
+assignedIds values =
+    Set.fromList <| List.filterMap identity <| Array.toList values
+
+
+freeCandidates : Array Candidate -> Array (Maybe Int) -> Maybe Int -> List Candidate
+freeCandidates candidates values selfId =
+    candidates
+        |> Array.toList
+        |> List.filter (\candidate -> Just candidate.id == selfId || (not <| Set.member candidate.id (assignedIds values)))
 
 
 view : Model -> Array Candidate -> Html Msg
 view model candidates =
     let
-        assignedIds =
-            Set.fromList <| List.filterMap identity <| Array.toList model.values
-
-        freeCandidates selfId =
-            candidates
-                |> Array.toList
-                |> List.filter (\candidate -> candidate.id == selfId || (not <| Set.member candidate.id assignedIds))
+        assigned =
+            assignedIds model.values
 
         selectedAttr candidate selfId =
             if candidate.id == selfId then
@@ -69,9 +142,13 @@ view model candidates =
                 []
 
         options index selfId =
+            let
+                opt c =
+                    option (selectedAttr c selfId ++ [ value <| String.fromInt c.id ]) [ text c.name ]
+            in
             select [ onInput (\v -> SetValue { order = index, value = v }) ]
                 (option [ value "-" ] [ text "Prosím vyberte" ]
-                    :: List.map (\c -> option (selectedAttr c selfId ++ [ value <| String.fromInt c.id ]) [ text c.name ]) (freeCandidates selfId)
+                    :: List.map opt (freeCandidates candidates model.values (Just selfId))
                 )
 
         row index candidateIdMaybe =
@@ -119,12 +196,38 @@ view model candidates =
                             ]
                     ]
                 ]
+
+        refreshButton =
+            button
+                [ disabled <| Set.isEmpty assigned
+                , onClick Reset
+                ]
+                [ FeatherIcons.refreshCw
+                    |> FeatherIcons.withSize 16
+                    |> FeatherIcons.toHtml []
+                , div [] [ text "Začít znovu" ]
+                ]
+
+        finishButton =
+            button
+                [ disabled <| Set.size assigned == Array.length candidates || Set.isEmpty assigned
+                , onClick CompleteRandomly
+                ]
+                [ FeatherIcons.skipForward
+                    |> FeatherIcons.withSize 16
+                    |> FeatherIcons.toHtml []
+                , div [] [ text "Doplnit náhodně" ]
+                ]
     in
     section [ class "poll" ]
         [ div [ class "wide" ]
             [ headerView candidates ]
         , div [ class "narrow" ]
             (Array.toList model.values |> List.indexedMap row)
+        , div [ class "narrow" ]
+            [ div [ class "poll-buttons" ]
+                [ refreshButton, finishButton ]
+            ]
         ]
 
 
