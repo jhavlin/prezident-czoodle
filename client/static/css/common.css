@@ -207,6 +207,41 @@ section h2 {
     font-weight: bold;
 }
 
+.poll-heading {
+    color: white;
+}
+
+.poll-info {
+    color: white;
+    line-height: 1.25;
+}
+
+.poll-title {
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+.poll-title>h2 {
+    flex: 1 1 auto;
+}
+
+.poll-title>button {
+    flex: 0 0 auto;
+}
+
+.poll-row {
+    padding: 0.5em 0;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    border-bottom: 1px #444 solid;
+}
+
+.poll-row:last-child {
+    border-bottom: none;
+}
+
 .poll-buttons {
     display: flex;
     justify-content: space-evenly;
@@ -243,18 +278,6 @@ section h2 {
 
 .star-poll {
     margin: 1em 0;
-}
-
-.star-poll-row {
-    padding: 0.5em 0;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    border-bottom: 1px #444 solid;
-}
-
-.star-poll-row:last-child {
-    border-bottom: none;
 }
 
 .star-poll-value {
@@ -338,28 +361,6 @@ section h2 {
     color: lightcoral;
 }
 
-.star-poll-heading {
-    color: white;
-}
-
-.star-poll-info {
-    color: white;
-    line-height: 1.25;
-}
-
-.star-poll-title {
-    display: flex;
-    align-items: center;
-    color: white;
-}
-
-.star-poll-title>h2 {
-    flex: 1 1 auto;
-}
-
-.star-poll-title>button {
-    flex: 0 0 auto;
-}
 
 /*
  * Order Poll
@@ -420,4 +421,13 @@ section h2 {
 .order-poll-row-photo-placeholder>svg {
     stroke: gray;
     stroke-width: 1;
+}
+
+/*
+ * Doodle Poll
+ */
+
+.doodle-poll-value {
+    flex: 1 1 auto;
+    text-align: right;
 }

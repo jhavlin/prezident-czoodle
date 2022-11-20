@@ -6,8 +6,8 @@ module Polls.StarPoll exposing
     , view
     )
 
-import Array exposing (Array)
-import Candidates exposing (Candidate)
+import Array
+import Candidates
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
@@ -83,15 +83,15 @@ onKeyUp tagger =
     on "keyup" (Decode.map tagger keyCode)
 
 
-view : Model -> Array Candidate -> Html Msg
-view model candidates =
+view : Model -> Html Msg
+view model =
     let
         row candidate =
             let
                 value =
                     Maybe.withDefault (UserInputInt.Valid 0) <| Dict.get candidate.id model.values
             in
-            div [ class "star-poll-row" ]
+            div [ class "poll-row" ]
                 [ Component.candidateView candidate
                 , rowValueView { value = value, candidateId = candidate.id }
                 ]
@@ -131,7 +131,7 @@ view model candidates =
                        , class customClass
                        ]
                 )
-                (Array.toList candidates |> List.map row)
+                (Array.toList Candidates.all |> List.map row)
             ]
         ]
 
@@ -171,8 +171,8 @@ headerView isCustomPoll model =
     in
     div
         []
-        [ h1 [ class "star-poll-heading" ] [ text "Hvězdičkové hlasování" ]
-        , div [ class "star-poll-info" ]
+        [ h1 [ class "poll-heading" ] [ text "Hvězdičkové hlasování" ]
+        , div [ class "poll-info" ]
             [ p []
                 [ text <|
                     String.concat
@@ -184,7 +184,7 @@ headerView isCustomPoll model =
                 ]
             ]
         , div
-            [ class "star-poll-title"
+            [ class "poll-title"
             ]
             [ heading, switchButton ]
         ]

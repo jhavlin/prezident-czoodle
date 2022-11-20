@@ -32,9 +32,9 @@ type alias Model =
     }
 
 
-init : Array Candidate -> Model
-init candidates =
-    { values = Array.map (\_ -> Nothing) candidates
+init : Model
+init =
+    { values = Array.map (\_ -> Nothing) Candidates.all
     , toRevert = Nothing
     }
 
@@ -58,7 +58,7 @@ update msg model =
         CompleteRandomly ->
             let
                 n =
-                    List.length <| freeCandidates Candidates.all model.values Nothing
+                    List.length <| freeCandidates model.values Nothing
 
                 counts =
                     -- keep reversed here, it will be reversed back in randomList inner fn
@@ -82,7 +82,7 @@ update msg model =
         SetRandomly randomValues ->
             let
                 freeIdList =
-                    freeCandidates Candidates.all model.values Nothing |> List.map (\c -> c.id)
+                    freeCandidates model.values Nothing |> List.map (\c -> c.id)
 
                 fn : Maybe Int -> ( List Int, List Int, List (Maybe Int) ) -> ( List Int, List Int, List (Maybe Int) )
                 fn maybeValue ( random, remainingFree, values ) =
@@ -126,15 +126,15 @@ assignedIds values =
     Set.fromList <| List.filterMap identity <| Array.toList values
 
 
-freeCandidates : Array Candidate -> Array (Maybe Int) -> Maybe Int -> List Candidate
-freeCandidates candidates values selfId =
-    candidates
+freeCandidates : Array (Maybe Int) -> Maybe Int -> List Candidate
+freeCandidates values selfId =
+    Candidates.all
         |> Array.toList
         |> List.filter (\candidate -> Just candidate.id == selfId || (not <| Set.member candidate.id (assignedIds values)))
 
 
-view : Model -> Array Candidate -> Html Msg
-view model candidates =
+view : Model -> Html Msg
+view model =
     let
         assigned =
             assignedIds model.values
@@ -153,13 +153,13 @@ view model candidates =
             in
             select [ onInput (\v -> SetValue { order = index, value = v }) ]
                 (option [ value "-" ] [ text "Prosím vyberte" ]
-                    :: List.map opt (freeCandidates candidates model.values (Just selfId))
+                    :: List.map opt (freeCandidates model.values (Just selfId))
                 )
 
         row index candidateIdMaybe =
             let
                 candidateMaybe =
-                    Maybe.andThen (\candidateId -> Array.get candidateId candidates) candidateIdMaybe
+                    Maybe.andThen (\candidateId -> Array.get candidateId Candidates.all) candidateIdMaybe
 
                 photoOrPlaceholder =
                     case candidateMaybe of
@@ -199,7 +199,7 @@ view model candidates =
                     [ options index <| Maybe.withDefault -1 <| Maybe.map (\c -> c.id) candidateMaybe ]
                 , div [ class "order-poll-row-points", class assignedState ]
                     [ text "("
-                    , text <| String.fromInt (Array.length candidates - index)
+                    , text <| String.fromInt (Array.length Candidates.all - index)
                     , text " b)"
                     ]
                 , div [ class "action-unset", class unsetState ]
@@ -227,7 +227,7 @@ view model candidates =
 
         completeRandomlyButton =
             button
-                [ disabled <| Set.size assigned == Array.length candidates || Set.isEmpty assigned
+                [ disabled <| Set.size assigned == Array.length Candidates.all || Set.isEmpty assigned
                 , onClick CompleteRandomly
                 ]
                 [ FeatherIcons.skipForward
@@ -257,7 +257,7 @@ view model candidates =
     in
     section [ class "poll" ]
         [ div [ class "wide" ]
-            [ headerView candidates ]
+            [ headerView ]
         , div [ class "narrow" ]
             (Array.toList model.values |> List.indexedMap row)
         , div [ class "narrow" ]
@@ -267,28 +267,28 @@ view model candidates =
         ]
 
 
-headerView : Array Candidate -> Html Msg
-headerView candidates =
+headerView : Html Msg
+headerView =
     let
         heading =
             h2 [] [ text "Pořadí kandidátů" ]
     in
     div
         []
-        [ h1 [ class "star-poll-heading" ] [ text "Hlasování řazením" ]
-        , div [ class "star-poll-info" ]
+        [ h1 [ class "poll-heading" ] [ text "Hlasování řazením" ]
+        , div [ class "poll-info" ]
             [ p []
                 [ text <|
                     String.concat
                         [ "Seřaďte kandidáty podle důvěry, kterou jim přisuzujete. Nejdůvěrohodnějšího kandidáta "
                         , "zvolte na prvním místě (získá "
-                        , String.fromInt <| Array.length candidates
+                        , String.fromInt <| Array.length Candidates.all
                         , " bodů) a nejméně důvěryhodného kandidáta umístěte na poslední místo (získá 1 bod)."
                         ]
                 ]
             ]
         , div
-            [ class "star-poll-title"
+            [ class "poll-title"
             ]
             [ heading ]
         ]
