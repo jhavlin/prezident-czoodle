@@ -221,7 +221,7 @@ section h2 {
     font-size: inherit;
 }
 
-.poll-buttons button > div {
+.poll-buttons button>div {
     position: relative;
     top: 0.1em;
 }
@@ -230,7 +230,7 @@ section h2 {
     color: white;
     background: transparent;
     color: white;
-    border: none;
+    border-color: transparent;
 }
 
 .poll-buttons button>svg {
@@ -387,13 +387,18 @@ section h2 {
     text-align: right;
 }
 
+.order-poll-row-order.unassigned,
+.order-poll-row-points.unassigned {
+    color: gray;
+}
+
 .order-poll-row-select {
     padding-left: 0.5em;
     flex: 1 1 auto;
 }
 
 .order-poll-row-select>select {
-    font-size: 120%;
+    font-size: 110%;
     width: 100%;
     padding: 0.25em;
 }
@@ -409,6 +414,7 @@ section h2 {
     align-items: center;
     justify-content: center;
     margin-right: 0.5em;
+    flex: 0 0 auto;
 }
 
 .order-poll-row-photo-placeholder>svg {

@@ -182,13 +182,22 @@ view model candidates =
 
                         _ ->
                             "disabled"
+
+                assignedState =
+                    case candidateMaybe of
+                        Just _ ->
+                            "assigned"
+
+                        _ ->
+                            "unassigned"
             in
             div [ class "order-poll-row" ]
-                [ div [ class "order-poll-row-order" ] [ text <| String.fromInt (index + 1), text "." ]
+                [ div [ class "order-poll-row-order", class assignedState ]
+                    [ text <| String.fromInt (index + 1), text "." ]
                 , photoOrPlaceholder
                 , div [ class "order-poll-row-select" ]
                     [ options index <| Maybe.withDefault -1 <| Maybe.map (\c -> c.id) candidateMaybe ]
-                , div [ class "order-poll-row-points" ]
+                , div [ class "order-poll-row-points", class assignedState ]
                     [ text "("
                     , text <| String.fromInt (Array.length candidates - index)
                     , text " b)"
