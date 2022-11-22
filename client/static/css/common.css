@@ -431,3 +431,97 @@ section h2 {
     flex: 1 1 auto;
     text-align: right;
 }
+
+.doodle-poll input[type="radio"] {
+    opacity: 0;
+    width: 0;
+}
+
+.doodle-poll input[type="radio"]:focus-visible+.doodle-poll-option {
+    outline-offset: 2px;
+    outline: 2px white solid;
+}
+
+.doodle-poll-option {
+    border: 1px rgb(110, 110, 110) solid;
+    border-radius: 2px;
+    padding: 1px;
+    text-align: center;
+    user-select: none;
+    display: inline-block;
+    margin: 0 0.5em;
+}
+
+.doodle-poll-option-svg {
+    fill: inherit;
+    stroke: inherit;
+    stroke-width: inherit;
+}
+
+.doodle-poll-option-yes {
+    fill: #999999;
+    stroke: #999999;
+    stroke-width: 3;
+}
+
+.doodle-poll input[type="radio"]:checked+.doodle-poll-option-yes {
+    border-color: #48cd0e;
+    fill: #48cd0e;
+    stroke: #48cd0e;
+    stroke-width: 3;
+}
+
+.doodle-poll-option-yes:hover,
+.doodle-poll input[type="radio"]:checked+.doodle-poll-option-yes:hover {
+    fill: #61e22a;
+    stroke: #61e22a;
+}
+
+.doodle-poll-option-no {
+    stroke: #999999;
+    stroke-width: 4;
+}
+
+.doodle-poll input[type="radio"]:checked+.doodle-poll-option-no {
+    border-color: red;
+    fill: transparent;
+    stroke: red;
+}
+
+.doodle-poll-option-no:hover,
+.doodle-poll input[type="radio"]:checked+.doodle-poll-option-no:hover {
+    stroke: #ff7b7b
+}
+
+.doodle-poll-option-if-needed {
+    fill: transparent;
+    stroke: #999999;
+    stroke-width: 5;
+}
+
+.doodle-poll input[type="radio"]:checked+.doodle-poll-option-if-needed {
+    border-color: #ffc800;
+    stroke: #ffc800;
+}
+
+.doodle-poll-option-if-needed:hover,
+.doodle-poll input[type="radio"]:checked+.doodle-poll-option-if-needed:hover {
+    stroke: #ffde68;
+}
+
+.doodle-poll .poll-row .candidate-photo {
+    outline-offset: 3px;
+    margin-right: 0.7em;
+}
+
+.doodle-poll .poll-row.yes .candidate-photo {
+    outline: 3px #61e22a solid;
+}
+
+.doodle-poll .poll-row.no .candidate-photo {
+    opacity: 0.6;
+}
+
+.doodle-poll .poll-row.if-needed .candidate-photo {
+    outline: 3px #ffc800 solid;
+}

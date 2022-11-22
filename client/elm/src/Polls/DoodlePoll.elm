@@ -11,8 +11,10 @@ import Candidates
 import Component
 import Dict exposing (Dict)
 import Html exposing (Html, div, h1, h2, input, label, p, section, text)
-import Html.Attributes exposing (checked, class, name, type_, value)
+import Html.Attributes exposing (attribute, checked, class, name, type_, value)
 import Html.Events exposing (onInput)
+import Svg exposing (circle, line, svg)
+import Svg.Attributes as SAttr
 
 
 type Option
@@ -56,6 +58,19 @@ optionToValue option =
             "2"
 
 
+optionToClass : Option -> String
+optionToClass option =
+    case option of
+        No ->
+            "no"
+
+        IfNeeded ->
+            "if-needed"
+
+        Yes ->
+            "yes"
+
+
 init : Model
 init =
     { values = Dict.empty
@@ -81,7 +96,7 @@ view model =
                 value =
                     Maybe.withDefault No <| Dict.get candidate.id model.values
             in
-            div [ class "poll-row" ]
+            div [ class "poll-row", class <| optionToClass value ]
                 [ Component.candidateView candidate
                 , rowValueView { value = value, candidateId = candidate.id }
                 ]
@@ -128,7 +143,7 @@ rowValueView { candidateId, value } =
     let
         radio option =
             label
-                []
+                [ attribute "aria-label" <| optionToName option ]
                 [ input
                     [ type_ "radio"
                     , name <| String.concat [ "doodle-", String.fromInt candidateId ]
@@ -137,10 +152,57 @@ rowValueView { candidateId, value } =
                     , onInput <| \_ -> SetValue candidateId option
                     ]
                     []
-                , text <| optionToName option
+                , optionSvg option
                 ]
 
         options =
             List.map radio [ No, IfNeeded, Yes ]
     in
     div [ class "doodle-poll-value" ] options
+
+
+optionSvg : Option -> Html Msg
+optionSvg option =
+    case option of
+        Yes ->
+            viewCellYes
+
+        No ->
+            viewCellNo
+
+        IfNeeded ->
+            viewCellIfNeeded
+
+
+viewCellYes : Html Msg
+viewCellYes =
+    div
+        [ class <| "doodle-poll-option doodle-poll-option-yes"
+        ]
+        [ svg [ SAttr.class "doodle-poll-option-svg", SAttr.width "34", SAttr.height "34", SAttr.viewBox "0 0 34 34" ]
+            [ circle [ SAttr.cx "17", SAttr.cy "17", SAttr.r "12" ] []
+            ]
+        ]
+
+
+viewCellNo : Html Msg
+viewCellNo =
+    div
+        [ class <| "doodle-poll-option doodle-poll-option-no"
+        ]
+        [ svg [ SAttr.class "doodle-poll-option-svg", SAttr.width "34", SAttr.height "34", SAttr.viewBox "0 0 34 34" ]
+            [ line [ SAttr.x1 "6", SAttr.y1 "6", SAttr.x2 "28", SAttr.y2 "28" ] []
+            , line [ SAttr.x1 "6", SAttr.y1 "28", SAttr.x2 "28", SAttr.y2 "6" ] []
+            ]
+        ]
+
+
+viewCellIfNeeded : Html Msg
+viewCellIfNeeded =
+    div
+        [ class <| "doodle-poll-option doodle-poll-option-if-needed"
+        ]
+        [ svg [ SAttr.class "doodle-poll-option-svg", SAttr.width "34", SAttr.height "34", SAttr.viewBox "0 0 34 34" ]
+            [ circle [ SAttr.cx "17", SAttr.cy "17", SAttr.r "12" ] []
+            ]
+        ]
