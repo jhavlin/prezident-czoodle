@@ -427,6 +427,30 @@ section h2 {
  * Doodle Poll
  */
 
+.doodle-poll-info .doodle-poll-option-svg {
+    stroke: #dddddd;
+    fill: transparent;
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+    position: relative;
+    top: -0.1em;
+}
+
+.doodle-poll-info .doodle-poll-option-svg.yes {
+    fill: #dddddd;
+    stroke-width: 5;
+}
+
+.doodle-poll-info .doodle-poll-option-svg.no {
+    stroke-width: 4;
+    ;
+}
+
+.doodle-poll-info .doodle-poll-option-svg.if-needed {
+    stroke-width: 5;
+}
+
 .doodle-poll-value {
     flex: 1 1 auto;
     text-align: right;
@@ -458,54 +482,54 @@ section h2 {
     stroke-width: inherit;
 }
 
-.doodle-poll-option-yes {
+.doodle-poll-option.yes {
     fill: #999999;
     stroke: #999999;
     stroke-width: 3;
 }
 
-.doodle-poll input[type="radio"]:checked+.doodle-poll-option-yes {
+.doodle-poll input[type="radio"]:checked+.doodle-poll-option.yes {
     border-color: #48cd0e;
     fill: #48cd0e;
     stroke: #48cd0e;
     stroke-width: 3;
 }
 
-.doodle-poll-option-yes:hover,
-.doodle-poll input[type="radio"]:checked+.doodle-poll-option-yes:hover {
+.doodle-poll-option.yes:hover,
+.doodle-poll input[type="radio"]:checked+.doodle-poll-option.yes:hover {
     fill: #61e22a;
     stroke: #61e22a;
 }
 
-.doodle-poll-option-no {
+.doodle-poll-option.no {
     stroke: #999999;
     stroke-width: 4;
 }
 
-.doodle-poll input[type="radio"]:checked+.doodle-poll-option-no {
+.doodle-poll input[type="radio"]:checked+.doodle-poll-option.no {
     border-color: red;
     fill: transparent;
     stroke: red;
 }
 
-.doodle-poll-option-no:hover,
-.doodle-poll input[type="radio"]:checked+.doodle-poll-option-no:hover {
+.doodle-poll-option.no:hover,
+.doodle-poll input[type="radio"]:checked+.doodle-poll-option.no:hover {
     stroke: #ff7b7b
 }
 
-.doodle-poll-option-if-needed {
+.doodle-poll-option.if-needed {
     fill: transparent;
     stroke: #999999;
     stroke-width: 5;
 }
 
-.doodle-poll input[type="radio"]:checked+.doodle-poll-option-if-needed {
+.doodle-poll input[type="radio"]:checked+.doodle-poll-option.if-needed {
     border-color: #ffc800;
     stroke: #ffc800;
 }
 
-.doodle-poll-option-if-needed:hover,
-.doodle-poll input[type="radio"]:checked+.doodle-poll-option-if-needed:hover {
+.doodle-poll-option.if-needed:hover,
+.doodle-poll input[type="radio"]:checked+.doodle-poll-option.if-needed:hover {
     stroke: #ffde68;
 }
 

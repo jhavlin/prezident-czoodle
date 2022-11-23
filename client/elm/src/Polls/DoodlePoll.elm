@@ -121,14 +121,18 @@ headerView =
     div
         []
         [ h1 [ class "poll-heading" ] [ text "Doodle hlasování" ]
-        , div [ class "poll-info" ]
+        , div [ class "poll-info doodle-poll-info" ]
             [ p []
-                [ text <|
-                    String.concat
-                        [ "V tomto hlasování u každého kandidáta uvedete, zdali si ho ve funkci "
-                        , "prezidenta přejete (Ano), je pro vás přijatelný (Pokud nutno), "
-                        , "nebo ho za prezidenta nechcete (Ne)."
-                        ]
+                [ text "V tomto hlasování u každého kandidáta uvedete, zdali si ho ve funkci "
+                , text "prezidenta přejete "
+                , text "(Ano "
+                , viewYesSvg
+                , text "), je pro vás přijatelný (Pokud nutno "
+                , viewIfNeededSvg
+                , text "), "
+                , text "nebo ho za prezidenta nechcete (Ne "
+                , viewNoSvg
+                , text ")."
                 ]
             ]
         , div
@@ -165,44 +169,51 @@ optionSvg : Option -> Html Msg
 optionSvg option =
     case option of
         Yes ->
-            viewCellYes
+            viewYes
 
         No ->
-            viewCellNo
+            viewNo
 
         IfNeeded ->
-            viewCellIfNeeded
+            viewIfNeeded
 
 
-viewCellYes : Html Msg
-viewCellYes =
+viewYes : Html Msg
+viewYes =
     div
-        [ class <| "doodle-poll-option doodle-poll-option-yes"
-        ]
-        [ svg [ SAttr.class "doodle-poll-option-svg", SAttr.width "34", SAttr.height "34", SAttr.viewBox "0 0 34 34" ]
-            [ circle [ SAttr.cx "17", SAttr.cy "17", SAttr.r "12" ] []
-            ]
-        ]
+        [ class <| "doodle-poll-option yes" ]
+        [ viewYesSvg ]
 
 
-viewCellNo : Html Msg
-viewCellNo =
+viewYesSvg : Html Msg
+viewYesSvg =
+    svg [ SAttr.class "doodle-poll-option-svg yes", SAttr.width "34", SAttr.height "34", SAttr.viewBox "0 0 34 34" ]
+        [ circle [ SAttr.cx "17", SAttr.cy "17", SAttr.r "12" ] [] ]
+
+
+viewNo : Html Msg
+viewNo =
     div
-        [ class <| "doodle-poll-option doodle-poll-option-no"
-        ]
-        [ svg [ SAttr.class "doodle-poll-option-svg", SAttr.width "34", SAttr.height "34", SAttr.viewBox "0 0 34 34" ]
-            [ line [ SAttr.x1 "6", SAttr.y1 "6", SAttr.x2 "28", SAttr.y2 "28" ] []
-            , line [ SAttr.x1 "6", SAttr.y1 "28", SAttr.x2 "28", SAttr.y2 "6" ] []
-            ]
+        [ class <| "doodle-poll-option no" ]
+        [ viewNoSvg ]
+
+
+viewNoSvg : Html Msg
+viewNoSvg =
+    svg [ SAttr.class "doodle-poll-option-svg no", SAttr.width "34", SAttr.height "34", SAttr.viewBox "0 0 34 34" ]
+        [ line [ SAttr.x1 "6", SAttr.y1 "6", SAttr.x2 "28", SAttr.y2 "28" ] []
+        , line [ SAttr.x1 "6", SAttr.y1 "28", SAttr.x2 "28", SAttr.y2 "6" ] []
         ]
 
 
-viewCellIfNeeded : Html Msg
-viewCellIfNeeded =
+viewIfNeeded : Html Msg
+viewIfNeeded =
     div
-        [ class <| "doodle-poll-option doodle-poll-option-if-needed"
-        ]
-        [ svg [ SAttr.class "doodle-poll-option-svg", SAttr.width "34", SAttr.height "34", SAttr.viewBox "0 0 34 34" ]
-            [ circle [ SAttr.cx "17", SAttr.cy "17", SAttr.r "12" ] []
-            ]
-        ]
+        [ class <| "doodle-poll-option if-needed" ]
+        [ viewIfNeededSvg ]
+
+
+viewIfNeededSvg : Html Msg
+viewIfNeededSvg =
+    svg [ SAttr.class "doodle-poll-option-svg if-needed", SAttr.width "34", SAttr.height "34", SAttr.viewBox "0 0 34 34" ]
+        [ circle [ SAttr.cx "17", SAttr.cy "17", SAttr.r "12" ] [] ]
