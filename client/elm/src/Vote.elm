@@ -4,6 +4,7 @@ import Browser
 import Html exposing (Html, div, p, text)
 import Html.Attributes exposing (class)
 import Json.Decode as D
+import Polls.D21Poll
 import Polls.DoodlePoll
 import Polls.OrderPoll
 import Polls.StarPoll
@@ -29,6 +30,7 @@ main =
 
 type alias Model =
     { uuid : String
+    , d21Poll : Polls.D21Poll.Model
     , doodlePoll : Polls.DoodlePoll.Model
     , orderPoll : Polls.OrderPoll.Model
     , starPoll : Polls.StarPoll.Model
@@ -42,6 +44,7 @@ init jsonFlags =
             D.decodeValue (D.field "uuid" D.string) jsonFlags
     in
     ( { uuid = Result.withDefault "" uuidResult
+      , d21Poll = Polls.D21Poll.init
       , doodlePoll = Polls.DoodlePoll.init
       , orderPoll = Polls.OrderPoll.init
       , starPoll = Polls.StarPoll.init
@@ -56,6 +59,7 @@ init jsonFlags =
 
 type Msg
     = NoOp
+    | D21PollMsg Polls.D21Poll.Msg
     | DoodlePollMsg Polls.DoodlePoll.Msg
     | StarPollMsg Polls.StarPoll.Msg
     | OrderPollMsg Polls.OrderPoll.Msg
@@ -64,6 +68,13 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update cmd model =
     case cmd of
+        D21PollMsg inner ->
+            let
+                updated =
+                    Polls.D21Poll.update inner model.d21Poll
+            in
+            ( { model | d21Poll = updated }, Cmd.none )
+
         DoodlePollMsg inner ->
             let
                 updated =
@@ -99,6 +110,7 @@ view model =
         [ div [ class "wide" ]
             [ p [] [ text "Zúčastněte se prosím malého experimentu. Porovnejte různé hlasovací systémy na příkladu volby prezidenta České republiky." ]
             ]
+        , div [ class "" ] [ Html.map (\inner -> D21PollMsg inner) (Polls.D21Poll.view model.d21Poll) ]
         , div [ class "" ] [ Html.map (\inner -> DoodlePollMsg inner) (Polls.DoodlePoll.view model.doodlePoll) ]
         , div [ class "" ] [ Html.map (\inner -> OrderPollMsg inner) (Polls.OrderPoll.view model.orderPoll) ]
         , div [ class "" ] [ Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view model.starPoll) ]

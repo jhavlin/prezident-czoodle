@@ -550,3 +550,97 @@ section h2 {
 .doodle-poll .poll-row.if-needed .candidate-photo {
     border-color: #ffc800;
 }
+
+/*
+ * D21 Poll
+ */
+
+.d21-poll-value {
+    flex: 1 1 auto;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+}
+
+.d21-poll-value label {
+    display: flex;
+    align-items: center;
+}
+
+.d21-poll input[type="radio"] {
+    opacity: 0;
+    width: 0;
+}
+
+.d21-poll input[type="radio"]:focus-visible+.d21-poll-option {
+    outline-offset: 2px;
+    outline: 2px white solid;
+}
+
+.d21-poll-option {
+    color: #cccccc;
+    border: 1px #6e6e6e solid;
+    border-radius: 2px;
+    padding: 1px;
+    text-align: center;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 150%;
+    width: 1.5em;
+    height: 1.5em;
+    margin: 0 0.3em;
+    cursor: pointer;
+}
+
+.d21-poll input[type="radio"]:checked+.d21-poll-option.positive {
+    color: #48cd0e;
+    border-color: #48cd0e;
+    font-weight: bold;
+}
+
+.d21-poll-option.positive:hover,
+.d21-poll input[type="radio"]:checked+.d21-poll-option.positive:hover {
+    color: #61e22a;
+}
+
+.d21-poll input[type="radio"]:checked+.d21-poll-option.negative {
+    color: red;
+    border-color: red;
+    font-weight: bold;
+}
+
+.d21-poll-option.negative:hover,
+.d21-poll input[type="radio"]:checked+.d21-poll-option.negative:hover {
+    color: #ff7b7b
+}
+
+.d21-poll input[type="radio"]:checked+.d21-poll-option.neutral {
+    color: #3a7ec6;
+    border-color: #5491d2
+}
+
+.d21-poll-option.neutral:hover,
+.d21-poll input[type="radio"]:checked+.d21-poll-option.neutral:hover {
+    color: #5491d2;
+}
+
+.d21-poll .poll-row .candidate-photo {
+    border: 3px transparent solid;
+    margin-right: 0.7em;
+    border-radius: 24px;
+}
+
+.d21-poll .poll-row.positive .candidate-photo {
+    border-color: #61e22a;
+}
+
+.d21-poll .poll-row.negative .candidate-photo {
+    border-color: red;
+}
+
+.d21-poll .poll-row.neutral .candidate-photo {
+    opacity: 0.6;
+}
