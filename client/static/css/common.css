@@ -534,12 +534,13 @@ section h2 {
 }
 
 .doodle-poll .poll-row .candidate-photo {
-    outline-offset: 3px;
+    border: 3px transparent solid;
     margin-right: 0.7em;
+    border-radius: 24px;
 }
 
 .doodle-poll .poll-row.yes .candidate-photo {
-    outline: 3px #61e22a solid;
+    border-color: #61e22a;
 }
 
 .doodle-poll .poll-row.no .candidate-photo {
@@ -547,5 +548,5 @@ section h2 {
 }
 
 .doodle-poll .poll-row.if-needed .candidate-photo {
-    outline: 3px #ffc800 solid;
+    border-color: #ffc800;
 }
