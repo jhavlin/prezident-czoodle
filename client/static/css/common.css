@@ -503,7 +503,7 @@ section h2 {
 
 .doodle-poll-option.no {
     stroke: #999999;
-    stroke-width: 4;
+    stroke-width: 2;
 }
 
 .doodle-poll input[type="radio"]:checked+.doodle-poll-option.no {
