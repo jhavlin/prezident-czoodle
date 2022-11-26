@@ -17,6 +17,7 @@ body {
     overflow: auto scroll;
     background: #222222;
     color: white;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body,
