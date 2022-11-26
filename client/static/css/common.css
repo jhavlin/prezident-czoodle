@@ -732,10 +732,6 @@ label.disabled>.d21-poll-option,
  * Divide Poll
  */
 
-.divide-poll {
-    margin: 1em 0;
-}
-
 .divide-poll-value {
     align-items: center;
     display: flex;
@@ -797,4 +793,31 @@ label.disabled>.d21-poll-option,
     .divide-poll-rank label:hover~label>.divide-poll-dot.off {
         fill: #383838;
     }
+}
+
+.divide-poll-credit {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    margin: 0.5em 0 0 0;
+    border-bottom: 1px #444444 solid;
+    padding-bottom: 1em;
+}
+
+.divide-poll-credit-label {
+    margin-right: 1em;
+}
+
+.divide-poll-credit-item {
+    margin: 0.2em;
+    width: 1.25em;
+    height: 1.25em;
+    fill: #383838;
+    stroke-width: 1;
+    stroke: #626262;
+}
+
+.divide-poll-credit-item.free {
+    fill: #4fd0ff;
+    stroke: white;
 }

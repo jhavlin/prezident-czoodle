@@ -67,6 +67,8 @@ view model =
         [ div [ class "wide" ]
             [ headerView ]
         , div [ class "narrow" ]
+            [ creditView { freeCount = free } ]
+        , div [ class "narrow" ]
             [ div
                 [ class "divide-poll"
                 ]
@@ -202,3 +204,25 @@ rowValueView { candidateId, value, free } =
     in
     div [ class "divide-poll-value" ]
         [ dotRankView ]
+
+
+creditView : { freeCount : Int } -> Html Msg
+creditView { freeCount } =
+    let
+        freeClass isFree =
+            if isFree then
+                "free"
+
+            else
+                ""
+
+        items =
+            List.range 1 5 |> List.map (\i -> oneItem (i > (5 - freeCount)))
+
+        oneItem isFree =
+            FeatherIcons.circle |> FeatherIcons.toHtml [ SAttr.class "divide-poll-credit-item", SAttr.class <| freeClass isFree ]
+
+        label =
+            div [ class "divide-poll-credit-label" ] [ text "Zbývající hlasy: " ]
+    in
+    div [ class "divide-poll-credit" ] (label :: items)
