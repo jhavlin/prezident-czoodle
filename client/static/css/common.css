@@ -606,6 +606,7 @@ section.poll .narrow {
     cursor: pointer;
 }
 
+label.disabled>.d21-poll-option,
 .d21-poll input[type="radio"]:disabled+.d21-poll-option {
     opacity: 0.4;
 }

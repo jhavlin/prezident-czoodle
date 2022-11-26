@@ -131,6 +131,7 @@ view model =
                 , rowValueView
                     { value = value
                     , candidateId = candidate.id
+                    , positiveAssigned = positiveAssigned
                     , positiveAvailable = positiveAvailable
                     , negativeAvailable = negativeAvailable
                     , negativeEnabled = negativeEnabled
@@ -224,12 +225,13 @@ creditView { positiveAssigned, negativeAssigned, negativeEnabled } =
 rowValueView :
     { candidateId : Int
     , value : Option
+    , positiveAssigned : Int
     , positiveAvailable : Bool
     , negativeAvailable : Bool
     , negativeEnabled : Bool
     }
     -> Html Msg
-rowValueView { candidateId, value, positiveAvailable, negativeAvailable, negativeEnabled } =
+rowValueView { candidateId, value, positiveAvailable, negativeAvailable, negativeEnabled, positiveAssigned } =
     let
         isDisabled option =
             case option of
@@ -240,11 +242,20 @@ rowValueView { candidateId, value, positiveAvailable, negativeAvailable, negativ
                     False
 
                 Negative ->
-                    not negativeEnabled || (not negativeAvailable && option /= value)
+                    (not negativeAvailable && option /= value)
+                        || (not negativeEnabled && option /= value)
+                        || (value == Positive && positiveAssigned == minPositiveToEnableNegative)
+
+        disabledClass option =
+            if not negativeEnabled && option == Negative && option == value then
+                "disabled"
+
+            else
+                ""
 
         radio option =
             label
-                [ attribute "aria-label" <| optionToName option ]
+                [ attribute "aria-label" <| optionToName option, class <| disabledClass option ]
                 [ input
                     [ type_ "radio"
                     , name <| String.concat [ "d21-", String.fromInt candidateId ]
@@ -254,7 +265,7 @@ rowValueView { candidateId, value, positiveAvailable, negativeAvailable, negativ
                     , onInput <| \_ -> SetValue candidateId option
                     ]
                     []
-                , optionSvg option
+                , optionView option
                 ]
 
         options =
@@ -263,8 +274,8 @@ rowValueView { candidateId, value, positiveAvailable, negativeAvailable, negativ
     div [ class "d21-poll-value" ] options
 
 
-optionSvg : Option -> Html Msg
-optionSvg option =
+optionView : Option -> Html Msg
+optionView option =
     case option of
         Positive ->
             viewPositive
@@ -287,7 +298,7 @@ viewNeutral : Html Msg
 viewNeutral =
     div
         [ class <| "d21-poll-option neutral" ]
-        [ text "0" ]
+        [ text "-" ]
 
 
 viewNegative : Html Msg
