@@ -766,6 +766,10 @@ label.disabled>.d21-poll-option,
     outline: 2px white solid;
 }
 
+.divide-poll-rank input[type="radio"]:disabled+.divide-poll-option {
+    fill: #383838;
+}
+
 .divide-poll-option>svg {
     fill: inherit;
     stroke: inherit;
@@ -788,5 +792,9 @@ label.disabled>.d21-poll-option,
 
     .divide-poll-rank label:hover~label>.divide-poll-dot.disabled {
         fill: #626262;
+    }
+
+    .divide-poll-rank label:hover~label>.divide-poll-dot.off {
+        fill: #383838;
     }
 }

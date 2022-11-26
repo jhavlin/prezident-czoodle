@@ -13,13 +13,13 @@ import Dict exposing (Dict)
 import FeatherIcons
 import Html exposing (Html, div, h1, h2, input, label, p, section, text)
 import Html.Attributes exposing (checked, class, disabled, name, title, type_)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
 import Svg.Attributes as SAttr
-import Svg.Events as SEvent
 
 
 type Msg
     = SetValue { id : Int, value : Int }
+    | NoOp
 
 
 type alias Model =
@@ -43,10 +43,16 @@ update msg model =
             in
             { model | values = updatedValues }
 
+        NoOp ->
+            model
+
 
 view : Model -> Html Msg
 view model =
     let
+        free =
+            5 - (List.sum <| Dict.values model.values)
+
         row candidate =
             let
                 value =
@@ -54,7 +60,7 @@ view model =
             in
             div [ class "poll-row" ]
                 [ Component.candidateView candidate
-                , rowValueView { value = value, candidateId = candidate.id }
+                , rowValueView { value = value, candidateId = candidate.id, free = free }
                 ]
     in
     section [ class "poll" ]
@@ -94,11 +100,28 @@ headerView =
         ]
 
 
-rowValueView : { candidateId : Int, value : Int } -> Html Msg
-rowValueView { candidateId, value } =
+rowValueView : { candidateId : Int, value : Int, free : Int } -> Html Msg
+rowValueView { candidateId, value, free } =
     let
         iconSize =
             32
+
+        isDisabled points =
+            (points - value) > free
+
+        offClass points =
+            if isDisabled points then
+                "off"
+
+            else
+                ""
+
+        onClickHandler points =
+            if isDisabled points then
+                SetValue { id = candidateId, value = min points (max free value) }
+
+            else
+                NoOp
 
         oneDot cls points =
             label
@@ -108,13 +131,15 @@ rowValueView { candidateId, value } =
                     , name <| String.concat [ "div", String.fromInt candidateId ]
                     , Html.Attributes.value <| String.fromInt points
                     , onInput <| \_ -> SetValue { id = candidateId, value = points }
-                    , checked <| points == value
+                    , disabled <| isDisabled points
                     ]
                     []
                 , div
                     [ title <| String.concat [ String.fromInt points ]
                     , class "divide-poll-option divide-poll-dot"
                     , class cls
+                    , class <| offClass points
+                    , onClick <| onClickHandler points
                     ]
                     [ FeatherIcons.circle
                         |> FeatherIcons.withSize iconSize
@@ -155,8 +180,7 @@ rowValueView { candidateId, value } =
                     [ FeatherIcons.x
                         |> FeatherIcons.withSize iconSize
                         |> FeatherIcons.toHtml
-                            [ SEvent.onClick <| SetValue { id = candidateId, value = 0 }
-                            ]
+                            []
                     ]
                 ]
 
