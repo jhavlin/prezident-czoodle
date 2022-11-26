@@ -11,12 +11,11 @@ import Candidates
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
-import Html exposing (Attribute, Html, button, div, h1, h2, input, p, section, span, text)
-import Html.Attributes exposing (class, disabled, style, tabindex, title, type_)
-import Html.Events exposing (keyCode, on, onClick, onFocus, onInput)
+import Html exposing (Html, div, h1, h2, input, label, p, section, text)
+import Html.Attributes exposing (checked, class, disabled, name, title, type_)
+import Html.Events exposing (onInput)
 import Svg.Attributes as SAttr
 import Svg.Events as SEvent
-import UserInputInt exposing (UserInputInt)
 
 
 type Msg
@@ -24,7 +23,7 @@ type Msg
 
 
 type alias Model =
-    { values : Dict Int UserInputInt
+    { values : Dict Int Int
     }
 
 
@@ -40,7 +39,7 @@ update msg model =
         SetValue { id, value } ->
             let
                 updatedValues =
-                    Dict.insert id (UserInputInt.Valid value) model.values
+                    Dict.insert id value model.values
             in
             { model | values = updatedValues }
 
@@ -51,7 +50,7 @@ view model =
         row candidate =
             let
                 value =
-                    Maybe.withDefault (UserInputInt.Valid 0) <| Dict.get candidate.id model.values
+                    Maybe.withDefault 0 <| Dict.get candidate.id model.values
             in
             div [ class "poll-row" ]
                 [ Component.candidateView candidate
@@ -95,24 +94,34 @@ headerView =
         ]
 
 
-rowValueView : { candidateId : Int, value : UserInputInt } -> Html Msg
+rowValueView : { candidateId : Int, value : Int } -> Html Msg
 rowValueView { candidateId, value } =
     let
         iconSize =
             32
 
         oneDot cls points =
-            span
-                [ title <| String.concat [ String.fromInt (points * 20), "%" ]
-                , class "divide-poll-option divide-poll-dot"
-                , class cls
-                ]
-                [ FeatherIcons.circle
-                    |> FeatherIcons.withSize iconSize
-                    |> FeatherIcons.toHtml
-                        [ SAttr.title <| String.concat [ String.fromInt points ]
-                        , SEvent.onClick <| SetValue { id = candidateId, value = points * 20 }
-                        ]
+            label
+                []
+                [ input
+                    [ type_ "radio"
+                    , name <| String.concat [ "div", String.fromInt candidateId ]
+                    , Html.Attributes.value <| String.fromInt points
+                    , onInput <| \_ -> SetValue { id = candidateId, value = points }
+                    , checked <| points == value
+                    ]
+                    []
+                , div
+                    [ title <| String.concat [ String.fromInt points ]
+                    , class "divide-poll-option divide-poll-dot"
+                    , class cls
+                    ]
+                    [ FeatherIcons.circle
+                        |> FeatherIcons.withSize iconSize
+                        |> FeatherIcons.toHtml
+                            [ SAttr.title <| String.concat [ String.fromInt points ]
+                            ]
+                    ]
                 ]
 
         oneDotDisabled points =
@@ -122,46 +131,44 @@ rowValueView { candidateId, value } =
             oneDot "enabled" points
 
         noPointState =
-            case value of
-                UserInputInt.Valid v ->
-                    if v > 0 then
-                        "enabled"
+            if value > 0 then
+                "enabled"
 
-                    else
-                        "disabled"
-
-                _ ->
-                    "disabled"
+            else
+                "disabled"
 
         noDots =
-            span
-                [ title "0%"
-                , class "divide-poll-option action-unset"
-                , class noPointState
-                ]
-                [ FeatherIcons.x
-                    |> FeatherIcons.withSize iconSize
-                    |> FeatherIcons.toHtml
-                        [ SEvent.onClick <| SetValue { id = candidateId, value = 0 }
-                        , SAttr.title "0%"
-                        ]
+            label
+                []
+                [ input
+                    [ type_ "radio"
+                    , name <| String.concat [ "div", String.fromInt candidateId ]
+                    , onInput <| \_ -> SetValue { id = candidateId, value = 0 }
+                    , checked <| value == 0
+                    ]
+                    []
+                , div
+                    [ title "0"
+                    , class "divide-poll-option action-unset"
+                    , class noPointState
+                    ]
+                    [ FeatherIcons.x
+                        |> FeatherIcons.withSize iconSize
+                        |> FeatherIcons.toHtml
+                            [ SEvent.onClick <| SetValue { id = candidateId, value = 0 }
+                            ]
+                    ]
                 ]
 
         pointsToDot p =
             if p == 0 then
                 noDots
 
+            else if p <= value then
+                oneDotEnabled p
+
             else
-                case value of
-                    UserInputInt.Valid v ->
-                        if p * 20 <= v then
-                            oneDotEnabled p
-
-                        else
-                            oneDotDisabled p
-
-                    _ ->
-                        oneDotDisabled p
+                oneDotDisabled p
 
         dots =
             List.range 0 5 |> List.map pointsToDot

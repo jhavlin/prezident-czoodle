@@ -747,12 +747,23 @@ label.disabled>.d21-poll-option,
     display: flex;
 }
 
+.divide-poll-rank input[type="radio"] {
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
+}
+
 .divide-poll-dot {
     fill: #626262;
     stroke-width: 1;
     stroke: gray;
     flex: 0 1 auto;
     cursor: pointer;
+}
+
+.divide-poll-rank input[type="radio"]:focus-visible+.divide-poll-option {
+    outline-offset: 1px;
+    outline: 2px white solid;
 }
 
 .divide-poll-option>svg {
@@ -771,11 +782,11 @@ label.disabled>.d21-poll-option,
         fill: white;
     }
 
-    .divide-poll-rank .divide-poll-option:hover~.divide-poll-dot.enabled {
+    .divide-poll-rank label:hover~label>.divide-poll-dot {
         fill: #3690b1
     }
 
-    .divide-poll-rank .divide-poll-option:hover~.divide-poll-dot.disabled {
+    .divide-poll-rank label:hover~label>.divide-poll-dot.disabled {
         fill: #626262;
     }
 }
