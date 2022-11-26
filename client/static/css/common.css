@@ -154,7 +154,13 @@ section.poll .narrow {
 
 .color-separator {
     height: 5px;
-    background: repeating-linear-gradient(to right, var(--czech-white), var(--czech-white) 5px, var(--czech-red) 5px, var(--czech-red) 10px, var(--czech-blue) 10px, var(--czech-blue) 15px, var(--czech-white) 15px);
+    background: repeating-linear-gradient(to right, var(--czech-white),
+            var(--czech-white) 5px,
+            var(--czech-red) 5px,
+            var(--czech-red) 10px,
+            var(--czech-blue) 10px,
+            var(--czech-blue) 15px,
+            var(--czech-white) 15px);
     border-bottom: 1px var(--logo-border) solid;
 }
 
@@ -171,6 +177,7 @@ section.poll .narrow {
 
 .action-unset.enabled {
     stroke: white;
+    cursor: pointer;
 }
 
 @media (hover: hover) {
@@ -301,6 +308,7 @@ section.poll .narrow {
     stroke-width: 1;
     stroke: gray;
     flex: 0 1 auto;
+    cursor: pointer;
 }
 
 .star-poll-option>svg {
@@ -477,6 +485,7 @@ section.poll .narrow {
     text-align: center;
     display: inline-block;
     margin: 0 0.5em;
+    cursor: pointer;
 }
 
 .doodle-poll-option-svg {
@@ -609,6 +618,7 @@ section.poll .narrow {
 label.disabled>.d21-poll-option,
 .d21-poll input[type="radio"]:disabled+.d21-poll-option {
     opacity: 0.4;
+    cursor: default;
 }
 
 .d21-poll input[type="radio"]:checked+.d21-poll-option.positive {
