@@ -727,3 +727,55 @@ label.disabled>.d21-poll-option,
     border-right: 1px #777777 solid;
     height: 1.2em;
 }
+
+/*
+ * Divide Poll
+ */
+
+.divide-poll {
+    margin: 1em 0;
+}
+
+.divide-poll-value {
+    align-items: center;
+    display: flex;
+    flex: 1 1 150px;
+    justify-content: right;
+}
+
+.divide-poll-rank {
+    display: flex;
+}
+
+.divide-poll-dot {
+    fill: #626262;
+    stroke-width: 1;
+    stroke: gray;
+    flex: 0 1 auto;
+    cursor: pointer;
+}
+
+.divide-poll-option>svg {
+    fill: inherit;
+    stroke: inherit;
+    stroke-width: inherit;
+}
+
+.divide-poll-dot.enabled {
+    fill: #4fd0ff;
+    stroke: white;
+}
+
+@media (hover: hover) {
+    .divide-poll-rank:hover .divide-poll-dot {
+        fill: white;
+    }
+
+    .divide-poll-rank .divide-poll-option:hover~.divide-poll-dot.enabled {
+        fill: #3690b1
+    }
+
+    .divide-poll-rank .divide-poll-option:hover~.divide-poll-dot.disabled {
+        fill: #626262;
+    }
+}
