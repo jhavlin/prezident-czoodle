@@ -120,7 +120,7 @@ rowValueView { candidateId, value, free } =
 
         onClickHandler points =
             if isDisabled points then
-                SetValue { id = candidateId, value = min points (max free value) }
+                SetValue { id = candidateId, value = min points (free + value) }
 
             else
                 NoOp
