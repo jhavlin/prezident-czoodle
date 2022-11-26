@@ -136,6 +136,10 @@ section h2 {
     max-width: 450px;
 }
 
+section.poll .narrow {
+    user-select: none;
+}
+
 @media (min-width: 600px) {
 
     .wide,
@@ -471,7 +475,6 @@ section h2 {
     border-radius: 2px;
     padding: 1px;
     text-align: center;
-    user-select: none;
     display: inline-block;
     margin: 0 0.5em;
 }
@@ -495,10 +498,13 @@ section h2 {
     stroke-width: 3;
 }
 
-.doodle-poll-option.yes:hover,
-.doodle-poll input[type="radio"]:checked+.doodle-poll-option.yes:hover {
-    fill: #61e22a;
-    stroke: #61e22a;
+@media (hover: hover) {
+
+    .doodle-poll-option.yes:hover,
+    .doodle-poll input[type="radio"]:checked+.doodle-poll-option.yes:hover {
+        fill: #61e22a;
+        stroke: #61e22a;
+    }
 }
 
 .doodle-poll-option.no {
@@ -512,9 +518,12 @@ section h2 {
     stroke: red;
 }
 
-.doodle-poll-option.no:hover,
-.doodle-poll input[type="radio"]:checked+.doodle-poll-option.no:hover {
-    stroke: #ff7b7b
+@media (hover: hover) {
+
+    .doodle-poll-option.no:hover,
+    .doodle-poll input[type="radio"]:checked+.doodle-poll-option.no:hover {
+        stroke: #ff7b7b
+    }
 }
 
 .doodle-poll-option.if-needed {
@@ -528,9 +537,12 @@ section h2 {
     stroke: #ffc800;
 }
 
-.doodle-poll-option.if-needed:hover,
-.doodle-poll input[type="radio"]:checked+.doodle-poll-option.if-needed:hover {
-    stroke: #ffde68;
+@media (hover: hover) {
+
+    .doodle-poll-option.if-needed:hover,
+    .doodle-poll input[type="radio"]:checked+.doodle-poll-option.if-needed:hover {
+        stroke: #ffde68;
+    }
 }
 
 .doodle-poll .poll-row .candidate-photo {
@@ -584,7 +596,6 @@ section h2 {
     border-radius: 2px;
     padding: 1px;
     text-align: center;
-    user-select: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -595,15 +606,22 @@ section h2 {
     cursor: pointer;
 }
 
+.d21-poll input[type="radio"]:disabled+.d21-poll-option {
+    opacity: 0.4;
+}
+
 .d21-poll input[type="radio"]:checked+.d21-poll-option.positive {
     color: #48cd0e;
     border-color: #48cd0e;
     font-weight: bold;
 }
 
-.d21-poll-option.positive:hover,
-.d21-poll input[type="radio"]:checked+.d21-poll-option.positive:hover {
-    color: #61e22a;
+@media (hover: hover) {
+
+    .d21-poll-option.positive:hover,
+    .d21-poll input[type="radio"]:checked+.d21-poll-option.positive:hover {
+        color: #61e22a;
+    }
 }
 
 .d21-poll input[type="radio"]:checked+.d21-poll-option.negative {
@@ -612,9 +630,12 @@ section h2 {
     font-weight: bold;
 }
 
-.d21-poll-option.negative:hover,
-.d21-poll input[type="radio"]:checked+.d21-poll-option.negative:hover {
-    color: #ff7b7b
+@media (hover: hover) {
+
+    .d21-poll-option.negative:hover,
+    .d21-poll input[type="radio"]:checked+.d21-poll-option.negative:hover {
+        color: #ff7b7b
+    }
 }
 
 .d21-poll input[type="radio"]:checked+.d21-poll-option.neutral {
@@ -622,9 +643,12 @@ section h2 {
     border-color: #5491d2
 }
 
-.d21-poll-option.neutral:hover,
-.d21-poll input[type="radio"]:checked+.d21-poll-option.neutral:hover {
-    color: #5491d2;
+@media (hover: hover) {
+
+    .d21-poll-option.neutral:hover,
+    .d21-poll input[type="radio"]:checked+.d21-poll-option.neutral:hover {
+        color: #5491d2;
+    }
 }
 
 .d21-poll .poll-row .candidate-photo {
@@ -643,4 +667,52 @@ section h2 {
 
 .d21-poll .poll-row.neutral .candidate-photo {
     opacity: 0.6;
+}
+
+.d21-poll-credit {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    margin: 0.5em 0 0 0;
+    border-bottom: 1px #444444 solid;
+    padding-bottom: 1em;
+}
+
+.d21-poll-credit-label {
+    margin-right: 1em;
+}
+
+.d21-poll-credit-item {
+    border: 1px currentColor solid;
+    color: #777777;
+    border-radius: 0.2em;
+    padding: 0.2em;
+    margin: 0.2em;
+    width: 1.25em;
+    text-align: center;
+}
+
+.d21-poll-credit-item.free.positive {
+    background: #48cd0e;
+    color: black;
+    border-color: transparent
+}
+
+.d21-poll-credit-item.free.negative {
+    background: #ff0000c4;
+    color: white;
+    border-color: transparent;
+}
+
+.d21-poll-credit-lock {
+    stroke: red;
+    width: 1.2em;
+    height: 1.2em;
+    margin-left: 0.25em;
+}
+
+.d21-poll-credit-divider {
+    margin: 0 0.25em;
+    border-right: 1px #777777 solid;
+    height: 1.2em;
 }
