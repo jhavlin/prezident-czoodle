@@ -623,31 +623,41 @@ label.disabled>.d21-poll-option,
     cursor: default;
 }
 
+label.disabled>.d21-poll-option.negative {
+    background: transparent;
+    border-color: red;
+    color: red;
+
+}
+
 .d21-poll input[type="radio"]:checked+.d21-poll-option.positive {
-    color: #48cd0e;
+    color: black;
+    background: #48cd0e;
     border-color: #48cd0e;
     font-weight: bold;
 }
 
 @media (hover: hover) {
 
-    .d21-poll-option.positive:hover,
-    .d21-poll input[type="radio"]:checked+.d21-poll-option.positive:hover {
-        color: #61e22a;
+    label:not(.disabled) input:not(:disabled)+.d21-poll-option.positive:hover,
+    .d21-poll label:not(.disabled) input[type="radio"]:checked+.d21-poll-option.positive:hover {
+        background-color: #85e35d;
+        color: black;
     }
 }
 
-.d21-poll input[type="radio"]:checked+.d21-poll-option.negative {
-    color: red;
-    border-color: red;
+.d21-poll label:not(.disabled) input[type="radio"]:checked+.d21-poll-option.negative {
+    color: white;
+    border-color: #ff0000c4;
+    background-color: #ff0000c4;
     font-weight: bold;
 }
 
 @media (hover: hover) {
 
-    .d21-poll-option.negative:hover,
-    .d21-poll input[type="radio"]:checked+.d21-poll-option.negative:hover {
-        color: #ff7b7b
+    label:not(.disabled) input:not(:disabled)+.d21-poll-option.negative:hover,
+    .d21-poll label:not(.disabled) input[type="radio"]:checked+.d21-poll-option.negative:hover {
+        background: #ad0000c4;
     }
 }
 
