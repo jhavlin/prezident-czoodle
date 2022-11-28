@@ -246,6 +246,7 @@ section.poll .narrow {
     padding: 0.5em 0;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     flex-wrap: wrap;
     border-bottom: 1px #444 solid;
 }
@@ -821,4 +822,44 @@ label.disabled>.d21-poll-option,
 .divide-poll-credit-item.free {
     fill: #4fd0ff;
     stroke: white;
+}
+
+/*
+ * One Round Poll
+ */
+
+.one-round-poll>.poll-row {
+    padding-right: 1em;
+    cursor: pointer;
+}
+
+.one-round-poll label {
+    cursor: pointer;
+}
+
+@media (hover: hover) {
+    .one-round-poll>.poll-row:hover {
+        background: #333333;
+    }
+}
+
+.one-round-poll-value input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    z-index: -1;
+}
+
+.one-round-option svg {
+    stroke: #626262;
+    stroke-width: 2;
+}
+
+.one-round-poll-value input[type="radio"]:checked+.one-round-option svg {
+    stroke: gold;
+    stroke-width: 5;
+}
+
+.one-round-poll-value input[type="radio"]:focus-visible+.one-round-option svg {
+    outline-offset: 2px;
+    outline: 2px white solid;
 }

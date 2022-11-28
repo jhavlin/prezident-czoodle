@@ -7,6 +7,7 @@ import Json.Decode as D
 import Polls.D21Poll
 import Polls.DividePoll
 import Polls.DoodlePoll
+import Polls.OneRoundPoll
 import Polls.OrderPoll
 import Polls.StarPoll
 
@@ -31,6 +32,7 @@ main =
 
 type alias Model =
     { uuid : String
+    , oneRoundPoll : Polls.OneRoundPoll.Model
     , dividePoll : Polls.DividePoll.Model
     , d21Poll : Polls.D21Poll.Model
     , doodlePoll : Polls.DoodlePoll.Model
@@ -46,6 +48,7 @@ init jsonFlags =
             D.decodeValue (D.field "uuid" D.string) jsonFlags
     in
     ( { uuid = Result.withDefault "" uuidResult
+      , oneRoundPoll = Polls.OneRoundPoll.init
       , dividePoll = Polls.DividePoll.init
       , d21Poll = Polls.D21Poll.init
       , doodlePoll = Polls.DoodlePoll.init
@@ -62,6 +65,7 @@ init jsonFlags =
 
 type Msg
     = NoOp
+    | OneRoundPollMsg Polls.OneRoundPoll.Msg
     | D21PollMsg Polls.D21Poll.Msg
     | DoodlePollMsg Polls.DoodlePoll.Msg
     | StarPollMsg Polls.StarPoll.Msg
@@ -72,6 +76,13 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update cmd model =
     case cmd of
+        OneRoundPollMsg inner ->
+            let
+                updated =
+                    Polls.OneRoundPoll.update inner model.oneRoundPoll
+            in
+            ( { model | oneRoundPoll = updated }, Cmd.none )
+
         DividePollMsg inner ->
             let
                 updated =
@@ -121,6 +132,7 @@ view model =
         [ div [ class "wide" ]
             [ p [] [ text "Zúčastněte se prosím malého experimentu. Porovnejte různé hlasovací systémy na příkladu volby prezidenta České republiky." ]
             ]
+        , div [ class "" ] [ Html.map (\inner -> OneRoundPollMsg inner) (Polls.OneRoundPoll.view model.oneRoundPoll) ]
         , div [ class "" ] [ Html.map (\inner -> DividePollMsg inner) (Polls.DividePoll.view model.dividePoll) ]
         , div [ class "" ] [ Html.map (\inner -> D21PollMsg inner) (Polls.D21Poll.view model.d21Poll) ]
         , div [ class "" ] [ Html.map (\inner -> DoodlePollMsg inner) (Polls.DoodlePoll.view model.doodlePoll) ]
