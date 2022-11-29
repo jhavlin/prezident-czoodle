@@ -835,41 +835,47 @@ label.disabled>.d21-poll-option.negative {
 }
 
 /*
- * One Round Poll
+ * Single Poll
  */
 
-.one-round-poll>.poll-row {
+.single-poll>.poll-row {
     padding-right: 1em;
     cursor: pointer;
 }
 
-.one-round-poll label {
+.single-poll label {
     cursor: pointer;
 }
 
 @media (hover: hover) {
-    .one-round-poll>.poll-row:hover {
+    .single-poll>.poll-row:hover {
         background: #333333;
     }
 }
 
-.one-round-poll-value input[type="radio"] {
+.single-poll-value input[type="radio"] {
     position: absolute;
     opacity: 0;
     z-index: -1;
 }
 
-.one-round-option svg {
+.single-poll-option svg {
     stroke: #626262;
     stroke-width: 2;
 }
 
-.one-round-poll-value input[type="radio"]:checked+.one-round-option svg {
+.single-poll-value input[type="radio"]:checked+.single-poll-option svg {
     stroke: gold;
-    stroke-width: 5;
 }
 
-.one-round-poll-value input[type="radio"]:focus-visible+.one-round-option svg {
+.single-poll-value input[type="radio"]:focus-visible+.single-poll-option svg {
     outline-offset: 2px;
     outline: 2px white solid;
+}
+
+/*
+ * One-Round Poll (type of Single Poll)
+ */
+.one-round-poll .single-poll-value input[type="radio"]:checked+.single-poll-option svg {
+    stroke-width: 5;
 }
