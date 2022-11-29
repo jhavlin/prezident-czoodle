@@ -35,11 +35,11 @@ view model =
         desc =
             div []
                 [ p []
-                    [ text "Vyberte kandidáta, kterého byste volili v prvním kole "
+                    [ text "Vyberte kandidáta, kterého byste volili v\u{00A0}prvním kole "
                     , text "současného dvoukolového systému."
                     ]
                 , p []
-                    [ text "Výsledky případného druhého kola odvodíme z hlasování řazením (viz níže)."
+                    [ text "Výsledky případného druhého kola odvodíme z\u{00A0}hlasování řazením (viz níže)."
                     ]
                 ]
 

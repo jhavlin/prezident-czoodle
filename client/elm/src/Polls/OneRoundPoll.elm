@@ -34,7 +34,7 @@ view model =
     let
         desc =
             p []
-                [ text "Vyberte kandidáta, kterého byste volili v případně jednokolového "
+                [ text "Vyberte kandidáta, kterého byste volili v\u{00A0}případě jednokolového "
                 , text "volebního systému."
                 ]
 
