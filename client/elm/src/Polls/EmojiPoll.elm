@@ -61,7 +61,7 @@ headerView : Html Msg
 headerView =
     let
         heading =
-            h2 [] [ text "Výběr kandidáta" ]
+            h2 [] [ text "Hodnocení kandidátů" ]
     in
     div
         []
