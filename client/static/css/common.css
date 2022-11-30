@@ -876,6 +876,26 @@ label.disabled>.d21-poll-option.negative {
 /*
  * One-Round Poll (type of Single Poll)
  */
+
 .one-round-poll .single-poll-value input[type="radio"]:checked+.single-poll-option svg {
     stroke-width: 5;
+}
+
+/*
+ * Emoji Poll
+ */
+
+.emoji-poll-input {
+    width: 1.7em;
+    font-size: 180%;
+    text-align: center;
+    padding: 0.1em 0;
+    background: transparent;
+    border: 1px #777777 solid;
+    border-radius: 0.1em;
+    color: white;
+}
+
+.emoji-poll>.poll-row {
+    padding-right: 1em;
 }

@@ -7,6 +7,7 @@ import Json.Decode as D
 import Polls.D21Poll
 import Polls.DividePoll
 import Polls.DoodlePoll
+import Polls.EmojiPoll
 import Polls.OneRoundPoll
 import Polls.OrderPoll
 import Polls.StarPoll
@@ -40,6 +41,7 @@ type alias Model =
     , doodlePoll : Polls.DoodlePoll.Model
     , orderPoll : Polls.OrderPoll.Model
     , starPoll : Polls.StarPoll.Model
+    , emojiPoll : Polls.EmojiPoll.Model
     }
 
 
@@ -57,6 +59,7 @@ init jsonFlags =
       , doodlePoll = Polls.DoodlePoll.init
       , orderPoll = Polls.OrderPoll.init
       , starPoll = Polls.StarPoll.init
+      , emojiPoll = Polls.EmojiPoll.init
       }
     , Cmd.none
     )
@@ -75,6 +78,7 @@ type Msg
     | StarPollMsg Polls.StarPoll.Msg
     | OrderPollMsg Polls.OrderPoll.Msg
     | DividePollMsg Polls.DividePoll.Msg
+    | EmojiPollMsg Polls.EmojiPoll.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -129,6 +133,13 @@ update cmd model =
             in
             ( { model | starPoll = updated }, Cmd.none )
 
+        EmojiPollMsg inner ->
+            let
+                updated =
+                    Polls.EmojiPoll.update inner model.emojiPoll
+            in
+            ( { model | emojiPoll = updated }, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -150,6 +161,7 @@ view model =
         , div [ class "" ] [ Html.map (\inner -> DoodlePollMsg inner) (Polls.DoodlePoll.view model.doodlePoll) ]
         , div [ class "" ] [ Html.map (\inner -> OrderPollMsg inner) (Polls.OrderPoll.view model.orderPoll) ]
         , div [ class "" ] [ Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view model.starPoll) ]
+        , div [ class "" ] [ Html.map (\inner -> EmojiPollMsg inner) (Polls.EmojiPoll.view model.emojiPoll) ]
         ]
 
 
