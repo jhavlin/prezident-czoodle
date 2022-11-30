@@ -44,7 +44,7 @@ view model =
                 ]
 
         viewConfig =
-            { title = "Dvoukolová volba volba"
+            { title = "Dvoukolový systém"
             , desc = desc
             , prefix = "two-round"
             , icon = FeatherIcons.playCircle

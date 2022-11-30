@@ -39,7 +39,7 @@ view model =
                 ]
 
         viewConfig =
-            { title = "Jednokolová volba"
+            { title = "Jednokolový systém"
             , desc = desc
             , prefix = "one-round"
             , icon = FeatherIcons.check
