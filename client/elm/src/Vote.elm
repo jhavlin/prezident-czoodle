@@ -3,7 +3,7 @@ module Vote exposing (..)
 import Array
 import Browser
 import Candidates
-import Html exposing (Html, div, p, text)
+import Html exposing (Html, div, p, section, text)
 import Html.Attributes exposing (class)
 import Json.Decode as D
 import Polls.D21Poll
@@ -161,17 +161,19 @@ update cmd model =
 view : Model -> Html Msg
 view model =
     div []
-        [ div [ class "wide" ]
-            [ p [] [ text "Zúčastněte se prosím malého experimentu. Porovnejte různé hlasovací systémy na příkladu volby prezidenta České republiky." ]
+        [ section [ class "intro" ]
+            [ div [ class "wide" ]
+                [ p [] [ text "Zúčastněte se prosím malého experimentu. Porovnejte různé hlasovací systémy na příkladu volby prezidenta České republiky." ]
+                ]
             ]
-        , div [ class "" ] [ Html.map (\inner -> TwoRoundPollMsg inner) (Polls.TwoRoundPoll.view model.twoRoundPoll) ]
-        , div [ class "" ] [ Html.map (\inner -> OneRoundPollMsg inner) (Polls.OneRoundPoll.view model.oneRoundPoll) ]
-        , div [ class "" ] [ Html.map (\inner -> DividePollMsg inner) (Polls.DividePoll.view model.dividePoll) ]
-        , div [ class "" ] [ Html.map (\inner -> D21PollMsg inner) (Polls.D21Poll.view model.d21Poll) ]
-        , div [ class "" ] [ Html.map (\inner -> DoodlePollMsg inner) (Polls.DoodlePoll.view model.doodlePoll) ]
-        , div [ class "" ] [ Html.map (\inner -> OrderPollMsg inner) (Polls.OrderPoll.view model.orderPoll) ]
-        , div [ class "" ] [ Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view model.starPoll) ]
-        , div [ class "" ] [ Html.map (\inner -> EmojiPollMsg inner) (Polls.EmojiPoll.view model.emojiPoll) ]
+        , Html.map (\inner -> TwoRoundPollMsg inner) (Polls.TwoRoundPoll.view model.twoRoundPoll)
+        , Html.map (\inner -> OneRoundPollMsg inner) (Polls.OneRoundPoll.view model.oneRoundPoll)
+        , Html.map (\inner -> DividePollMsg inner) (Polls.DividePoll.view model.dividePoll)
+        , Html.map (\inner -> D21PollMsg inner) (Polls.D21Poll.view model.d21Poll)
+        , Html.map (\inner -> DoodlePollMsg inner) (Polls.DoodlePoll.view model.doodlePoll)
+        , Html.map (\inner -> OrderPollMsg inner) (Polls.OrderPoll.view model.orderPoll)
+        , Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view model.starPoll)
+        , Html.map (\inner -> EmojiPollMsg inner) (Polls.EmojiPoll.view model.emojiPoll)
         ]
 
 

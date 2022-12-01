@@ -110,6 +110,10 @@ h1.header {
  * Layout
  */
 
+section.intro {
+    margin: 3em 0;
+}
+
 section.poll {
     margin: 3em 0 5em 0;
 }
