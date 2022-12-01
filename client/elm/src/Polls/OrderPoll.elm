@@ -13,7 +13,8 @@ import FeatherIcons
 import Html exposing (Html, button, div, h1, h2, option, p, section, select, text)
 import Html.Attributes exposing (class, disabled, selected, value)
 import Html.Events exposing (onClick, onInput)
-import Random exposing (Generator)
+import Random
+import RandomUtils exposing (takeNthFromList)
 import Set exposing (Set)
 import Svg.Events as SEvent
 
@@ -60,22 +61,8 @@ update msg model =
                 n =
                     List.length <| freeCandidates model.values Nothing
 
-                counts =
-                    -- keep reversed here, it will be reversed back in randomList inner fn
-                    List.range 0 (n - 1)
-
-                randomList : Generator (List Int)
-                randomList =
-                    let
-                        fn : Int -> Generator (List Int) -> Generator (List Int)
-                        fn limit acc =
-                            Random.andThen (\r -> Random.map (\i -> i :: r) (Random.int 0 limit)) acc
-                    in
-                    -- Random.andThen (\v -> Random.int 0 m)
-                    List.foldl fn (Random.constant []) counts
-
                 cmd =
-                    Random.generate SetRandomly randomList
+                    Random.generate SetRandomly <| RandomUtils.decreasingRandomIntList n
             in
             ( model, cmd )
 
@@ -107,18 +94,6 @@ update msg model =
 
         RevertLastAction ->
             ( { model | values = Maybe.withDefault model.values model.toRevert, toRevert = Nothing }, Cmd.none )
-
-
-takeNthFromList : Int -> List a -> ( Maybe a, List a )
-takeNthFromList n list =
-    let
-        before =
-            List.take n list
-
-        rest =
-            List.drop n list
-    in
-    ( List.head rest, before ++ List.drop 1 rest )
 
 
 assignedIds : Array (Maybe Int) -> Set Int

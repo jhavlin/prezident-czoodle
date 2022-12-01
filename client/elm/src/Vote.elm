@@ -1,6 +1,8 @@
 module Vote exposing (..)
 
+import Array
 import Browser
+import Candidates
 import Html exposing (Html, div, p, text)
 import Html.Attributes exposing (class)
 import Json.Decode as D
@@ -12,6 +14,8 @@ import Polls.OneRoundPoll
 import Polls.OrderPoll
 import Polls.StarPoll
 import Polls.TwoRoundPoll
+import Random
+import RandomUtils
 
 
 
@@ -34,6 +38,7 @@ main =
 
 type alias Model =
     { uuid : String
+    , order : List Int
     , twoRoundPoll : Polls.TwoRoundPoll.Model
     , oneRoundPoll : Polls.OneRoundPoll.Model
     , dividePoll : Polls.DividePoll.Model
@@ -52,6 +57,7 @@ init jsonFlags =
             D.decodeValue (D.field "uuid" D.string) jsonFlags
     in
     ( { uuid = Result.withDefault "" uuidResult
+      , order = []
       , twoRoundPoll = Polls.TwoRoundPoll.init
       , oneRoundPoll = Polls.OneRoundPoll.init
       , dividePoll = Polls.DividePoll.init
@@ -61,7 +67,7 @@ init jsonFlags =
       , starPoll = Polls.StarPoll.init
       , emojiPoll = Polls.EmojiPoll.init
       }
-    , Cmd.none
+    , Random.generate Shuffle <| RandomUtils.shuffle (Array.length Candidates.all)
     )
 
 
@@ -71,6 +77,7 @@ init jsonFlags =
 
 type Msg
     = NoOp
+    | Shuffle (List Int)
     | TwoRoundPollMsg Polls.TwoRoundPoll.Msg
     | OneRoundPollMsg Polls.OneRoundPoll.Msg
     | D21PollMsg Polls.D21Poll.Msg
@@ -139,6 +146,9 @@ update cmd model =
                     Polls.EmojiPoll.update inner model.emojiPoll
             in
             ( { model | emojiPoll = updated }, Cmd.none )
+
+        Shuffle permutation ->
+            ( { model | order = permutation }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )

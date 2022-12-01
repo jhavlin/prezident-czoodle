@@ -23,7 +23,8 @@
     <header>
         <h1 class="header">
             <div class="logo">
-                <span class="cz-start">Cz</span><span class="oo">oo</span><span class="d">d</span><span class="le">le</span>.<span class="cz-end">cz</span>
+                <span class="cz-start">Cz</span><span class="oo">oo</span><span class="d">d</span><span
+                    class="le">le</span>.<span class="cz-end">cz</span>
                 <div class="header-prezident">Prezidentský</div>
             </div>
         </h1>
@@ -31,11 +32,29 @@
     <div class="color-separator"></div>
     <div id="myapp"></div>
     <script>
+        var lastProject = localStorage.getItem('last-project');
+        if (lastProject) {
+            lastProject.restored = true;
+        } else {
+            lastProject = {
+                uuid: crypto.randomUUID(),
+                restored: false,
+                order: [],
+                polls: {
+                    twoRoundPoll: 0,
+                    oneRoundPoll: 0,
+                    dividePoll: [],
+                    d21Poll: [],
+                    doodlePoll: [],
+                    orderPoll: [],
+                    starPoll: [],
+                    emojiPoll: [],
+                }
+            };
+        }
         var app = Elm.Vote.init({
             node: document.getElementById('myapp'),
-            flags: {
-                uuid: crypto.randomUUID(),
-            }
+            flags: lastProject
         });
     </script>
 </body>
