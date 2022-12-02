@@ -38,7 +38,7 @@ main =
 
 type alias Model =
     { uuid : String
-    , order : List Int
+    , candidates : List Candidates.Candidate
     , twoRoundPoll : Polls.TwoRoundPoll.Model
     , oneRoundPoll : Polls.OneRoundPoll.Model
     , dividePoll : Polls.DividePoll.Model
@@ -57,7 +57,7 @@ init jsonFlags =
             D.decodeValue (D.field "uuid" D.string) jsonFlags
     in
     ( { uuid = Result.withDefault "" uuidResult
-      , order = []
+      , candidates = []
       , twoRoundPoll = Polls.TwoRoundPoll.init
       , oneRoundPoll = Polls.OneRoundPoll.init
       , dividePoll = Polls.DividePoll.init
@@ -148,7 +148,14 @@ update cmd model =
             ( { model | emojiPoll = updated }, Cmd.none )
 
         Shuffle permutation ->
-            ( { model | order = permutation }, Cmd.none )
+            let
+                candidates =
+                    List.map (\i -> Array.get i Candidates.all) permutation |> List.filterMap identity
+
+                singleModel =
+                    { value = Maybe.withDefault 0 <| List.head permutation }
+            in
+            ( { model | candidates = candidates, oneRoundPoll = singleModel, twoRoundPoll = singleModel }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -160,20 +167,24 @@ update cmd model =
 
 view : Model -> Html Msg
 view model =
+    let
+        pollConfig =
+            { candidates = model.candidates, readOnly = False }
+    in
     div []
         [ section [ class "intro" ]
             [ div [ class "wide" ]
                 [ p [] [ text "Zúčastněte se prosím malého experimentu. Porovnejte různé hlasovací systémy na příkladu volby prezidenta České republiky." ]
                 ]
             ]
-        , Html.map (\inner -> TwoRoundPollMsg inner) (Polls.TwoRoundPoll.view model.twoRoundPoll)
-        , Html.map (\inner -> OneRoundPollMsg inner) (Polls.OneRoundPoll.view model.oneRoundPoll)
-        , Html.map (\inner -> DividePollMsg inner) (Polls.DividePoll.view model.dividePoll)
-        , Html.map (\inner -> D21PollMsg inner) (Polls.D21Poll.view model.d21Poll)
-        , Html.map (\inner -> DoodlePollMsg inner) (Polls.DoodlePoll.view model.doodlePoll)
-        , Html.map (\inner -> OrderPollMsg inner) (Polls.OrderPoll.view model.orderPoll)
-        , Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view model.starPoll)
-        , Html.map (\inner -> EmojiPollMsg inner) (Polls.EmojiPoll.view model.emojiPoll)
+        , Html.map (\inner -> TwoRoundPollMsg inner) (Polls.TwoRoundPoll.view pollConfig model.twoRoundPoll)
+        , Html.map (\inner -> OneRoundPollMsg inner) (Polls.OneRoundPoll.view pollConfig model.oneRoundPoll)
+        , Html.map (\inner -> DividePollMsg inner) (Polls.DividePoll.view pollConfig model.dividePoll)
+        , Html.map (\inner -> D21PollMsg inner) (Polls.D21Poll.view pollConfig model.d21Poll)
+        , Html.map (\inner -> DoodlePollMsg inner) (Polls.DoodlePoll.view pollConfig model.doodlePoll)
+        , Html.map (\inner -> OrderPollMsg inner) (Polls.OrderPoll.view pollConfig model.orderPoll)
+        , Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view pollConfig model.starPoll)
+        , Html.map (\inner -> EmojiPollMsg inner) (Polls.EmojiPoll.view pollConfig model.emojiPoll)
         ]
 
 

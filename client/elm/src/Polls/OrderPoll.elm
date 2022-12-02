@@ -13,6 +13,7 @@ import FeatherIcons
 import Html exposing (Html, button, div, h1, h2, option, p, section, select, text)
 import Html.Attributes exposing (class, disabled, selected, value)
 import Html.Events exposing (onClick, onInput)
+import Polls.Common exposing (PollConfig)
 import Random
 import RandomUtils exposing (takeNthFromList)
 import Set exposing (Set)
@@ -108,8 +109,8 @@ freeCandidates values selfId =
         |> List.filter (\candidate -> Just candidate.id == selfId || (not <| Set.member candidate.id (assignedIds values)))
 
 
-view : Model -> Html Msg
-view model =
+view : PollConfig -> Model -> Html Msg
+view _ model =
     let
         assigned =
             assignedIds model.values
@@ -124,7 +125,7 @@ view model =
         options index selfId =
             let
                 opt c =
-                    option (selectedAttr c selfId ++ [ value <| String.fromInt c.id ]) [ text c.name ]
+                    option (selectedAttr c selfId ++ [ value <| String.fromInt c.id ]) [ text <| String.concat [ c.surname, " ", c.firstName ] ]
             in
             select [ onInput (\v -> SetValue { order = index, value = v }) ]
                 (option [ value "-" ] [ text "Prosím vyberte" ]

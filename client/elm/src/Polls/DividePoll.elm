@@ -6,14 +6,13 @@ module Polls.DividePoll exposing
     , view
     )
 
-import Array
-import Candidates
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
 import Html exposing (Html, div, h1, h2, input, label, p, section, text)
 import Html.Attributes exposing (checked, class, disabled, name, title, type_)
 import Html.Events exposing (onClick, onInput)
+import Polls.Common exposing (PollConfig)
 import Svg.Attributes as SAttr
 
 
@@ -47,8 +46,8 @@ update msg model =
             model
 
 
-view : Model -> Html Msg
-view model =
+view : PollConfig -> Model -> Html Msg
+view pollConfig model =
     let
         free =
             5 - (List.sum <| Dict.values model.values)
@@ -72,7 +71,7 @@ view model =
             [ div
                 [ class "divide-poll"
                 ]
-                (Array.toList Candidates.all |> List.map row)
+                (List.map row pollConfig.candidates)
             ]
         ]
 

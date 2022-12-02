@@ -6,13 +6,12 @@ module Polls.DoodlePoll exposing
     , view
     )
 
-import Array
-import Candidates
 import Component
 import Dict exposing (Dict)
 import Html exposing (Html, div, h1, h2, input, label, p, section, text)
 import Html.Attributes exposing (attribute, checked, class, name, type_, value)
 import Html.Events exposing (onInput)
+import Polls.Common exposing (PollConfig)
 import Svg exposing (circle, line, svg)
 import Svg.Attributes as SAttr
 
@@ -88,8 +87,8 @@ update msg model =
             { model | values = updatedValues }
 
 
-view : Model -> Html Msg
-view model =
+view : PollConfig -> Model -> Html Msg
+view pollConfig model =
     let
         row candidate =
             let
@@ -107,7 +106,7 @@ view model =
         , div [ class "narrow" ]
             [ div
                 [ class "doodle-poll" ]
-                (Array.toList Candidates.all |> List.map row)
+                (List.map row pollConfig.candidates)
             ]
         ]
 

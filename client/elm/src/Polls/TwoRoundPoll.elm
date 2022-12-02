@@ -8,6 +8,7 @@ module Polls.TwoRoundPoll exposing
 
 import FeatherIcons
 import Html exposing (Html, div, p, text)
+import Polls.Common exposing (PollConfig)
 import Polls.SinglePoll as SinglePoll
 
 
@@ -29,8 +30,8 @@ update =
     SinglePoll.update
 
 
-view : Model -> Html Msg
-view model =
+view : PollConfig -> Model -> Html Msg
+view pollConfig model =
     let
         desc =
             div []
@@ -51,4 +52,4 @@ view model =
             , pollClass = "two-round-poll"
             }
     in
-    SinglePoll.view viewConfig model
+    SinglePoll.view viewConfig pollConfig model

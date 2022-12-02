@@ -6,13 +6,13 @@ module Polls.EmojiPoll exposing
     , view
     )
 
-import Array
 import Candidates
 import Component
 import Dict exposing (Dict)
 import Html exposing (Html, div, h1, h2, input, section, text)
 import Html.Attributes exposing (class, maxlength, type_)
 import Html.Events exposing (onInput)
+import Polls.Common exposing (PollConfig)
 
 
 type Msg
@@ -37,8 +37,8 @@ update msg model =
             { model | values = Dict.insert id (String.left 2 string) model.values }
 
 
-view : Model -> Html Msg
-view model =
+view : PollConfig -> Model -> Html Msg
+view pollConfig model =
     let
         row candidate =
             div [ class "poll-row" ]
@@ -52,7 +52,7 @@ view model =
         , div [ class "narrow" ]
             [ div
                 [ class "emoji-poll" ]
-                (Array.toList Candidates.all |> List.map row)
+                (List.map row pollConfig.candidates)
             ]
         ]
 

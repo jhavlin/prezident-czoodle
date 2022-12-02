@@ -6,14 +6,13 @@ module Polls.D21Poll exposing
     , view
     )
 
-import Array
-import Candidates
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
 import Html exposing (Html, div, h1, h2, input, label, p, section, text)
 import Html.Attributes exposing (attribute, checked, class, disabled, name, type_, value)
 import Html.Events exposing (onInput)
+import Polls.Common exposing (PollConfig)
 import Svg.Attributes as SAttr
 
 
@@ -103,8 +102,8 @@ update msg model =
             { model | values = updatedValues }
 
 
-view : Model -> Html Msg
-view model =
+view : PollConfig -> Model -> Html Msg
+view pollConfig model =
     let
         positiveAssigned =
             model.values |> Dict.values |> List.filter (\i -> i == Positive) |> List.length
@@ -151,7 +150,7 @@ view model =
         , div [ class "narrow" ]
             [ div
                 [ class "d21-poll" ]
-                (Array.toList Candidates.all |> List.map row)
+                (List.map row pollConfig.candidates)
             ]
         ]
 

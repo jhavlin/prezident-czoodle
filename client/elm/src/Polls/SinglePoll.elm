@@ -6,13 +6,13 @@ module Polls.SinglePoll exposing
     , view
     )
 
-import Array
 import Candidates
 import Component
 import FeatherIcons
 import Html exposing (Html, div, h1, h2, input, label, section, text)
 import Html.Attributes exposing (attribute, checked, class, name, type_)
 import Html.Events exposing (onClick, onInput)
+import Polls.Common exposing (PollConfig)
 
 
 type Msg
@@ -46,8 +46,8 @@ type alias ViewConfig =
     }
 
 
-view : ViewConfig -> Model -> Html Msg
-view viewConfig model =
+view : ViewConfig -> PollConfig -> Model -> Html Msg
+view viewConfig pollConfig model =
     let
         row candidate =
             div [ class "poll-row", onClick <| SetValue candidate.id ]
@@ -61,7 +61,7 @@ view viewConfig model =
         , div [ class "narrow" ]
             [ div
                 [ class "single-poll" ]
-                (Array.toList Candidates.all |> List.map row)
+                (List.map row pollConfig.candidates)
             ]
         ]
 

@@ -15,6 +15,7 @@ import Html exposing (Attribute, Html, button, div, h1, h2, input, p, section, s
 import Html.Attributes exposing (class, disabled, style, tabindex, title, type_)
 import Html.Events exposing (keyCode, on, onClick, onFocus, onInput)
 import Json.Decode as Decode
+import Polls.Common exposing (PollConfig)
 import Svg.Attributes as SAttr
 import Svg.Events as SEvent
 import UserInputInt exposing (UserInputInt)
@@ -83,8 +84,8 @@ onKeyUp tagger =
     on "keyup" (Decode.map tagger keyCode)
 
 
-view : Model -> Html Msg
-view model =
+view : PollConfig -> Model -> Html Msg
+view pollConfig model =
     let
         row candidate =
             let
@@ -131,7 +132,7 @@ view model =
                        , class customClass
                        ]
                 )
-                (Array.toList Candidates.all |> List.map row)
+                (List.map row pollConfig.candidates)
             ]
         ]
 
