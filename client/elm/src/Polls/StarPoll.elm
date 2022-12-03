@@ -2,12 +2,11 @@ module Polls.StarPoll exposing
     ( Model
     , Msg
     , init
+    , serialize
     , update
     , view
     )
 
-import Array
-import Candidates
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
@@ -15,6 +14,7 @@ import Html exposing (Attribute, Html, button, div, h1, h2, input, p, section, s
 import Html.Attributes exposing (class, disabled, style, tabindex, title, type_)
 import Html.Events exposing (keyCode, on, onClick, onFocus, onInput)
 import Json.Decode as Decode
+import Json.Encode
 import Polls.Common exposing (PollConfig)
 import Svg.Attributes as SAttr
 import Svg.Events as SEvent
@@ -312,3 +312,17 @@ inputView { candidateId, value } =
         [ progressView
         , inputField
         ]
+
+
+serialize : Model -> Json.Encode.Value
+serialize model =
+    let
+        userInputToString userInput =
+            case userInput of
+                UserInputInt.Valid v ->
+                    String.fromInt v
+
+                UserInputInt.Invalid s _ ->
+                    s
+    in
+    Polls.Common.serializeStringDict <| Dict.map (\_ v -> userInputToString v) model.values

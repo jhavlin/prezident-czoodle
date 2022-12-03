@@ -41,20 +41,23 @@
                 restored: false,
                 order: [],
                 polls: {
-                    twoRoundPoll: 0,
-                    oneRoundPoll: 0,
-                    dividePoll: [],
-                    d21Poll: [],
-                    doodlePoll: [],
-                    orderPoll: [],
-                    starPoll: [],
-                    emojiPoll: [],
+                    twoRound: 0,
+                    oneRound: 0,
+                    divide: [],
+                    d21: [],
+                    doodle: [],
+                    order: [],
+                    star: [],
+                    emoji: [],
                 }
             };
         }
         var app = Elm.Vote.init({
             node: document.getElementById('myapp'),
             flags: lastProject
+        });
+        app.ports.storePolls.subscribe(function (message) {
+            localStorage.setItem('last-project', JSON.stringify(message));
         });
     </script>
 </body>

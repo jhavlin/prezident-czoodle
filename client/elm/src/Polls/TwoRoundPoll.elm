@@ -2,12 +2,14 @@ module Polls.TwoRoundPoll exposing
     ( Model
     , Msg
     , init
+    , serialize
     , update
     , view
     )
 
 import FeatherIcons
 import Html exposing (Html, div, p, text)
+import Json.Encode
 import Polls.Common exposing (PollConfig)
 import Polls.SinglePoll as SinglePoll
 
@@ -53,3 +55,8 @@ view pollConfig model =
             }
     in
     SinglePoll.view viewConfig pollConfig model
+
+
+serialize : Model -> Json.Encode.Value
+serialize =
+    SinglePoll.serialize

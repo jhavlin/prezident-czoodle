@@ -2,6 +2,7 @@ module Polls.EmojiPoll exposing
     ( Model
     , Msg
     , init
+    , serialize
     , update
     , view
     )
@@ -12,6 +13,7 @@ import Dict exposing (Dict)
 import Html exposing (Html, div, h1, h2, input, section, text)
 import Html.Attributes exposing (class, maxlength, type_)
 import Html.Events exposing (onInput)
+import Json.Encode
 import Polls.Common exposing (PollConfig)
 
 
@@ -90,3 +92,8 @@ rowValueView { candidate, model } =
                 []
     in
     div [ class "emoji-poll-value" ] [ field ]
+
+
+serialize : Model -> Json.Encode.Value
+serialize model =
+    Polls.Common.serializeStringDict model.values

@@ -2,6 +2,7 @@ module Polls.SinglePoll exposing
     ( Model
     , Msg
     , init
+    , serialize
     , update
     , view
     )
@@ -12,6 +13,7 @@ import FeatherIcons
 import Html exposing (Html, div, h1, h2, input, label, section, text)
 import Html.Attributes exposing (attribute, checked, class, name, type_)
 import Html.Events exposing (onClick, onInput)
+import Json.Encode
 import Polls.Common exposing (PollConfig)
 
 
@@ -109,3 +111,8 @@ optionSvg : ViewConfig -> Html Msg
 optionSvg viewConfig =
     div [ class "single-poll-option" ]
         [ viewConfig.icon |> FeatherIcons.withSize 32 |> FeatherIcons.toHtml [] ]
+
+
+serialize : Model -> Json.Encode.Value
+serialize model =
+    Json.Encode.int model.value

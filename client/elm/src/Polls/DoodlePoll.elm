@@ -2,6 +2,7 @@ module Polls.DoodlePoll exposing
     ( Model
     , Msg
     , init
+    , serialize
     , update
     , view
     )
@@ -11,6 +12,7 @@ import Dict exposing (Dict)
 import Html exposing (Html, div, h1, h2, input, label, p, section, text)
 import Html.Attributes exposing (attribute, checked, class, name, type_, value)
 import Html.Events exposing (onInput)
+import Json.Encode
 import Polls.Common exposing (PollConfig)
 import Svg exposing (circle, line, svg)
 import Svg.Attributes as SAttr
@@ -55,6 +57,19 @@ optionToValue option =
 
         Yes ->
             "2"
+
+
+optionToInt : Option -> Int
+optionToInt option =
+    case option of
+        No ->
+            0
+
+        IfNeeded ->
+            1
+
+        Yes ->
+            2
 
 
 optionToClass : Option -> String
@@ -216,3 +231,8 @@ viewIfNeededSvg : Html Msg
 viewIfNeededSvg =
     svg [ SAttr.class "doodle-poll-option-svg if-needed", SAttr.width "34", SAttr.height "34", SAttr.viewBox "0 0 34 34" ]
         [ circle [ SAttr.cx "17", SAttr.cy "17", SAttr.r "12" ] [] ]
+
+
+serialize : Model -> Json.Encode.Value
+serialize model =
+    Polls.Common.serializeIntDict <| Dict.map (\_ v -> optionToInt v) model.values

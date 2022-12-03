@@ -2,6 +2,7 @@ module Polls.DividePoll exposing
     ( Model
     , Msg
     , init
+    , serialize
     , update
     , view
     )
@@ -12,6 +13,7 @@ import FeatherIcons
 import Html exposing (Html, div, h1, h2, input, label, p, section, text)
 import Html.Attributes exposing (checked, class, disabled, name, title, type_)
 import Html.Events exposing (onClick, onInput)
+import Json.Encode
 import Polls.Common exposing (PollConfig)
 import Svg.Attributes as SAttr
 
@@ -225,3 +227,8 @@ creditView { freeCount } =
             div [ class "divide-poll-credit-label" ] [ text "Zbývající hlasy: " ]
     in
     div [ class "divide-poll-credit" ] (label :: items)
+
+
+serialize : Model -> Json.Encode.Value
+serialize model =
+    Polls.Common.serializeIntDict model.values

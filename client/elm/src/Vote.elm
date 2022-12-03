@@ -1,4 +1,4 @@
-module Vote exposing (..)
+port module Vote exposing (..)
 
 import Array
 import Browser
@@ -6,6 +6,7 @@ import Candidates
 import Html exposing (Html, div, p, section, text)
 import Html.Attributes exposing (class)
 import Json.Decode as D
+import Json.Encode
 import Polls.D21Poll
 import Polls.DividePoll
 import Polls.DoodlePoll
@@ -14,8 +15,10 @@ import Polls.OneRoundPoll
 import Polls.OrderPoll
 import Polls.StarPoll
 import Polls.TwoRoundPoll
+import Process
 import Random
 import RandomUtils
+import Task
 
 
 
@@ -33,12 +36,20 @@ main =
 
 
 
+-- PORTS
+
+
+port storePolls : Json.Encode.Value -> Cmd msg
+
+
+
 -- MODEL
 
 
 type alias Model =
     { uuid : String
     , candidates : List Candidates.Candidate
+    , version : Int
     , twoRoundPoll : Polls.TwoRoundPoll.Model
     , oneRoundPoll : Polls.OneRoundPoll.Model
     , dividePoll : Polls.DividePoll.Model
@@ -58,6 +69,7 @@ init jsonFlags =
     in
     ( { uuid = Result.withDefault "" uuidResult
       , candidates = []
+      , version = 1
       , twoRoundPoll = Polls.TwoRoundPoll.init
       , oneRoundPoll = Polls.OneRoundPoll.init
       , dividePoll = Polls.DividePoll.init
@@ -78,6 +90,7 @@ init jsonFlags =
 type Msg
     = NoOp
     | Shuffle (List Int)
+    | Store Int
     | TwoRoundPollMsg Polls.TwoRoundPoll.Msg
     | OneRoundPollMsg Polls.OneRoundPoll.Msg
     | D21PollMsg Polls.D21Poll.Msg
@@ -90,62 +103,70 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update cmd model =
+    let
+        nextVersion =
+            model.version + 1
+
+        command =
+            Process.sleep 100
+                |> Task.perform (\_ -> Store nextVersion)
+    in
     case cmd of
         TwoRoundPollMsg inner ->
             let
                 updated =
                     Polls.TwoRoundPoll.update inner model.twoRoundPoll
             in
-            ( { model | twoRoundPoll = updated }, Cmd.none )
+            ( { model | twoRoundPoll = updated, version = nextVersion }, command )
 
         OneRoundPollMsg inner ->
             let
                 updated =
                     Polls.OneRoundPoll.update inner model.oneRoundPoll
             in
-            ( { model | oneRoundPoll = updated }, Cmd.none )
+            ( { model | oneRoundPoll = updated, version = nextVersion }, command )
 
         DividePollMsg inner ->
             let
                 updated =
                     Polls.DividePoll.update inner model.dividePoll
             in
-            ( { model | dividePoll = updated }, Cmd.none )
+            ( { model | dividePoll = updated, version = nextVersion }, command )
 
         D21PollMsg inner ->
             let
                 updated =
                     Polls.D21Poll.update inner model.d21Poll
             in
-            ( { model | d21Poll = updated }, Cmd.none )
+            ( { model | d21Poll = updated, version = nextVersion }, command )
 
         DoodlePollMsg inner ->
             let
                 updated =
                     Polls.DoodlePoll.update inner model.doodlePoll
             in
-            ( { model | doodlePoll = updated }, Cmd.none )
+            ( { model | doodlePoll = updated, version = nextVersion }, command )
 
         OrderPollMsg inner ->
             let
                 ( updated, innerCmd ) =
                     Polls.OrderPoll.update inner model.orderPoll
             in
-            ( { model | orderPoll = updated }, Cmd.map OrderPollMsg innerCmd )
+            ( { model | orderPoll = updated, version = nextVersion }, Cmd.batch [ Cmd.map OrderPollMsg innerCmd, command ] )
 
         StarPollMsg inner ->
             let
                 updated =
                     Polls.StarPoll.update inner model.starPoll
             in
-            ( { model | starPoll = updated }, Cmd.none )
+            ( { model | starPoll = updated, version = nextVersion }, command )
 
         EmojiPollMsg inner ->
             let
                 updated =
                     Polls.EmojiPoll.update inner model.emojiPoll
             in
-            ( { model | emojiPoll = updated }, Cmd.none )
+            ( { model | emojiPoll = updated, version = nextVersion }, command )
 
         Shuffle permutation ->
             let
@@ -157,8 +178,35 @@ update cmd model =
             in
             ( { model | candidates = candidates, oneRoundPoll = singleModel, twoRoundPoll = singleModel }, Cmd.none )
 
+        Store version ->
+            if model.version == version then
+                ( model, storePolls <| serialize model )
+
+            else
+                ( model, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
+
+
+serialize : Model -> Json.Encode.Value
+serialize model =
+    Json.Encode.object
+        [ ( "uuid", Json.Encode.string model.uuid )
+        , ( "order", Json.Encode.list Json.Encode.int <| List.map .id model.candidates )
+        , ( "polls"
+          , Json.Encode.object
+                [ ( "twoRound", Polls.TwoRoundPoll.serialize model.twoRoundPoll )
+                , ( "oneRound", Polls.OneRoundPoll.serialize model.oneRoundPoll )
+                , ( "divide", Polls.DividePoll.serialize model.dividePoll )
+                , ( "d21", Polls.D21Poll.serialize model.d21Poll )
+                , ( "doodle", Polls.DoodlePoll.serialize model.doodlePoll )
+                , ( "order", Polls.OrderPoll.serialize model.orderPoll )
+                , ( "star", Polls.StarPoll.serialize model.starPoll )
+                , ( "emoji", Polls.EmojiPoll.serialize model.emojiPoll )
+                ]
+          )
+        ]
 
 
 
