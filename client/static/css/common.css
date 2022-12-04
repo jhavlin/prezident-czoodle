@@ -153,6 +153,49 @@ section.poll .narrow {
     }
 }
 
+.box {
+    border: 1px white solid;
+    margin-top: 2em;
+    margin-bottom: 2em;
+    padding: 2em;
+    border-radius: 1em;
+    background: #005080;
+    position: relative;
+}
+
+.box-close-button {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.box-close-button>svg {
+    stroke: white;
+}
+
+@media (hover: hover) {
+    .box-close-button:hover>svg {
+        background: #ff0000c4;
+        border-radius: 2px;
+    }
+}
+
+.box-action-button {
+    font-size: inherit;
+    font: inherit;
+    display: block;
+    background: none;
+    border: none;
+    color: inherit;
+    padding: 0;
+    text-decoration: underline;
+    margin: 0.5em 0;
+    cursor: Pointer
+}
+
 /*
  * Common UI elements
  */

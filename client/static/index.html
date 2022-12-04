@@ -54,6 +54,13 @@
         app.ports.storePolls.subscribe(function (message) {
             sessionStorage.setItem('last-project', JSON.stringify(message));
         });
+        app.ports.reset.subscribe(function () {
+            sessionStorage.removeItem('last-project');
+            app.ports.reInit.send({
+                uuid: crypto.randomUUID(),
+                order: [],
+            });
+        });
     </script>
 </body>
 

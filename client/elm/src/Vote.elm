@@ -3,8 +3,10 @@ port module Vote exposing (..)
 import Array
 import Browser
 import Candidates
-import Html exposing (Html, div, p, section, text)
-import Html.Attributes exposing (class)
+import FeatherIcons
+import Html exposing (Html, button, div, p, section, text)
+import Html.Attributes exposing (class, title)
+import Html.Events exposing (onClick)
 import Json.Decode as D
 import Json.Encode
 import Polls.D21Poll
@@ -42,6 +44,12 @@ main =
 port storePolls : Json.Encode.Value -> Cmd msg
 
 
+port reset : () -> Cmd msg
+
+
+port reInit : (D.Value -> msg) -> Sub msg
+
+
 
 -- MODEL
 
@@ -50,6 +58,7 @@ type alias Model =
     { uuid : String
     , candidates : List Candidates.Candidate
     , version : Int
+    , showRestoredInfo : Bool
     , twoRoundPoll : Polls.TwoRoundPoll.Model
     , oneRoundPoll : Polls.OneRoundPoll.Model
     , dividePoll : Polls.DividePoll.Model
@@ -77,6 +86,7 @@ init jsonFlags =
             ( { uuid = uuid
               , candidates = []
               , version = 1
+              , showRestoredInfo = False
               , twoRoundPoll = Polls.TwoRoundPoll.init
               , oneRoundPoll = Polls.OneRoundPoll.init
               , dividePoll = Polls.DividePoll.init
@@ -98,7 +108,7 @@ init jsonFlags =
                 List.map (\i -> Array.get i Candidates.all) orderList |> List.filterMap identity
 
             partial =
-                Model uuid candidatesInOrder 1
+                Model uuid candidatesInOrder 1 True
 
             pollsDecoder =
                 D.map8 partial
@@ -130,6 +140,9 @@ type Msg
     = NoOp
     | Shuffle (List Int)
     | Store Int
+    | CloseRestoreBox
+    | Reset
+    | ReInit D.Value
     | TwoRoundPollMsg Polls.TwoRoundPoll.Msg
     | OneRoundPollMsg Polls.OneRoundPoll.Msg
     | D21PollMsg Polls.D21Poll.Msg
@@ -147,7 +160,7 @@ update cmd model =
             model.version + 1
 
         command =
-            Process.sleep 2500
+            Process.sleep 1000
                 |> Task.perform (\_ -> Store nextVersion)
     in
     case cmd of
@@ -224,6 +237,15 @@ update cmd model =
             else
                 ( model, Cmd.none )
 
+        CloseRestoreBox ->
+            ( { model | showRestoredInfo = False }, Cmd.none )
+
+        Reset ->
+            ( model, reset () )
+
+        ReInit v ->
+            init v
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -257,9 +279,24 @@ view model =
     let
         pollConfig =
             { candidates = model.candidates, readOnly = False }
+
+        restoredInfo =
+            if model.showRestoredInfo then
+                div [ class "wide" ]
+                    [ div [ class "box info" ]
+                        [ button [ class "box-close-button", title "Zavřít", onClick CloseRestoreBox ]
+                            [ FeatherIcons.x |> FeatherIcons.withSize 18 |> FeatherIcons.toHtml [] ]
+                        , text "Obnoven poslední uložený stav."
+                        , button [ class "box-action-button", onClick Reset ] [ text "Zahodit a začít znovu" ]
+                        ]
+                    ]
+
+            else
+                text ""
     in
     div []
-        [ section [ class "intro" ]
+        [ restoredInfo
+        , section [ class "intro" ]
             [ div [ class "wide" ]
                 [ p [] [ text "Zúčastněte se prosím malého experimentu. Porovnejte různé hlasovací systémy na příkladu volby prezidenta České republiky." ]
                 ]
@@ -281,4 +318,4 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    reInit ReInit
