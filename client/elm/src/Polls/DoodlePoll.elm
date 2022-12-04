@@ -1,6 +1,7 @@
 module Polls.DoodlePoll exposing
     ( Model
     , Msg
+    , deserialize
     , init
     , serialize
     , update
@@ -12,6 +13,7 @@ import Dict exposing (Dict)
 import Html exposing (Html, div, h1, h2, input, label, p, section, text)
 import Html.Attributes exposing (attribute, checked, class, name, type_, value)
 import Html.Events exposing (onInput)
+import Json.Decode
 import Json.Encode
 import Polls.Common exposing (PollConfig)
 import Svg exposing (circle, line, svg)
@@ -70,6 +72,19 @@ optionToInt option =
 
         Yes ->
             2
+
+
+intToOption : Int -> Option
+intToOption i =
+    case i of
+        1 ->
+            IfNeeded
+
+        2 ->
+            Yes
+
+        _ ->
+            No
 
 
 optionToClass : Option -> String
@@ -236,3 +251,8 @@ viewIfNeededSvg =
 serialize : Model -> Json.Encode.Value
 serialize model =
     Polls.Common.serializeIntDict <| Dict.map (\_ v -> optionToInt v) model.values
+
+
+deserialize : Json.Decode.Decoder Model
+deserialize =
+    Json.Decode.map Model <| Polls.Common.deserializeMappedIntDict intToOption

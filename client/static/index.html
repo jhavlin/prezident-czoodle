@@ -32,29 +32,24 @@
     <div class="color-separator"></div>
     <div id="myapp"></div>
     <script>
-        var lastProject = localStorage.getItem('last-project');
-        if (lastProject) {
-            lastProject.restored = true;
-        } else {
+        const storedString = localStorage.getItem('last-project');
+        let lastProject;
+        if (storedString) {
+            try {
+                lastProject = JSON.parse(storedString);
+            } catch (e) {
+                console.error('Nepodařilo se načíst poslední uložený stav:', storedString);
+            }
+        }
+        if (!lastProject) {
             lastProject = {
                 uuid: crypto.randomUUID(),
-                restored: false,
                 order: [],
-                polls: {
-                    twoRound: 0,
-                    oneRound: 0,
-                    divide: [],
-                    d21: [],
-                    doodle: [],
-                    order: [],
-                    star: [],
-                    emoji: [],
-                }
             };
         }
         var app = Elm.Vote.init({
             node: document.getElementById('myapp'),
-            flags: lastProject
+            flags: lastProject,
         });
         app.ports.storePolls.subscribe(function (message) {
             localStorage.setItem('last-project', JSON.stringify(message));

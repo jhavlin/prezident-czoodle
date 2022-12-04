@@ -1,6 +1,7 @@
 module Polls.OrderPoll exposing
     ( Model
     , Msg
+    , deserialize
     , init
     , serialize
     , update
@@ -14,6 +15,7 @@ import FeatherIcons
 import Html exposing (Html, button, div, h1, h2, option, p, section, select, text)
 import Html.Attributes exposing (class, disabled, selected, value)
 import Html.Events exposing (onClick, onInput)
+import Json.Decode
 import Json.Encode
 import Polls.Common exposing (PollConfig)
 import Random
@@ -275,3 +277,21 @@ headerView =
 serialize : Model -> Json.Encode.Value
 serialize model =
     Json.Encode.array Json.Encode.int <| Array.map (\m -> Maybe.withDefault -1 m) model.values
+
+
+deserialize : Json.Decode.Decoder Model
+deserialize =
+    let
+        len =
+            Array.length Candidates.all
+
+        intToMaybe i =
+            if i >= 0 && i < len then
+                Just i
+
+            else
+                Nothing
+    in
+    Json.Decode.map2 Model
+        (Json.Decode.array (Json.Decode.map intToMaybe Json.Decode.int))
+        (Json.Decode.succeed Nothing)

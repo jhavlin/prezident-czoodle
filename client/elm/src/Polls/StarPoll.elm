@@ -1,6 +1,7 @@
 module Polls.StarPoll exposing
     ( Model
     , Msg
+    , deserialize
     , init
     , serialize
     , update
@@ -13,7 +14,7 @@ import FeatherIcons
 import Html exposing (Attribute, Html, button, div, h1, h2, input, p, section, span, text)
 import Html.Attributes exposing (class, disabled, style, tabindex, title, type_)
 import Html.Events exposing (keyCode, on, onClick, onFocus, onInput)
-import Json.Decode as Decode
+import Json.Decode
 import Json.Encode
 import Polls.Common exposing (PollConfig)
 import Svg.Attributes as SAttr
@@ -81,7 +82,7 @@ update msg model =
 
 onKeyUp : (Int -> msg) -> Attribute msg
 onKeyUp tagger =
-    on "keyup" (Decode.map tagger keyCode)
+    on "keyup" (Json.Decode.map tagger keyCode)
 
 
 view : PollConfig -> Model -> Html Msg
@@ -326,3 +327,22 @@ serialize model =
                     s
     in
     Polls.Common.serializeStringDict <| Dict.map (\_ v -> userInputToString v) model.values
+
+
+deserialize : Json.Decode.Decoder Model
+deserialize =
+    let
+        mapper str =
+            let
+                trimmed =
+                    String.trim str
+            in
+            if String.isEmpty trimmed then
+                UserInputInt.Valid 0
+
+            else
+                UserInputInt.create userInputConfig trimmed
+    in
+    Json.Decode.map2 Model
+        (Polls.Common.deserializeMappedStringDict mapper)
+        (Json.Decode.succeed False)

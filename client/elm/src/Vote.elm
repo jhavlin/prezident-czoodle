@@ -64,23 +64,62 @@ type alias Model =
 init : D.Value -> ( Model, Cmd Msg )
 init jsonFlags =
     let
-        uuidResult =
-            D.decodeValue (D.field "uuid" D.string) jsonFlags
+        orderList =
+            Result.withDefault [] <| Debug.log "order decoded" <| D.decodeValue (D.field "order" (D.list D.int)) jsonFlags
+
+        uuid =
+            Result.withDefault "" <| D.decodeValue (D.field "uuid" D.string) jsonFlags
+
+        isNew =
+            List.isEmpty orderList
+
+        defaultModel =
+            ( { uuid = uuid
+              , candidates = []
+              , version = 1
+              , twoRoundPoll = Polls.TwoRoundPoll.init
+              , oneRoundPoll = Polls.OneRoundPoll.init
+              , dividePoll = Polls.DividePoll.init
+              , d21Poll = Polls.D21Poll.init
+              , doodlePoll = Polls.DoodlePoll.init
+              , orderPoll = Polls.OrderPoll.init
+              , starPoll = Polls.StarPoll.init
+              , emojiPoll = Polls.EmojiPoll.init
+              }
+            , Random.generate Shuffle <| RandomUtils.shuffle (Array.length Candidates.all)
+            )
     in
-    ( { uuid = Result.withDefault "" uuidResult
-      , candidates = []
-      , version = 1
-      , twoRoundPoll = Polls.TwoRoundPoll.init
-      , oneRoundPoll = Polls.OneRoundPoll.init
-      , dividePoll = Polls.DividePoll.init
-      , d21Poll = Polls.D21Poll.init
-      , doodlePoll = Polls.DoodlePoll.init
-      , orderPoll = Polls.OrderPoll.init
-      , starPoll = Polls.StarPoll.init
-      , emojiPoll = Polls.EmojiPoll.init
-      }
-    , Random.generate Shuffle <| RandomUtils.shuffle (Array.length Candidates.all)
-    )
+    if isNew then
+        defaultModel
+
+    else
+        let
+            candidatesInOrder =
+                List.map (\i -> Array.get i Candidates.all) orderList |> List.filterMap identity
+
+            partial =
+                Model uuid candidatesInOrder 1
+
+            pollsDecoder =
+                D.map8 partial
+                    (D.field "twoRound" Polls.TwoRoundPoll.deserialize)
+                    (D.field "oneRound" Polls.TwoRoundPoll.deserialize)
+                    (D.field "divide" Polls.DividePoll.deserialize)
+                    (D.field "d21" Polls.D21Poll.deserialize)
+                    (D.field "doodle" Polls.DoodlePoll.deserialize)
+                    (D.field "order" Polls.OrderPoll.deserialize)
+                    (D.field "star" Polls.StarPoll.deserialize)
+                    (D.field "emoji" Polls.EmojiPoll.deserialize)
+
+            decodeResult =
+                Debug.log "decodeResult" <| D.decodeValue (D.field "polls" pollsDecoder) jsonFlags
+        in
+        case decodeResult of
+            Err _ ->
+                defaultModel
+
+            Ok model ->
+                ( model, Cmd.none )
 
 
 

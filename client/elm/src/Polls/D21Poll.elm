@@ -1,6 +1,7 @@
 module Polls.D21Poll exposing
     ( Model
     , Msg
+    , deserialize
     , init
     , serialize
     , update
@@ -13,6 +14,7 @@ import FeatherIcons
 import Html exposing (Html, div, h1, h2, input, label, p, section, text)
 import Html.Attributes exposing (attribute, checked, class, disabled, name, type_, value)
 import Html.Events exposing (onInput)
+import Json.Decode
 import Json.Encode
 import Polls.Common exposing (PollConfig)
 import Svg.Attributes as SAttr
@@ -98,6 +100,18 @@ optionToInt option =
 
         Negative ->
             -1
+
+
+intToOption : Int -> Option
+intToOption i =
+    if i < 0 then
+        Negative
+
+    else if i == 0 then
+        Neutral
+
+    else
+        Positive
 
 
 init : Model
@@ -325,3 +339,8 @@ viewNegative =
 serialize : Model -> Json.Encode.Value
 serialize model =
     Polls.Common.serializeIntDict <| Dict.map (\_ v -> optionToInt v) model.values
+
+
+deserialize : Json.Decode.Decoder Model
+deserialize =
+    Json.Decode.map Model <| Polls.Common.deserializeMappedIntDict intToOption
