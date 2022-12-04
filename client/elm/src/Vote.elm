@@ -65,7 +65,7 @@ init : D.Value -> ( Model, Cmd Msg )
 init jsonFlags =
     let
         orderList =
-            Result.withDefault [] <| Debug.log "order decoded" <| D.decodeValue (D.field "order" (D.list D.int)) jsonFlags
+            Result.withDefault [] <| D.decodeValue (D.field "order" (D.list D.int)) jsonFlags
 
         uuid =
             Result.withDefault "" <| D.decodeValue (D.field "uuid" D.string) jsonFlags
@@ -112,7 +112,7 @@ init jsonFlags =
                     (D.field "emoji" Polls.EmojiPoll.deserialize)
 
             decodeResult =
-                Debug.log "decodeResult" <| D.decodeValue (D.field "polls" pollsDecoder) jsonFlags
+                D.decodeValue (D.field "polls" pollsDecoder) jsonFlags
         in
         case decodeResult of
             Err _ ->
@@ -147,7 +147,7 @@ update cmd model =
             model.version + 1
 
         command =
-            Process.sleep 100
+            Process.sleep 2500
                 |> Task.perform (\_ -> Store nextVersion)
     in
     case cmd of
