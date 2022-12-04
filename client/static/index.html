@@ -32,7 +32,7 @@
     <div class="color-separator"></div>
     <div id="myapp"></div>
     <script>
-        const storedString = localStorage.getItem('last-project');
+        const storedString = sessionStorage.getItem('last-project');
         let lastProject;
         if (storedString) {
             try {
@@ -52,7 +52,7 @@
             flags: lastProject,
         });
         app.ports.storePolls.subscribe(function (message) {
-            localStorage.setItem('last-project', JSON.stringify(message));
+            sessionStorage.setItem('last-project', JSON.stringify(message));
         });
     </script>
 </body>
