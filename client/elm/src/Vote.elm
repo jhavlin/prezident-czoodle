@@ -224,11 +224,8 @@ update cmd model =
             let
                 candidates =
                     List.map (\i -> Array.get i Candidates.all) permutation |> List.filterMap identity
-
-                singleModel =
-                    { value = Maybe.withDefault 0 <| List.head permutation }
             in
-            ( { model | candidates = candidates, oneRoundPoll = singleModel, twoRoundPoll = singleModel }, Cmd.none )
+            ( { model | candidates = candidates }, Cmd.none )
 
         Store version ->
             if model.version == version then
