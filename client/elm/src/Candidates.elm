@@ -46,36 +46,24 @@ all =
           , imgName = "marek_hilser"
           }
         , { id = 5
-          , name = "Karel Janeček"
-          , firstName = "Karel"
-          , surname = "Janeček"
-          , imgName = "karel_janecek"
-          }
-        , { id = 6
           , name = "Danuše Nerudová"
           , firstName = "Danuše"
           , surname = "Nerudová"
           , imgName = "danuse_nerudova"
           }
-        , { id = 7
+        , { id = 6
           , name = "Petr Pavel"
           , firstName = "Petr"
           , surname = "Pavel"
           , imgName = "petr_pavel"
           }
-        , { id = 8
-          , name = "Denisa Rohanová"
-          , firstName = "Denisa"
-          , surname = "Rohanová"
-          , imgName = "denisa_rohanova"
-          }
-        , { id = 9
+        , { id = 7
           , name = "Josef Středula"
           , firstName = "Josef"
           , surname = "Středula"
           , imgName = "josef_stredula"
           }
-        , { id = 10
+        , { id = 8
           , name = "Tomáš Zima"
           , firstName = "Tomáš"
           , surname = "Zima"
