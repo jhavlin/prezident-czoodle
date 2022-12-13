@@ -38,7 +38,7 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         SetValue id string ->
-            { model | values = Dict.insert id (String.left 2 string) model.values }
+            { model | values = Dict.insert id (String.left 3 string) model.values }
 
 
 view : PollConfig -> Model -> Html Msg
@@ -71,7 +71,7 @@ headerView =
         []
         [ h1 [ class "poll-heading" ] [ text "Bonus: Emoji Hlasování" ]
         , div [ class "poll-info emoji-poll-info" ]
-            [ text "Přiřaďte každé osobnosti emoji nebo jiný symbol."
+            [ text "Přiřaďte každé osobnosti emoji nebo textového smajlíka (až 3 znaky)."
             ]
         , div
             [ class "poll-title"
@@ -88,7 +88,7 @@ rowValueView { candidate, model } =
                 [ type_ "text"
                 , Html.Attributes.value <| Maybe.withDefault "" <| Dict.get candidate.id model.values
                 , onInput <| SetValue candidate.id
-                , maxlength 2
+                , maxlength 3
                 , class "emoji-poll-input"
                 ]
                 []
