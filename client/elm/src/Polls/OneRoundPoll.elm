@@ -4,6 +4,7 @@ module Polls.OneRoundPoll exposing
     , deserialize
     , init
     , serialize
+    , summarize
     , update
     , view
     )
@@ -62,3 +63,8 @@ serialize =
 deserialize : Json.Decode.Decoder Model
 deserialize =
     SinglePoll.deserialize
+
+
+summarize : Model -> Polls.Common.Summary
+summarize model =
+    SinglePoll.summarize "jednokolové volbě" model

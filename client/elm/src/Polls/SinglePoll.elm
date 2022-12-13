@@ -4,10 +4,12 @@ module Polls.SinglePoll exposing
     , deserialize
     , init
     , serialize
+    , summarize
     , update
     , view
     )
 
+import Array
 import Candidates
 import Component
 import FeatherIcons
@@ -16,7 +18,7 @@ import Html.Attributes exposing (attribute, checked, class, name, type_)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig)
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
 
 
 type Msg
@@ -123,3 +125,23 @@ serialize model =
 deserialize : Json.Decode.Decoder Model
 deserialize =
     Json.Decode.map Model Json.Decode.int
+
+
+summarize : String -> Model -> Polls.Common.Summary
+summarize pollName model =
+    if model.value >= 0 && model.value < Array.length Candidates.all then
+        let
+            candidateName =
+                Array.get model.value Candidates.all |> Maybe.map .p4 |> Maybe.withDefault "-"
+
+            html =
+                div [] [ text <| String.concat [ "V\u{00A0}", pollName, " jste zvolili ", candidateName, "." ] ]
+        in
+        Summary Valid html
+
+    else
+        let
+            html =
+                div [] [ text <| String.concat [ "V\u{00A0}", pollName, " jste nikoho nezvolili." ] ]
+        in
+        Summary Error html

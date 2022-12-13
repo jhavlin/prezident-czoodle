@@ -4,11 +4,12 @@ import Array
 import Browser
 import Candidates
 import FeatherIcons
-import Html exposing (Html, button, div, p, section, text)
+import Html exposing (Html, button, div, h1, p, section, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
 import Json.Decode as D
 import Json.Encode
+import Polls.Common exposing (Summary(..), Validation(..))
 import Polls.D21Poll
 import Polls.DividePoll
 import Polls.DoodlePoll
@@ -306,6 +307,51 @@ view model =
         , Html.map (\inner -> OrderPollMsg inner) (Polls.OrderPoll.view pollConfig model.orderPoll)
         , Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view pollConfig model.starPoll)
         , Html.map (\inner -> EmojiPollMsg inner) (Polls.EmojiPoll.view pollConfig model.emojiPoll)
+        , summaries model
+        ]
+
+
+summaries : Model -> Html Msg
+summaries model =
+    let
+        localHtml html =
+            Html.map (\_ -> NoOp) html
+
+        icon validation =
+            case validation of
+                Valid ->
+                    FeatherIcons.checkCircle |> FeatherIcons.withClass (validationClass validation) |> FeatherIcons.toHtml []
+
+                Warning ->
+                    FeatherIcons.alertCircle |> FeatherIcons.withClass (validationClass validation) |> FeatherIcons.toHtml []
+
+                Error ->
+                    FeatherIcons.xCircle |> FeatherIcons.withClass (validationClass validation) |> FeatherIcons.toHtml []
+
+        validationClass validation =
+            case validation of
+                Valid ->
+                    "valid"
+
+                Warning ->
+                    "warning"
+
+                Error ->
+                    "error"
+
+        showSummary : Summary -> Html Msg
+        showSummary (Summary validation html) =
+            div [ class "summary", class <| validationClass validation ]
+                [ div [ class "summary-icon" ] [ icon validation ]
+                , div [ class "summary-text" ] [ localHtml html ]
+                ]
+    in
+    section [ class "summaries" ]
+        [ div [ class "wide" ]
+            [ h1 [] [ text "Shrnutí" ]
+            , showSummary <| Polls.TwoRoundPoll.summarize model.twoRoundPoll
+            , showSummary <| Polls.OneRoundPoll.summarize model.oneRoundPoll
+            ]
         ]
 
 

@@ -1,5 +1,7 @@
 module Polls.Common exposing
     ( PollConfig
+    , Summary(..)
+    , Validation(..)
     , deserializeIntDict
     , deserializeMappedIntDict
     , deserializeMappedStringDict
@@ -11,6 +13,7 @@ module Polls.Common exposing
 import Array
 import Candidates
 import Dict exposing (Dict)
+import Html exposing (Html)
 import Json.Decode
 import Json.Encode
 
@@ -19,6 +22,16 @@ type alias PollConfig =
     { candidates : List Candidates.Candidate
     , readOnly : Bool
     }
+
+
+type Validation
+    = Valid
+    | Warning
+    | Error
+
+
+type Summary
+    = Summary Validation (Html ())
 
 
 serializeIntDict : Dict Int Int -> Json.Encode.Value

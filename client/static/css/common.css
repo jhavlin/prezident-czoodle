@@ -114,7 +114,7 @@ section.intro {
     margin: 3em 0;
 }
 
-section.poll {
+section.poll, section.summaries {
     margin: 3em 0 5em 0;
 }
 
@@ -945,4 +945,31 @@ label.disabled>.d21-poll-option.negative {
 
 .emoji-poll>.poll-row {
     padding-right: 1em;
+}
+
+
+/*
+ * Summary
+ */
+
+.summary {
+    display: flex;
+}
+
+.summary-icon {
+    padding: 0.5em 0;
+}
+
+.summary-icon > svg.valid {
+    stroke: greenyellow;
+}
+.summary-icon > svg.error {
+    stroke: red;
+}
+.summary-icon > svg.warning {
+    stroke: orange;
+}
+
+.summary-text {
+    padding: 0.7em 0 0.7em 1em;
 }
