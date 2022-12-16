@@ -351,6 +351,7 @@ summaries model =
             [ h1 [] [ text "Shrnutí" ]
             , showSummary <| Polls.TwoRoundPoll.summarize model.twoRoundPoll
             , showSummary <| Polls.OneRoundPoll.summarize model.oneRoundPoll
+            , showSummary <| Polls.DividePoll.summarize model.dividePoll
             ]
         ]
 

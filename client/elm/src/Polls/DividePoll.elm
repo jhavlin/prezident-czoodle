@@ -4,10 +4,13 @@ module Polls.DividePoll exposing
     , deserialize
     , init
     , serialize
+    , summarize
     , update
     , view
     )
 
+import Array
+import Candidates
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
@@ -16,7 +19,7 @@ import Html.Attributes exposing (checked, class, disabled, name, title, type_)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig)
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
 import Svg.Attributes as SAttr
 
 
@@ -50,11 +53,16 @@ update msg model =
             model
 
 
+sumFree : Model -> Int
+sumFree model =
+    5 - (List.sum <| Dict.values model.values)
+
+
 view : PollConfig -> Model -> Html Msg
 view pollConfig model =
     let
         free =
-            5 - (List.sum <| Dict.values model.values)
+            sumFree model
 
         row candidate =
             let
@@ -239,3 +247,50 @@ serialize model =
 deserialize : Json.Decode.Decoder Model
 deserialize =
     Json.Decode.map Model Polls.Common.deserializeIntDict
+
+
+summarize : Model -> Polls.Common.Summary
+summarize model =
+    let
+        free =
+            sumFree model
+    in
+    if free > 0 then
+        let
+            html =
+                div [] [ text "V\u{00A0}rozdělovacím hlasování jste neudělili všech pět bodů." ]
+        in
+        Summary Error html
+
+    else
+        let
+            pointsToString p =
+                if p == 1 then
+                    "1\u{00A0}bod"
+
+                else if p > 1 && p < 5 then
+                    String.concat [ String.fromInt p, "\u{00A0}", "body" ]
+
+                else
+                    String.concat [ String.fromInt p, "\u{00A0}", "bodů" ]
+
+            items =
+                Dict.toList model.values
+                    |> List.filter (\( _, v ) -> v > 0)
+                    |> List.filterMap (\( k, v ) -> Array.get k Candidates.all |> Maybe.map (\c -> ( c, v )))
+                    |> List.sortBy Tuple.second
+                    |> List.reverse
+                    |> List.map (\( c, v ) -> String.concat [ pointsToString v, " ", c.p3 ])
+                    |> Component.itemsString ", " " a "
+
+            summaryText =
+                String.concat
+                    [ "V rozdělovacím hlasování jste udělili "
+                    , items
+                    , "."
+                    ]
+
+            html =
+                div [] [ text summaryText ]
+        in
+        Summary Valid html
