@@ -421,7 +421,7 @@ summarize model =
         let
             ( warningText, status ) =
                 if not someHasFullValue then
-                    ( " Nikdo nebyl ohodnocen sty proceny. Tím můžete oslabit svůj hlas.", Warning )
+                    ( " Nikdo nebyl ohodnocen sty procenty. Tím můžete oslabit svůj hlas.", Warning )
 
                 else
                     ( "", Valid )
