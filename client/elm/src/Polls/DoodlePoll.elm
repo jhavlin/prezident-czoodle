@@ -4,10 +4,13 @@ module Polls.DoodlePoll exposing
     , deserialize
     , init
     , serialize
+    , summarize
     , update
     , view
     )
 
+import Array
+import Candidates
 import Component
 import Dict exposing (Dict)
 import Html exposing (Html, div, h1, h2, input, label, p, section, text)
@@ -15,7 +18,7 @@ import Html.Attributes exposing (attribute, checked, class, name, type_, value)
 import Html.Events exposing (onInput)
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig)
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
 import Svg exposing (circle, line, svg)
 import Svg.Attributes as SAttr
 
@@ -256,3 +259,77 @@ serialize model =
 deserialize : Json.Decode.Decoder Model
 deserialize =
     Json.Decode.map Model <| Polls.Common.deserializeMappedIntDict intToOption
+
+
+summarize : Model -> Polls.Common.Summary
+summarize model =
+    let
+        yesCount =
+            Dict.values model.values
+                |> List.filter (\v -> v == Yes)
+                |> List.length
+
+        ifNeededCount =
+            Dict.values model.values
+                |> List.filter (\v -> v == IfNeeded)
+                |> List.length
+    in
+    if yesCount + ifNeededCount == 0 then
+        let
+            html =
+                div [] [ text "V\u{00A0}Doodle hlasování nebyl udělen ani jeden hlas Ano nebo Pokud nutno." ]
+        in
+        Summary Error html
+
+    else
+        let
+            yesNames =
+                Dict.toList model.values
+                    |> List.filter (\( _, v ) -> v == Yes)
+                    |> List.filterMap (\( k, _ ) -> Array.get k Candidates.all)
+                    |> List.sortBy .surname
+                    |> List.map .p4
+                    |> Component.itemsString ", " " a "
+
+            ifNeededNames =
+                Dict.toList model.values
+                    |> List.filter (\( _, v ) -> v == IfNeeded)
+                    |> List.filterMap (\( k, _ ) -> Array.get k Candidates.all)
+                    |> List.sortBy .surname
+                    |> List.map .p4
+                    |> Component.itemsString ", " " a "
+
+            yesText =
+                if yesCount > 0 then
+                    String.concat [ "kladně (Ano) ", yesNames ]
+
+                else
+                    ""
+
+            andOptional =
+                if yesCount > 0 && ifNeededCount > 0 then
+                    " a "
+
+                else
+                    ""
+
+            ifNeededText =
+                if ifNeededCount > 0 then
+                    String.concat [ "přijatelně (Pokud nutno) ", ifNeededNames ]
+
+                else
+                    ""
+
+            summaryText =
+                String.concat
+                    [ "V Doodle hlasování jste hodnotili "
+                    , yesText
+                    , andOptional
+                    , ifNeededText
+                    , "."
+                    ]
+
+            html =
+                div [] [ text summaryText ]
+        in
+        Summary Valid html

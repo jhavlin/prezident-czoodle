@@ -353,6 +353,7 @@ summaries model =
             , showSummary <| Polls.OneRoundPoll.summarize model.oneRoundPoll
             , showSummary <| Polls.DividePoll.summarize model.dividePoll
             , showSummary <| Polls.D21Poll.summarize model.d21Poll
+            , showSummary <| Polls.DoodlePoll.summarize model.doodlePoll
             ]
         ]
 
