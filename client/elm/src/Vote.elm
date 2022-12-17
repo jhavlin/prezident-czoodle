@@ -356,6 +356,7 @@ summaries model =
             , showSummary <| Polls.DoodlePoll.summarize model.doodlePoll
             , showSummary <| Polls.OrderPoll.summarize model.orderPoll
             , showSummary <| Polls.StarPoll.summarize model.starPoll
+            , showSummary <| Polls.EmojiPoll.summarize model.emojiPoll
             ]
         ]
 

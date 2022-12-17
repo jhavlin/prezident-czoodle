@@ -4,10 +4,12 @@ module Polls.EmojiPoll exposing
     , deserialize
     , init
     , serialize
+    , summarize
     , update
     , view
     )
 
+import Array
 import Candidates
 import Component
 import Dict exposing (Dict)
@@ -16,7 +18,7 @@ import Html.Attributes exposing (class, maxlength, type_)
 import Html.Events exposing (onInput)
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig)
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
 
 
 type Msg
@@ -38,7 +40,7 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         SetValue id string ->
-            { model | values = Dict.insert id (String.left 3 string) model.values }
+            { model | values = Dict.insert id string model.values }
 
 
 view : PollConfig -> Model -> Html Msg
@@ -104,3 +106,45 @@ serialize model =
 deserialize : Json.Decode.Decoder Model
 deserialize =
     Json.Decode.map Model <| Polls.Common.deserializeStringDict
+
+
+summarize : Model -> Polls.Common.Summary
+summarize model =
+    let
+        validValueCount =
+            Dict.values model.values
+                |> List.map String.trim
+                |> List.filter (not << String.isEmpty)
+                |> List.length
+
+        ( warningText, status ) =
+            if validValueCount /= Array.length Candidates.all then
+                ( " Některým kandidátům nebylo emoji přidělno.", Warning )
+
+            else
+                ( "", Valid )
+
+        items =
+            Dict.toList model.values
+                |> List.filter (\( _, v ) -> not <| String.isEmpty <| String.trim v)
+                |> List.filterMap (\( k, v ) -> Maybe.map (\c -> ( c, v )) (Array.get k Candidates.all))
+                |> List.sortBy (\( c, _ ) -> c.surname)
+                |> List.map (\( c, v ) -> String.concat [ c.name, "\u{00A0}", v ])
+                |> Component.itemsString ", " " a "
+
+        summaryText =
+            String.concat
+                [ "V emoji hlasování jste přidělili tyto smajlíky:  "
+                , items
+                , "."
+                , warningText
+                ]
+
+        html =
+            div [] [ text summaryText ]
+    in
+    if validValueCount == 0 then
+        Summary Warning <| div [] [ text "Emoji hlasování není vyplněno (dobrovolné)." ]
+
+    else
+        Summary status html
