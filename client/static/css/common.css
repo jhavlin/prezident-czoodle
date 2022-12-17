@@ -289,6 +289,12 @@ section.poll .narrow {
     flex: 0 0 auto;
 }
 
+.poll-rows {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
 .poll-row {
     padding: 0.5em 0;
     display: flex;

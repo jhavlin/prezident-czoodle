@@ -14,9 +14,10 @@ import Candidates
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
-import Html exposing (Html, div, h1, h2, input, label, p, section, text)
+import Html exposing (Html, div, h1, h2, input, label, li, p, section, text)
 import Html.Attributes exposing (attribute, checked, class, disabled, name, type_, value)
 import Html.Events exposing (onInput)
+import Html.Keyed
 import Json.Decode
 import Json.Encode
 import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
@@ -157,7 +158,7 @@ view pollConfig model =
                 value =
                     Maybe.withDefault Neutral <| Dict.get candidate.id model.values
             in
-            div [ class "poll-row", class <| optionToClass value ]
+            li [ class "poll-row", class <| optionToClass value ]
                 [ Component.candidateView candidate
                 , rowValueView
                     { value = value
@@ -180,9 +181,8 @@ view pollConfig model =
                 }
             ]
         , div [ class "narrow" ]
-            [ div
-                [ class "d21-poll" ]
-                (List.map row pollConfig.candidates)
+            [ Html.Keyed.ul [ class "d21-poll poll-rows" ]
+                (List.map (\c -> ( "d21-poll" ++ String.fromInt c.id, row c )) pollConfig.candidates)
             ]
         ]
 

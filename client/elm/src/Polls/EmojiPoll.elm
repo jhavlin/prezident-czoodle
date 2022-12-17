@@ -13,9 +13,10 @@ import Array
 import Candidates
 import Component
 import Dict exposing (Dict)
-import Html exposing (Html, div, h1, h2, input, section, text)
+import Html exposing (Html, div, h1, h2, input, li, section, text)
 import Html.Attributes exposing (class, maxlength, type_)
 import Html.Events exposing (onInput)
+import Html.Keyed
 import Json.Decode
 import Json.Encode
 import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
@@ -47,7 +48,7 @@ view : PollConfig -> Model -> Html Msg
 view pollConfig model =
     let
         row candidate =
-            div [ class "poll-row" ]
+            li [ class "poll-row" ]
                 [ Component.candidateView candidate
                 , rowValueView { model = model, candidate = candidate }
                 ]
@@ -56,9 +57,9 @@ view pollConfig model =
         [ div [ class "wide" ]
             [ headerView ]
         , div [ class "narrow" ]
-            [ div
-                [ class "emoji-poll" ]
-                (List.map row pollConfig.candidates)
+            [ Html.Keyed.ul
+                [ class "emoji-poll poll-rows" ]
+                (List.map (\c -> ( "emoji-poll-" ++ String.fromInt c.id, row c )) pollConfig.candidates)
             ]
         ]
 

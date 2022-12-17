@@ -14,9 +14,10 @@ import Candidates
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
-import Html exposing (Html, div, h1, h2, input, label, p, section, text)
+import Html exposing (Html, div, h1, h2, input, label, li, p, section, text)
 import Html.Attributes exposing (checked, class, disabled, name, title, type_)
 import Html.Events exposing (onClick, onInput)
+import Html.Keyed
 import Json.Decode
 import Json.Encode
 import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
@@ -69,7 +70,7 @@ view pollConfig model =
                 value =
                     Maybe.withDefault 0 <| Dict.get candidate.id model.values
             in
-            div [ class "poll-row" ]
+            li [ class "poll-row" ]
                 [ Component.candidateView candidate
                 , rowValueView { value = value, candidateId = candidate.id, free = free }
                 ]
@@ -80,10 +81,8 @@ view pollConfig model =
         , div [ class "narrow" ]
             [ creditView { freeCount = free } ]
         , div [ class "narrow" ]
-            [ div
-                [ class "divide-poll"
-                ]
-                (List.map row pollConfig.candidates)
+            [ Html.Keyed.ul [ class "divide-poll poll-rows" ]
+                (List.map (\c -> ( "divide-poll" ++ String.fromInt c.id, row c )) pollConfig.candidates)
             ]
         ]
 

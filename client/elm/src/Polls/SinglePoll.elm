@@ -13,9 +13,10 @@ import Array
 import Candidates
 import Component
 import FeatherIcons
-import Html exposing (Html, div, h1, h2, input, label, section, text)
+import Html exposing (Html, div, h1, h2, input, label, li, section, text)
 import Html.Attributes exposing (attribute, checked, class, name, type_)
 import Html.Events exposing (onClick, onInput)
+import Html.Keyed
 import Json.Decode
 import Json.Encode
 import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
@@ -56,7 +57,7 @@ view : ViewConfig -> PollConfig -> Model -> Html Msg
 view viewConfig pollConfig model =
     let
         row candidate =
-            div [ class "poll-row", onClick <| SetValue candidate.id ]
+            li [ class "poll-row", onClick <| SetValue candidate.id ]
                 [ Component.candidateView candidate
                 , rowValueView viewConfig { model = model, candidate = candidate }
                 ]
@@ -65,9 +66,8 @@ view viewConfig pollConfig model =
         [ div [ class "wide" ]
             [ headerView viewConfig ]
         , div [ class "narrow" ]
-            [ div
-                [ class "single-poll" ]
-                (List.map row pollConfig.candidates)
+            [ Html.Keyed.ul [ class "single-poll poll-rows" ]
+                (List.map (\c -> ( viewConfig.pollClass ++ String.fromInt c.id, row c )) pollConfig.candidates)
             ]
         ]
 

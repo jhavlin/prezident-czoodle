@@ -13,9 +13,10 @@ import Array exposing (Array)
 import Candidates exposing (Candidate)
 import Component
 import FeatherIcons
-import Html exposing (Html, button, div, h1, h2, option, p, section, select, text)
+import Html exposing (Html, button, div, h1, h2, li, option, p, section, select, text)
 import Html.Attributes exposing (class, disabled, selected, value)
 import Html.Events exposing (onClick, onInput)
+import Html.Keyed
 import Json.Decode
 import Json.Encode
 import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
@@ -172,7 +173,7 @@ view _ model =
                         _ ->
                             "unassigned"
             in
-            div [ class "order-poll-row" ]
+            li [ class "order-poll-row" ]
                 [ div [ class "order-poll-row-order", class assignedState ]
                     [ text <| String.fromInt (index + 1), text "." ]
                 , photoOrPlaceholder
@@ -240,7 +241,9 @@ view _ model =
         [ div [ class "wide" ]
             [ headerView ]
         , div [ class "narrow" ]
-            (Array.toList model.values |> List.indexedMap row)
+            [ Html.Keyed.ol [ class "poll-rows" ]
+                (Array.toList model.values |> List.indexedMap (\i v -> ( "order-poll-" ++ String.fromInt i, row i v )))
+            ]
         , div [ class "narrow" ]
             [ div [ class "poll-buttons" ]
                 buttons
