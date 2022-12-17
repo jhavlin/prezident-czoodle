@@ -4,6 +4,7 @@ module Polls.OrderPoll exposing
     , deserialize
     , init
     , serialize
+    , summarize
     , update
     , view
     )
@@ -17,7 +18,7 @@ import Html.Attributes exposing (class, disabled, selected, value)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig)
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
 import Random
 import RandomUtils exposing (takeNthFromList)
 import Set exposing (Set)
@@ -295,3 +296,44 @@ deserialize =
     Json.Decode.map2 Model
         (Json.Decode.array (Json.Decode.map intToMaybe Json.Decode.int))
         (Json.Decode.succeed Nothing)
+
+
+summarize : Model -> Polls.Common.Summary
+summarize model =
+    let
+        assignedSet =
+            Array.toList model.values
+                |> List.filterMap identity
+                |> Set.fromList
+
+        fullyAssigned =
+            Array.toList Candidates.all
+                |> List.all (\c -> Set.member c.id assignedSet)
+    in
+    if not fullyAssigned then
+        let
+            html =
+                div [] [ text "V\u{00A0}hlasování řazením nebyly zařazeny všechny osoby." ]
+        in
+        Summary Error html
+
+    else
+        let
+            surnames =
+                Array.toList model.values
+                    |> List.map (\v -> Maybe.andThen (\id -> Array.get id Candidates.all) v)
+                    |> List.filterMap identity
+                    |> List.map .surname
+                    |> Component.itemsString ", " " a "
+
+            summaryText =
+                String.concat
+                    [ "V hlasování řazením jste zvolili pořadí  "
+                    , surnames
+                    , "."
+                    ]
+
+            html =
+                div [] [ text summaryText ]
+        in
+        Summary Valid html

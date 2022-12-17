@@ -354,6 +354,7 @@ summaries model =
             , showSummary <| Polls.DividePoll.summarize model.dividePoll
             , showSummary <| Polls.D21Poll.summarize model.d21Poll
             , showSummary <| Polls.DoodlePoll.summarize model.doodlePoll
+            , showSummary <| Polls.OrderPoll.summarize model.orderPoll
             ]
         ]
 
