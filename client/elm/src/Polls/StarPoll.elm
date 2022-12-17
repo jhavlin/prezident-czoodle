@@ -156,7 +156,7 @@ headerView isCustomPoll model =
 
         tooltip =
             if not model.editMode then
-                "Přepnout do precentuálního režimu"
+                "Přepnout do procentuálního režimu"
 
             else if model.editMode && not isCustomPoll then
                 "Přepnout do hvězdičkového režimu"
