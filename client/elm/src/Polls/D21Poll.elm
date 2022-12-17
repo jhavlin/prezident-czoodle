@@ -4,10 +4,13 @@ module Polls.D21Poll exposing
     , deserialize
     , init
     , serialize
+    , summarize
     , update
     , view
     )
 
+import Array
+import Candidates
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
@@ -16,7 +19,7 @@ import Html.Attributes exposing (attribute, checked, class, disabled, name, type
 import Html.Events exposing (onInput)
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig)
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
 import Svg.Attributes as SAttr
 
 
@@ -344,3 +347,81 @@ serialize model =
 deserialize : Json.Decode.Decoder Model
 deserialize =
     Json.Decode.map Model <| Polls.Common.deserializeMappedIntDict intToOption
+
+
+summarize : Model -> Polls.Common.Summary
+summarize model =
+    let
+        positive =
+            Dict.values model.values
+                |> List.filter (\v -> v == Positive)
+                |> List.length
+
+        negative =
+            Dict.values model.values
+                |> List.filter (\v -> v == Negative)
+                |> List.length
+    in
+    if positive > 3 || negative > 1 then
+        let
+            html =
+                div [] [ text "V\u{00A0}hlasování D21 je rozdělen chybný počet hlasů." ]
+        in
+        Summary Error html
+
+    else if positive == 0 then
+        let
+            html =
+                div [] [ text "V\u{00A0}hlasování D21 nebyl udělen ani jeden hlas." ]
+        in
+        Summary Error html
+
+    else
+        let
+            pointsDisplayName =
+                if positive > 1 then
+                    "kladné hlasy"
+
+                else
+                    "kladný hlas"
+
+            positiveNames =
+                Dict.toList model.values
+                    |> List.filter (\( _, v ) -> v == Positive)
+                    |> List.filterMap (\( k, _ ) -> Array.get k Candidates.all)
+                    |> List.sortBy .surname
+                    |> List.map .p3
+                    |> Component.itemsString ", " " a "
+
+            negativeNames =
+                Dict.toList model.values
+                    |> List.filter (\( _, v ) -> v == Negative)
+                    |> List.filterMap (\( k, _ ) -> Array.get k Candidates.all)
+                    |> List.sortBy .surname
+                    |> List.map .p3
+                    |> Component.itemsString ", " " a "
+
+            negativeInfoOrEnd =
+                if positive >= 2 && negative >= 1 then
+                    String.concat
+                        [ " a záporný bod "
+                        , negativeNames
+                        , "."
+                        ]
+
+                else
+                    "."
+
+            summaryText =
+                String.concat
+                    [ "V hlasování D21 jste udělili "
+                    , pointsDisplayName
+                    , " "
+                    , positiveNames
+                    , negativeInfoOrEnd
+                    ]
+
+            html =
+                div [] [ text summaryText ]
+        in
+        Summary Valid html
