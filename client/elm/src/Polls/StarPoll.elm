@@ -4,10 +4,13 @@ module Polls.StarPoll exposing
     , deserialize
     , init
     , serialize
+    , summarize
     , update
     , view
     )
 
+import Array
+import Candidates
 import Component
 import Dict exposing (Dict)
 import FeatherIcons
@@ -16,7 +19,7 @@ import Html.Attributes exposing (class, disabled, style, tabindex, title, type_)
 import Html.Events exposing (keyCode, on, onClick, onFocus, onInput)
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig)
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
 import Svg.Attributes as SAttr
 import Svg.Events as SEvent
 import UserInputInt exposing (UserInputInt)
@@ -346,3 +349,99 @@ deserialize =
     Json.Decode.map2 Model
         (Polls.Common.deserializeMappedStringDict mapper)
         (Json.Decode.succeed False)
+
+
+summarize : Model -> Polls.Common.Summary
+summarize model =
+    let
+        values =
+            Dict.values model.values
+
+        isValidInput userInput =
+            case userInput of
+                UserInputInt.Valid _ ->
+                    True
+
+                _ ->
+                    False
+
+        allValid =
+            List.all isValidInput values
+
+        hasValue userInput =
+            case userInput of
+                UserInputInt.Valid v ->
+                    v > 0 && v <= 100
+
+                _ ->
+                    False
+
+        hasFullValue userInput =
+            case userInput of
+                UserInputInt.Valid v ->
+                    v == 100
+
+                _ ->
+                    False
+
+        someHasVallue =
+            List.any hasValue values
+
+        someHasFullValue =
+            List.any hasFullValue values
+
+        userInputToOption userInput =
+            case userInput of
+                UserInputInt.Valid v ->
+                    if v > 0 && v <= 100 then
+                        Just v
+
+                    else
+                        Nothing
+
+                _ ->
+                    Nothing
+    in
+    if not allValid then
+        let
+            html =
+                div [] [ text "Hvězdičkové (procentuální) hlasování obsahuje nesprávné hodnoty." ]
+        in
+        Summary Error html
+
+    else if not someHasVallue then
+        let
+            html =
+                div [] [ text "V\u{00A0}hvězdičkovém (procentuálním) hlasovování nebylo pro nikoho hlasováno." ]
+        in
+        Summary Error html
+
+    else
+        let
+            ( warningText, status ) =
+                if not someHasFullValue then
+                    ( " Nikdo nebyl ohodnocen sty proceny. Tím můžete oslabit svůj hlas.", Warning )
+
+                else
+                    ( "", Valid )
+
+            percents =
+                Dict.toList model.values
+                    |> List.filterMap (\( k, v ) -> Maybe.map2 Tuple.pair (Array.get k Candidates.all) (userInputToOption v))
+                    |> List.sortBy (\( _, v ) -> v)
+                    |> List.reverse
+                    |> List.map (\( k, v ) -> String.concat [ k.name, "\u{00A0}", String.fromInt v, "\u{00A0}%" ])
+                    |> Component.itemsString ", " " a "
+
+            summaryText =
+                String.concat
+                    [ "Ve hvězdičkovém hlasování jste svou důvěru ke kandidátům ohodnotili takto:  "
+                    , percents
+                    , "."
+                    , warningText
+                    ]
+
+            html =
+                div [] [ text summaryText ]
+        in
+        Summary status html
