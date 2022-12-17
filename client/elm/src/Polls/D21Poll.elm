@@ -404,7 +404,7 @@ summarize model =
             negativeInfoOrEnd =
                 if positive >= 2 && negative >= 1 then
                     String.concat
-                        [ " a záporný bod "
+                        [ " a záporný hlas "
                         , negativeNames
                         , "."
                         ]
