@@ -51,6 +51,9 @@ port reset : () -> Cmd msg
 port reInit : (D.Value -> msg) -> Sub msg
 
 
+port noncesUpdated : (D.Value -> msg) -> Sub msg
+
+
 
 -- MODEL
 
@@ -59,6 +62,7 @@ type alias Model =
     { uuid : String
     , candidates : List Candidates.Candidate
     , version : Int
+    , nonces : List String
     , showRestoredInfo : Bool
     , twoRoundPoll : Polls.TwoRoundPoll.Model
     , oneRoundPoll : Polls.OneRoundPoll.Model
@@ -87,6 +91,7 @@ init jsonFlags =
             ( { uuid = uuid
               , candidates = []
               , version = 1
+              , nonces = []
               , showRestoredInfo = False
               , twoRoundPoll = Polls.TwoRoundPoll.init
               , oneRoundPoll = Polls.OneRoundPoll.init
@@ -109,7 +114,7 @@ init jsonFlags =
                 List.map (\i -> Array.get i Candidates.all) orderList |> List.filterMap identity
 
             partial =
-                Model uuid candidatesInOrder 1 True
+                Model uuid candidatesInOrder 1 [] True
 
             pollsDecoder =
                 D.map8 partial
@@ -144,6 +149,7 @@ type Msg
     | CloseRestoreBox
     | Reset
     | ReInit D.Value
+    | NoncesUpdated D.Value
     | TwoRoundPollMsg Polls.TwoRoundPoll.Msg
     | OneRoundPollMsg Polls.OneRoundPoll.Msg
     | D21PollMsg Polls.D21Poll.Msg
@@ -244,6 +250,14 @@ update cmd model =
         ReInit v ->
             init v
 
+        NoncesUpdated jsonValue ->
+            let
+                newNonces =
+                    D.decodeValue (D.list D.string) jsonValue
+                        |> Result.withDefault []
+            in
+            ( { model | nonces = newNonces, version = nextVersion }, command )
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -253,6 +267,7 @@ serialize model =
     Json.Encode.object
         [ ( "uuid", Json.Encode.string model.uuid )
         , ( "order", Json.Encode.list Json.Encode.int <| List.map .id model.candidates )
+        , ( "nonces", Json.Encode.list Json.Encode.string model.nonces )
         , ( "polls"
           , Json.Encode.object
                 [ ( "twoRound", Polls.TwoRoundPoll.serialize model.twoRoundPoll )
@@ -345,6 +360,9 @@ summaries model =
                 [ div [ class "summary-icon" ] [ icon validation ]
                 , div [ class "summary-text" ] [ localHtml html ]
                 ]
+
+        weightInfo =
+            div [] [ text <| String.concat [ "Síla vašeho hlasu je ", String.fromInt <| List.length model.nonces ] ]
     in
     section [ class "summaries" ]
         [ div [ class "wide" ]
@@ -357,6 +375,7 @@ summaries model =
             , showSummary <| Polls.OrderPoll.summarize model.orderPoll
             , showSummary <| Polls.StarPoll.summarize model.starPoll
             , showSummary <| Polls.EmojiPoll.summarize model.emojiPoll
+            , weightInfo
             ]
         ]
 
@@ -367,4 +386,4 @@ summaries model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    reInit ReInit
+    Sub.batch [ reInit ReInit, noncesUpdated NoncesUpdated ]

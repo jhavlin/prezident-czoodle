@@ -32,6 +32,99 @@
     <div class="color-separator"></div>
     <div id="myapp"></div>
     <script>
+
+        const prove = (uuid, port, knownNonces) => {
+
+            let cancelled = false;
+
+            async function sha256(message) {
+                // https://stackoverflow.com/questions/18338890/are-there-any-sha-256-javascript-implementations-that-are-generally-considered-t
+                // encode as UTF-8
+                const msgBuffer = new TextEncoder('utf-8').encode(message);
+                // hash the message
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                // convert ArrayBuffer to Array
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                // convert bytes to hex string
+                const hashHex = hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
+                return hashHex;
+            }
+
+            const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+            const charToIndex = {};
+
+            const nextChar = chars.reduce((acc, cur, index, arr) => {
+                acc[cur] = arr[index + 1];
+                charToIndex[cur] = index;
+                return acc;
+            }, {});
+
+            let strArr = [];
+
+            const next = () => {
+                for (let i = 0; i < strArr.length; i++) {
+                    const c = strArr[i];
+                    const next = nextChar[c];
+                    if (next) {
+                        strArr[i] = next;
+                        for (let j = 0; j < i; j++) {
+                            strArr[j] = chars[0];
+                        }
+                        return;
+                    }
+                }
+                // No next
+                for (let i = 0; i < strArr.length; i++) {
+                    strArr[i] = chars[0];
+                }
+                strArr.push(chars[0]);
+            };
+
+            const check = hash => hash.startsWith('777')
+
+            let base = uuid + 'czoodle';
+
+            const run = async () => {
+
+                const start = Date.now();
+
+                for (nonce of knownNonces) {
+                    base = await sha256(base + nonce);
+                }
+                const results = knownNonces.slice();
+
+                port.send(results);
+
+                for (let round = results.length; round < 100; round++) {
+                    strAttr = [];
+                    for (let i = 0; ; i++) {
+                        if (cancelled) {
+                            return;
+                        }
+                        const nonce = strArr.join('');
+                        const val = base + nonce;
+                        const sha = await sha256(val);
+                        await new Promise(resolve => setTimeout(resolve, 1));
+                        if (check(sha)) {
+                            console.log(round, i, val, sha, (Date.now() - start) / 1000);
+                            base = sha;
+                            results.push(nonce);
+                            port.send(results);
+                            break;
+                        }
+                        next();
+                    }
+                }
+            };
+
+            run();
+
+            return {
+                cancel: () => { cancelled = true; },
+            };
+        }
+
         const storedString = sessionStorage.getItem('last-project');
         let lastProject;
         if (storedString) {
@@ -51,15 +144,21 @@
             node: document.getElementById('myapp'),
             flags: lastProject,
         });
+
+        let proof = prove(lastProject.uuid, app.ports.noncesUpdated, lastProject.nonces || []);
+
         app.ports.storePolls.subscribe(function (message) {
             sessionStorage.setItem('last-project', JSON.stringify(message));
         });
         app.ports.reset.subscribe(function () {
+            proof.cancel();
             sessionStorage.removeItem('last-project');
+            const uuid = crypto.randomUUID();
             app.ports.reInit.send({
-                uuid: crypto.randomUUID(),
+                uuid,
                 order: [],
             });
+            proof = prove(uuid, app.ports.noncesUpdated, []);
         });
     </script>
 </body>
