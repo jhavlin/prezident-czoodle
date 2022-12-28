@@ -7,10 +7,28 @@ CREATE TABLE votes (
     ip_hash char(64) NOT NULL,
 
     -- Two-Round Poll
-    rd2 integer NOT NULL,
+    rd2_0 integer NOT NULL,
+    rd2_1 integer NOT NULL,
+    rd2_2 integer NOT NULL,
+    rd2_3 integer NOT NULL,
+    rd2_4 integer NOT NULL,
+    rd2_5 integer NOT NULL,
+    rd2_6 integer NOT NULL,
+    rd2_7 integer NOT NULL,
+    rd2_8 integer NOT NULL,
+    rd2_9 integer NOT NULL,
 
     -- One-Round Poll
-    rd1 integer NOT NULL,
+    rd1_0 integer NOT NULL,
+    rd1_1 integer NOT NULL,
+    rd1_2 integer NOT NULL,
+    rd1_3 integer NOT NULL,
+    rd1_4 integer NOT NULL,
+    rd1_5 integer NOT NULL,
+    rd1_6 integer NOT NULL,
+    rd1_7 integer NOT NULL,
+    rd1_8 integer NOT NULL,
+    rd1_9 integer NOT NULL,
 
     -- Divide Poll
     div_0 integer NOT NULL,
@@ -88,8 +106,8 @@ CREATE TABLE votes (
 
 -- INSERT INTO votes (
 --     id, nonces, permutation, strength, ip_hash,
---     rd2,
---     rd1,
+--     rd2_0, rd2_1, rd2_2, rd2_3, rd2_4, rd2_5, rd2_6, rd2_7, rd2_8, rd2_9,
+--     rd1_0, rd1_1, rd1_2, rd1_3, rd1_4, rd1_5, rd1_6, rd1_7, rd1_8, rd1_9,
 --     div_0, div_1, div_2, div_3, div_4, div_5, div_6, div_7, div_8, div_9,
 --     d21_0, d21_1, d21_2, d21_3, d21_4, d21_5, d21_6, d21_7, d21_8, d21_9,
 --     ddl_0, ddl_1, ddl_2, ddl_3, ddl_4, ddl_5, ddl_6, ddl_7, ddl_8, ddl_9,
@@ -98,8 +116,8 @@ CREATE TABLE votes (
 --     emj_0, emj_1, emj_2, emj_3, emj_4, emj_5, emj_6, emj_7, emj_8, emj_9
 -- ) values (
 --     'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'abc,def', '7,0,3,8,4,9,5,1,2,6', 42, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
---     1,
---     1,
+--     1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+--     0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 --     0, 0, 2, 0, 1, 1, 1, 0, 0, 0,
 --     1, 0, 0, 1, 1, 0, -1, 0, 0, 0,
 --     1, 0, 1, 2, 2, 1, 1, 2, 0, 0,
