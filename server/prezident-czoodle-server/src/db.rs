@@ -13,7 +13,11 @@ fn index_to_points(value: i32, index: i32) -> i32 {
     }
 }
 
-pub async fn add_vote(client: &Client, vote_info: VoteWeb) -> Result<(), MyError> {
+pub async fn add_vote(
+    client: &Client,
+    vote_info: VoteWeb,
+    ip_address_hash: &str,
+) -> Result<(), MyError> {
     let _stmt = include_str!("../sql/add_vote.sql");
     let stmt = client.prepare(&_stmt).await.unwrap();
 
@@ -30,7 +34,7 @@ pub async fn add_vote(client: &Client, vote_info: VoteWeb) -> Result<(), MyError
                 &nonces_as_one_string,
                 &permutation,
                 &(vote_info.order.len() as i32),
-                &"ip_hash", // TODO
+                &ip_address_hash,
                 // Two-Round Poll
                 &(index_to_points(vote_info.polls.two_round, 0)),
                 &(index_to_points(vote_info.polls.two_round, 1)),

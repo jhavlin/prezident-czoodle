@@ -988,6 +988,7 @@ dependencies = [
  "derive_more",
  "dotenv",
  "serde",
+ "sha2",
  "tokio-pg-mapper",
  "tokio-pg-mapper-derive",
  "tokio-postgres",
