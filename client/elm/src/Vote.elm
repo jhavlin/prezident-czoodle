@@ -5,8 +5,9 @@ import Browser
 import Candidates
 import FeatherIcons
 import Html exposing (Html, button, div, h1, p, section, text)
-import Html.Attributes exposing (class, title)
+import Html.Attributes exposing (class, disabled, title)
 import Html.Events exposing (onClick)
+import Http
 import Json.Decode as D
 import Json.Encode
 import Polls.Common exposing (Summary(..), Validation(..))
@@ -124,7 +125,7 @@ init jsonFlags =
                     (D.field "d21" Polls.D21Poll.deserialize)
                     (D.field "doodle" Polls.DoodlePoll.deserialize)
                     (D.field "order" Polls.OrderPoll.deserialize)
-                    (D.field "star" Polls.StarPoll.deserialize)
+                    (D.field "star" <| Polls.StarPoll.deserialize False)
                     (D.field "emoji" Polls.EmojiPoll.deserialize)
 
             decodeResult =
@@ -158,6 +159,7 @@ type Msg
     | OrderPollMsg Polls.OrderPoll.Msg
     | DividePollMsg Polls.DividePoll.Msg
     | EmojiPollMsg Polls.EmojiPoll.Msg
+    | Vote
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -236,7 +238,7 @@ update cmd model =
 
         Store version ->
             if model.version == version then
-                ( model, storePolls <| serialize model )
+                ( model, storePolls <| serialize False model )
 
             else
                 ( model, Cmd.none )
@@ -258,12 +260,23 @@ update cmd model =
             in
             ( { model | nonces = newNonces, version = nextVersion }, command )
 
+        Vote ->
+            let
+                cmdPost =
+                    Http.post
+                        { url = "/api/add_vote"
+                        , body = Http.jsonBody <| serialize True model
+                        , expect = Http.expectWhatever (\_ -> NoOp)
+                        }
+            in
+            ( model, cmdPost )
+
         NoOp ->
             ( model, Cmd.none )
 
 
-serialize : Model -> Json.Encode.Value
-serialize model =
+serialize : Bool -> Model -> Json.Encode.Value
+serialize final model =
     Json.Encode.object
         [ ( "uuid", Json.Encode.string model.uuid )
         , ( "order", Json.Encode.list Json.Encode.int <| List.map .id model.candidates )
@@ -276,7 +289,7 @@ serialize model =
                 , ( "d21", Polls.D21Poll.serialize model.d21Poll )
                 , ( "doodle", Polls.DoodlePoll.serialize model.doodlePoll )
                 , ( "order", Polls.OrderPoll.serialize model.orderPoll )
-                , ( "star", Polls.StarPoll.serialize model.starPoll )
+                , ( "star", Polls.StarPoll.serialize final model.starPoll )
                 , ( "emoji", Polls.EmojiPoll.serialize model.emojiPoll )
                 ]
           )
@@ -329,6 +342,17 @@ view model =
 summaries : Model -> Html Msg
 summaries model =
     let
+        summaryList =
+            [ Polls.TwoRoundPoll.summarize model.twoRoundPoll
+            , Polls.OneRoundPoll.summarize model.oneRoundPoll
+            , Polls.DividePoll.summarize model.dividePoll
+            , Polls.D21Poll.summarize model.d21Poll
+            , Polls.DoodlePoll.summarize model.doodlePoll
+            , Polls.OrderPoll.summarize model.orderPoll
+            , Polls.StarPoll.summarize model.starPoll
+            , Polls.EmojiPoll.summarize model.emojiPoll
+            ]
+
         localHtml html =
             Html.map (\_ -> NoOp) html
 
@@ -363,20 +387,17 @@ summaries model =
 
         weightInfo =
             div [] [ text <| String.concat [ "Síla vašeho hlasu je ", String.fromInt <| List.length model.nonces ] ]
+
+        voteEnabled =
+            List.all (\(Summary validation _) -> validation /= Error) summaryList
     in
     section [ class "summaries" ]
         [ div [ class "wide" ]
-            [ h1 [] [ text "Shrnutí" ]
-            , showSummary <| Polls.TwoRoundPoll.summarize model.twoRoundPoll
-            , showSummary <| Polls.OneRoundPoll.summarize model.oneRoundPoll
-            , showSummary <| Polls.DividePoll.summarize model.dividePoll
-            , showSummary <| Polls.D21Poll.summarize model.d21Poll
-            , showSummary <| Polls.DoodlePoll.summarize model.doodlePoll
-            , showSummary <| Polls.OrderPoll.summarize model.orderPoll
-            , showSummary <| Polls.StarPoll.summarize model.starPoll
-            , showSummary <| Polls.EmojiPoll.summarize model.emojiPoll
-            , weightInfo
-            ]
+            (h1 [] [ text "Shrnutí" ] :: List.map showSummary summaryList)
+        , div [ class "wide" ]
+            [ weightInfo ]
+        , div [ class "wide" ]
+            [ button [ onClick Vote, disabled <| not voteEnabled ] [ text "Hlasovat nanečisto" ] ]
         ]
 
 

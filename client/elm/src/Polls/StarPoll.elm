@@ -319,37 +319,60 @@ inputView { candidateId, value } =
         ]
 
 
-serialize : Model -> Json.Encode.Value
-serialize model =
-    let
-        userInputToString userInput =
-            case userInput of
-                UserInputInt.Valid v ->
-                    String.fromInt v
+serialize : Bool -> Model -> Json.Encode.Value
+serialize final model =
+    if final then
+        let
+            userInputToInt userInput =
+                case userInput of
+                    UserInputInt.Valid v ->
+                        v
 
-                UserInputInt.Invalid s _ ->
-                    s
-    in
-    Polls.Common.serializeStringDict <| Dict.map (\_ v -> userInputToString v) model.values
+                    UserInputInt.Invalid _ _ ->
+                        0
+        in
+        Polls.Common.serializeIntDict <| Dict.map (\_ v -> userInputToInt v) model.values
+
+    else
+        let
+            userInputToString userInput =
+                case userInput of
+                    UserInputInt.Valid v ->
+                        String.fromInt v
+
+                    UserInputInt.Invalid s _ ->
+                        s
+        in
+        Polls.Common.serializeStringDict <| Dict.map (\_ v -> userInputToString v) model.values
 
 
-deserialize : Json.Decode.Decoder Model
-deserialize =
-    let
-        mapper str =
-            let
-                trimmed =
-                    String.trim str
-            in
-            if String.isEmpty trimmed then
-                UserInputInt.Valid 0
+deserialize : Bool -> Json.Decode.Decoder Model
+deserialize final =
+    if final then
+        let
+            mapper int =
+                UserInputInt.Valid int
+        in
+        Json.Decode.map2 Model
+            (Polls.Common.deserializeMappedIntDict mapper)
+            (Json.Decode.succeed False)
 
-            else
-                UserInputInt.create userInputConfig trimmed
-    in
-    Json.Decode.map2 Model
-        (Polls.Common.deserializeMappedStringDict mapper)
-        (Json.Decode.succeed False)
+    else
+        let
+            mapper str =
+                let
+                    trimmed =
+                        String.trim str
+                in
+                if String.isEmpty trimmed then
+                    UserInputInt.Valid 0
+
+                else
+                    UserInputInt.create userInputConfig trimmed
+        in
+        Json.Decode.map2 Model
+            (Polls.Common.deserializeMappedStringDict mapper)
+            (Json.Decode.succeed False)
 
 
 summarize : Model -> Polls.Common.Summary

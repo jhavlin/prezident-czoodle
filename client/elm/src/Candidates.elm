@@ -58,6 +58,14 @@ all =
           , p4 = "Marka Hilšera"
           }
         , { id = 5
+          , name = "Karel Janeček"
+          , firstName = "Karel"
+          , surname = "Janeček"
+          , imgName = "karel_janecek"
+          , p3 = "Karlu Janečkovi"
+          , p4 = "Karla Janečka"
+          }
+        , { id = 6
           , name = "Danuše Nerudová"
           , firstName = "Danuše"
           , surname = "Nerudová"
@@ -65,7 +73,7 @@ all =
           , p3 = "Danuši Nerudové"
           , p4 = "Danuši Nerudovou"
           }
-        , { id = 6
+        , { id = 7
           , name = "Petr Pavel"
           , firstName = "Petr"
           , surname = "Pavel"
@@ -73,7 +81,7 @@ all =
           , p3 = "Petru Pavlovi"
           , p4 = "Petra Pavla"
           }
-        , { id = 7
+        , { id = 8
           , name = "Josef Středula"
           , firstName = "Josef"
           , surname = "Středula"
@@ -81,7 +89,7 @@ all =
           , p3 = "Josefu Středulovi"
           , p4 = "Josefa Středulu"
           }
-        , { id = 8
+        , { id = 9
           , name = "Tomáš Zima"
           , firstName = "Tomáš"
           , surname = "Zima"
