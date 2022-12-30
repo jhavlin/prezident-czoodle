@@ -3,6 +3,7 @@ mod crypto_utils;
 mod db;
 mod errors;
 mod models;
+mod validations;
 
 use crate::{errors::MyError, models::VoteWeb};
 use ::config::Config;
@@ -27,6 +28,8 @@ pub async fn add_vote(
 ) -> Result<HttpResponse, Error> {
     let vote_info: VoteWeb = vote.into_inner();
 
+    validations::validate_vote(&vote_info)?;
+
     let ip_address = req
         .headers()
         .get("x-real-ip")
@@ -35,10 +38,6 @@ pub async fn add_vote(
 
     let ip_address_hash =
         crypto_utils::sha256(&format!("{}{}", &ip_address, &handler_config.ip_hash_salt));
-
-    println!("{:#?}", &handler_config);
-    println!("{:#?}", &ip_address);
-    println!("{:#?}", &ip_address_hash);
 
     let client: Client = db_pool.get().await.map_err(MyError::PoolError)?;
 

@@ -10,6 +10,7 @@ pub enum MyError {
     PGError(PGError),
     PGMError(PGMError),
     PoolError(PoolError),
+    ValidationError(String),
 }
 impl std::error::Error for MyError {}
 
@@ -21,6 +22,9 @@ impl ResponseError for MyError {
                 HttpResponse::InternalServerError().body(err.to_string())
             }
             MyError::PGError(ref err) => HttpResponse::InternalServerError().body(err.to_string()),
+            MyError::ValidationError(ref description) => {
+                HttpResponse::InternalServerError().body(description.to_string())
+            }
             _ => HttpResponse::InternalServerError().finish(),
         }
     }

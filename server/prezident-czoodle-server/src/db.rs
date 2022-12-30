@@ -31,9 +31,9 @@ pub async fn add_vote(
             &stmt,
             &[
                 &vote_info.uuid,
+                &(vote_info.nonces.len() as i32),
                 &nonces_as_one_string,
                 &permutation,
-                &(vote_info.order.len() as i32),
                 &ip_address_hash,
                 // Two-Round Poll
                 &(index_to_points(vote_info.polls.two_round, 0)),
