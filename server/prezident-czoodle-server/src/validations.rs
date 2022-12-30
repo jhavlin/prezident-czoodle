@@ -14,7 +14,6 @@ fn validate_uuid(vote: &models::VoteWeb) -> Result<(), errors::MyError> {
 fn validate_nonces(vote: &models::VoteWeb) -> Result<(), errors::MyError> {
     let mut current_string = format!("{}{}", vote.uuid, "czoodle");
     for nonce in &vote.nonces {
-        println!("Nonce validation: {}", current_string);
         current_string = sha256(&format!("{}{}", current_string, nonce));
         if !current_string.starts_with("777") {
             return Result::Err(errors::MyError::ValidationError(
@@ -22,7 +21,6 @@ fn validate_nonces(vote: &models::VoteWeb) -> Result<(), errors::MyError> {
             ));
         }
     }
-    println!("Nonce validation: {}", current_string);
     return Result::Ok(());
 }
 
