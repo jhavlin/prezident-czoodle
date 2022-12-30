@@ -61,6 +61,7 @@ port noncesUpdated : (D.Value -> msg) -> Sub msg
 
 type alias Model =
     { uuid : String
+    , readOnly : Bool
     , candidates : List Candidates.Candidate
     , version : Int
     , nonces : List String
@@ -85,11 +86,15 @@ init jsonFlags =
         uuid =
             Result.withDefault "" <| D.decodeValue (D.field "uuid" D.string) jsonFlags
 
+        readOnly =
+            Result.withDefault False <| D.decodeValue (D.field "readOnly" D.bool) jsonFlags
+
         isNew =
             List.isEmpty orderList
 
         defaultModel =
             ( { uuid = uuid
+              , readOnly = False
               , candidates = []
               , version = 1
               , nonces = []
@@ -106,7 +111,20 @@ init jsonFlags =
             , Random.generate Shuffle <| RandomUtils.shuffle (Array.length Candidates.all)
             )
     in
-    if isNew then
+    if readOnly then
+        let
+            ( model, _ ) =
+                defaultModel
+
+            loadCmd =
+                Http.get
+                    { url = String.concat [ "/api/get_vote/", uuid ]
+                    , expect = Http.expectJson Load storedProjectDecoder
+                    }
+        in
+        ( { model | readOnly = True }, loadCmd )
+
+    else if isNew then
         defaultModel
 
     else
@@ -115,7 +133,7 @@ init jsonFlags =
                 List.map (\i -> Array.get i Candidates.all) orderList |> List.filterMap identity
 
             partial =
-                Model uuid candidatesInOrder 1 [] True
+                Model uuid False candidatesInOrder 1 [] True
 
             pollsDecoder =
                 D.map8 partial
@@ -139,6 +157,36 @@ init jsonFlags =
                 ( model, Cmd.none )
 
 
+storedProjectDecoder : D.Decoder Model
+storedProjectDecoder =
+    let
+        orderDecoder =
+            D.list D.int |> D.map (\list -> List.filterMap (\id -> Array.get id Candidates.all) list)
+
+        partial1 =
+            D.map6 Model
+                (D.field "uuid" D.string)
+                (D.succeed True)
+                (D.field "order" orderDecoder)
+                (D.succeed 1)
+                (D.succeed [])
+                (D.succeed False)
+    in
+    D.andThen
+        (\p ->
+            D.map8 p
+                (D.at [ "polls", "twoRound" ] Polls.TwoRoundPoll.deserialize)
+                (D.at [ "polls", "oneRound" ] Polls.TwoRoundPoll.deserialize)
+                (D.at [ "polls", "divide" ] Polls.DividePoll.deserialize)
+                (D.at [ "polls", "d21" ] Polls.D21Poll.deserialize)
+                (D.at [ "polls", "doodle" ] Polls.DoodlePoll.deserialize)
+                (D.at [ "polls", "order" ] Polls.OrderPoll.deserialize)
+                (D.at [ "polls", "star" ] <| Polls.StarPoll.deserialize True)
+                (D.at [ "polls", "emoji" ] Polls.EmojiPoll.deserialize)
+        )
+        partial1
+
+
 
 -- UPDATE
 
@@ -160,6 +208,7 @@ type Msg
     | DividePollMsg Polls.DividePoll.Msg
     | EmojiPollMsg Polls.EmojiPoll.Msg
     | Vote
+    | Load (Result Http.Error Model)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -270,6 +319,14 @@ update cmd model =
                         }
             in
             ( model, cmdPost )
+
+        Load result ->
+            case Debug.log "result" result of
+                Err _ ->
+                    ( model, Cmd.none )
+
+                Ok newModel ->
+                    ( newModel, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
