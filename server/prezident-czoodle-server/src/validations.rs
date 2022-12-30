@@ -92,6 +92,12 @@ fn validate_d21_poll(vote: &models::VoteWeb) -> Result<(), errors::MyError> {
 
     let positive_count = vote.polls.d21.iter().copied().filter(|v| *v > 0).count();
 
+    if positive_count == 0 {
+        return Result::Err(errors::MyError::ValidationError(
+            "Invalid values in D21 poll - no positive vote.".to_owned(),
+        ));
+    }
+
     if positive_count > 3 {
         return Result::Err(errors::MyError::ValidationError(
             "Invalid values in D21 poll - too many positive votes.".to_owned(),
@@ -126,6 +132,15 @@ fn validate_doodle_poll(vote: &models::VoteWeb) -> Result<(), errors::MyError> {
             "Invalid values in Doodle poll.".to_owned(),
         ));
     }
+
+    let positive_count = vote.polls.doodle.iter().copied().filter(|v| *v > 0).count();
+
+    if positive_count == 0 {
+        return Result::Err(errors::MyError::ValidationError(
+            "Invalid values in Doodle poll - no positive vote".to_owned(),
+        ));
+    }
+
     return Result::Ok(());
 }
 
@@ -161,6 +176,15 @@ fn validate_star_poll(vote: &models::VoteWeb) -> Result<(), errors::MyError> {
             "Invalid values in star poll.".to_owned(),
         ));
     }
+
+    let positive_count = vote.polls.star.iter().copied().filter(|v| *v > 0).count();
+
+    if positive_count == 0 {
+        return Result::Err(errors::MyError::ValidationError(
+            "Invalid values in star poll - no positive vote".to_owned(),
+        ));
+    }
+
     return Result::Ok(());
 }
 

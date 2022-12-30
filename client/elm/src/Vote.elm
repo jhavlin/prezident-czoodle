@@ -321,7 +321,7 @@ update cmd model =
             ( model, cmdPost )
 
         Load result ->
-            case Debug.log "result" result of
+            case result of
                 Err _ ->
                     ( model, Cmd.none )
 
