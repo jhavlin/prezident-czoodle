@@ -59,14 +59,8 @@ port noncesUpdated : (D.Value -> msg) -> Sub msg
 -- MODEL
 
 
-type alias Model =
-    { uuid : String
-    , readOnly : Bool
-    , candidates : List Candidates.Candidate
-    , version : Int
-    , nonces : List String
-    , showRestoredInfo : Bool
-    , twoRoundPoll : Polls.TwoRoundPoll.Model
+type alias Polls =
+    { twoRoundPoll : Polls.TwoRoundPoll.Model
     , oneRoundPoll : Polls.OneRoundPoll.Model
     , dividePoll : Polls.DividePoll.Model
     , d21Poll : Polls.D21Poll.Model
@@ -74,6 +68,41 @@ type alias Model =
     , orderPoll : Polls.OrderPoll.Model
     , starPoll : Polls.StarPoll.Model
     , emojiPoll : Polls.EmojiPoll.Model
+    }
+
+
+type alias EditModel =
+    { candidates : List Candidates.Candidate
+    , version : Int
+    , nonces : List String
+    , showRestoredInfo : Bool
+    , polls : Polls
+    , lastSaveError : Maybe String
+    }
+
+
+type alias ShowModel =
+    { candidates : List Candidates.Candidate
+    , polls : Polls
+    }
+
+
+type State
+    = InitializingNew
+    | LoadingCached
+    | LoadingCachedFailed
+    | Editing EditModel
+    | Saving EditModel
+    | ShowingSavedInfo String
+    | LoadingStored
+    | ShowingStored ShowModel
+    | ShowingStoredFailed
+    | InvalidUUID
+
+
+type alias Model =
+    { uuid : String
+    , state : State
     }
 
 
@@ -90,71 +119,50 @@ init jsonFlags =
             Result.withDefault False <| D.decodeValue (D.field "readOnly" D.bool) jsonFlags
 
         isNew =
-            List.isEmpty orderList
-
-        defaultModel =
-            ( { uuid = uuid
-              , readOnly = False
-              , candidates = []
-              , version = 1
-              , nonces = []
-              , showRestoredInfo = False
-              , twoRoundPoll = Polls.TwoRoundPoll.init
-              , oneRoundPoll = Polls.OneRoundPoll.init
-              , dividePoll = Polls.DividePoll.init
-              , d21Poll = Polls.D21Poll.init
-              , doodlePoll = Polls.DoodlePoll.init
-              , orderPoll = Polls.OrderPoll.init
-              , starPoll = Polls.StarPoll.init
-              , emojiPoll = Polls.EmojiPoll.init
-              }
-            , Random.generate Shuffle <| RandomUtils.shuffle (Array.length Candidates.all)
-            )
+            List.sort orderList /= (List.sort <| List.map .id <| Array.toList <| Candidates.all)
     in
-    if readOnly then
-        let
-            ( model, _ ) =
-                defaultModel
+    if String.length uuid /= 36 then
+        ( { uuid = uuid, state = InvalidUUID }, Cmd.none )
 
+    else if readOnly then
+        let
             loadCmd =
                 Http.get
                     { url = String.concat [ "/api/get_vote/", uuid ]
                     , expect = Http.expectJson Load storedProjectDecoder
                     }
         in
-        ( { model | readOnly = True }, loadCmd )
+        ( { uuid = uuid, state = LoadingStored }, loadCmd )
 
     else if isNew then
-        defaultModel
+        ( { uuid = uuid, state = InitializingNew }
+        , Random.generate Shuffle <| RandomUtils.shuffle (Array.length Candidates.all)
+        )
 
     else
         let
             candidatesInOrder =
                 List.map (\i -> Array.get i Candidates.all) orderList |> List.filterMap identity
 
-            partial =
-                Model uuid False candidatesInOrder 1 [] True
-
-            pollsDecoder =
-                D.map8 partial
-                    (D.field "twoRound" Polls.TwoRoundPoll.deserialize)
-                    (D.field "oneRound" Polls.TwoRoundPoll.deserialize)
-                    (D.field "divide" Polls.DividePoll.deserialize)
-                    (D.field "d21" Polls.D21Poll.deserialize)
-                    (D.field "doodle" Polls.DoodlePoll.deserialize)
-                    (D.field "order" Polls.OrderPoll.deserialize)
-                    (D.field "star" <| Polls.StarPoll.deserialize False)
-                    (D.field "emoji" Polls.EmojiPoll.deserialize)
-
             decodeResult =
-                D.decodeValue (D.field "polls" pollsDecoder) jsonFlags
+                D.decodeValue pollsDecoder jsonFlags
         in
         case decodeResult of
             Err _ ->
-                defaultModel
+                ( { uuid = uuid, state = LoadingCachedFailed }, Cmd.none )
 
-            Ok model ->
-                ( model, Cmd.none )
+            Ok polls ->
+                let
+                    editModel =
+                        { candidates = candidatesInOrder
+                        , polls = polls
+                        , version = 1
+                        , nonces = []
+                        , showRestoredInfo = True
+                        , lastSaveError = Nothing
+                        }
+                in
+                ( { uuid = uuid, state = Editing editModel }, Cmd.none )
 
 
 storedProjectDecoder : D.Decoder Model
@@ -163,28 +171,33 @@ storedProjectDecoder =
         orderDecoder =
             D.list D.int |> D.map (\list -> List.filterMap (\id -> Array.get id Candidates.all) list)
 
-        partial1 =
-            D.map6 Model
+        showStateDecoder =
+            D.map2 ShowModel orderDecoder pollsDecoder
+                |> D.map (\showModel -> ShowingStored showModel)
+
+        modelDecoder =
+            D.map2 Model
                 (D.field "uuid" D.string)
-                (D.succeed True)
-                (D.field "order" orderDecoder)
-                (D.succeed 1)
-                (D.succeed [])
-                (D.succeed False)
+                showStateDecoder
     in
-    D.andThen
-        (\p ->
-            D.map8 p
-                (D.at [ "polls", "twoRound" ] Polls.TwoRoundPoll.deserialize)
-                (D.at [ "polls", "oneRound" ] Polls.TwoRoundPoll.deserialize)
-                (D.at [ "polls", "divide" ] Polls.DividePoll.deserialize)
-                (D.at [ "polls", "d21" ] Polls.D21Poll.deserialize)
-                (D.at [ "polls", "doodle" ] Polls.DoodlePoll.deserialize)
-                (D.at [ "polls", "order" ] Polls.OrderPoll.deserialize)
-                (D.at [ "polls", "star" ] <| Polls.StarPoll.deserialize True)
-                (D.at [ "polls", "emoji" ] Polls.EmojiPoll.deserialize)
-        )
-        partial1
+    modelDecoder
+
+
+pollsDecoder : D.Decoder Polls
+pollsDecoder =
+    let
+        inner =
+            D.map8 Polls
+                (D.field "twoRound" Polls.TwoRoundPoll.deserialize)
+                (D.field "oneRound" Polls.TwoRoundPoll.deserialize)
+                (D.field "divide" Polls.DividePoll.deserialize)
+                (D.field "d21" Polls.D21Poll.deserialize)
+                (D.field "doodle" Polls.DoodlePoll.deserialize)
+                (D.field "order" Polls.OrderPoll.deserialize)
+                (D.field "star" <| Polls.StarPoll.deserialize False)
+                (D.field "emoji" Polls.EmojiPoll.deserialize)
+    in
+    D.field "polls" inner
 
 
 
@@ -213,87 +226,80 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update cmd model =
-    let
-        nextVersion =
-            model.version + 1
-
-        command =
-            Process.sleep 1000
-                |> Task.perform (\_ -> Store nextVersion)
-    in
     case cmd of
         TwoRoundPollMsg inner ->
-            let
-                updated =
-                    Polls.TwoRoundPoll.update inner model.twoRoundPoll
-            in
-            ( { model | twoRoundPoll = updated, version = nextVersion }, command )
+            updatePolls (\polls -> { polls | twoRoundPoll = Polls.TwoRoundPoll.update inner polls.twoRoundPoll }) model
 
         OneRoundPollMsg inner ->
-            let
-                updated =
-                    Polls.OneRoundPoll.update inner model.oneRoundPoll
-            in
-            ( { model | oneRoundPoll = updated, version = nextVersion }, command )
+            updatePolls (\polls -> { polls | oneRoundPoll = Polls.OneRoundPoll.update inner polls.twoRoundPoll }) model
 
         DividePollMsg inner ->
-            let
-                updated =
-                    Polls.DividePoll.update inner model.dividePoll
-            in
-            ( { model | dividePoll = updated, version = nextVersion }, command )
+            updatePolls (\polls -> { polls | dividePoll = Polls.DividePoll.update inner polls.dividePoll }) model
 
         D21PollMsg inner ->
-            let
-                updated =
-                    Polls.D21Poll.update inner model.d21Poll
-            in
-            ( { model | d21Poll = updated, version = nextVersion }, command )
+            updatePolls (\polls -> { polls | d21Poll = Polls.D21Poll.update inner polls.d21Poll }) model
 
         DoodlePollMsg inner ->
-            let
-                updated =
-                    Polls.DoodlePoll.update inner model.doodlePoll
-            in
-            ( { model | doodlePoll = updated, version = nextVersion }, command )
+            updatePolls (\polls -> { polls | doodlePoll = Polls.DoodlePoll.update inner polls.doodlePoll }) model
 
         OrderPollMsg inner ->
             let
-                ( updated, innerCmd ) =
-                    Polls.OrderPoll.update inner model.orderPoll
+                fn polls =
+                    let
+                        ( m, c ) =
+                            Polls.OrderPoll.update inner polls.orderPoll
+                    in
+                    ( { polls | orderPoll = m }, Cmd.map OrderPollMsg c )
             in
-            ( { model | orderPoll = updated, version = nextVersion }, Cmd.batch [ Cmd.map OrderPollMsg innerCmd, command ] )
+            updatePollsWithInnerCmd fn model
 
         StarPollMsg inner ->
-            let
-                updated =
-                    Polls.StarPoll.update inner model.starPoll
-            in
-            ( { model | starPoll = updated, version = nextVersion }, command )
+            updatePolls (\polls -> { polls | starPoll = Polls.StarPoll.update inner polls.starPoll }) model
 
         EmojiPollMsg inner ->
-            let
-                updated =
-                    Polls.EmojiPoll.update inner model.emojiPoll
-            in
-            ( { model | emojiPoll = updated, version = nextVersion }, command )
+            updatePolls (\polls -> { polls | emojiPoll = Polls.EmojiPoll.update inner polls.emojiPoll }) model
 
         Shuffle permutation ->
             let
                 candidates =
                     List.map (\i -> Array.get i Candidates.all) permutation |> List.filterMap identity
+
+                polls =
+                    { twoRoundPoll = Polls.TwoRoundPoll.init
+                    , oneRoundPoll = Polls.OneRoundPoll.init
+                    , dividePoll = Polls.DividePoll.init
+                    , d21Poll = Polls.D21Poll.init
+                    , doodlePoll = Polls.DoodlePoll.init
+                    , orderPoll = Polls.OrderPoll.init
+                    , starPoll = Polls.StarPoll.init
+                    , emojiPoll = Polls.EmojiPoll.init
+                    }
+
+                editModel =
+                    { candidates = candidates
+                    , polls = polls
+                    , version = 1
+                    , nonces = []
+                    , showRestoredInfo = False
+                    , lastSaveError = Nothing
+                    }
             in
-            ( { model | candidates = candidates }, Cmd.none )
+            ( { uuid = model.uuid, state = Editing editModel }, Cmd.none )
 
         Store version ->
-            if model.version == version then
-                ( model, storePolls <| serialize False model )
+            case model.state of
+                Editing editModel ->
+                    if editModel.version == version then
+                        ( model, storePolls <| serialize False model editModel )
 
-            else
-                ( model, Cmd.none )
+                    else
+                        ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         CloseRestoreBox ->
-            ( { model | showRestoredInfo = False }, Cmd.none )
+            ( updateEditModelWithoutCacheUpdate (\editModel -> { editModel | showRestoredInfo = False }) model, Cmd.none )
 
         Reset ->
             ( model, reset () )
@@ -307,18 +313,23 @@ update cmd model =
                     D.decodeValue (D.list D.string) jsonValue
                         |> Result.withDefault []
             in
-            ( { model | nonces = newNonces, version = nextVersion }, command )
+            updateEditModel (\editModel -> { editModel | nonces = newNonces }) model
 
         Vote ->
-            let
-                cmdPost =
-                    Http.post
-                        { url = "/api/add_vote"
-                        , body = Http.jsonBody <| serialize True model
-                        , expect = Http.expectWhatever (\_ -> NoOp)
-                        }
-            in
-            ( model, cmdPost )
+            case model.state of
+                Editing editModel ->
+                    let
+                        cmdPost =
+                            Http.post
+                                { url = "/api/add_vote"
+                                , body = Http.jsonBody <| serialize True model editModel
+                                , expect = Http.expectWhatever (\_ -> NoOp)
+                                }
+                    in
+                    ( model, cmdPost )
+
+                _ ->
+                    ( model, Cmd.none )
 
         Load result ->
             case result of
@@ -332,22 +343,102 @@ update cmd model =
             ( model, Cmd.none )
 
 
-serialize : Bool -> Model -> Json.Encode.Value
-serialize final model =
+updateEditModel : (EditModel -> EditModel) -> Model -> ( Model, Cmd Msg )
+updateEditModel fn model =
+    case model.state of
+        Editing editModel ->
+            let
+                nextVersion =
+                    editModel.version + 1
+
+                command =
+                    Process.sleep 1000
+                        |> Task.perform (\_ -> Store nextVersion)
+
+                newEditModel =
+                    fn editModel
+            in
+            ( { model | state = Editing { newEditModel | version = editModel.version + 1 } }, command )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateEditModelWithoutCacheUpdate : (EditModel -> EditModel) -> Model -> Model
+updateEditModelWithoutCacheUpdate fn model =
+    case model.state of
+        Editing editModel ->
+            let
+                newEditModel =
+                    fn editModel
+            in
+            { model | state = Editing newEditModel }
+
+        _ ->
+            model
+
+
+updatePolls : (Polls -> Polls) -> Model -> ( Model, Cmd Msg )
+updatePolls fn model =
+    case model.state of
+        Editing editModel ->
+            let
+                nextVersion =
+                    editModel.version + 1
+
+                command =
+                    Process.sleep 1000
+                        |> Task.perform (\_ -> Store nextVersion)
+
+                newEditModel =
+                    { editModel | polls = fn editModel.polls }
+            in
+            ( { model | state = Editing { newEditModel | version = editModel.version + 1 } }, command )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updatePollsWithInnerCmd : (Polls -> ( Polls, Cmd Msg )) -> Model -> ( Model, Cmd Msg )
+updatePollsWithInnerCmd fn model =
+    case model.state of
+        Editing editModel ->
+            let
+                nextVersion =
+                    editModel.version + 1
+
+                command =
+                    Process.sleep 1000
+                        |> Task.perform (\_ -> Store nextVersion)
+
+                ( newPolls, innerCmd ) =
+                    fn editModel.polls
+
+                newEditModel =
+                    { editModel | polls = newPolls }
+            in
+            ( { model | state = Editing { newEditModel | version = editModel.version + 1 } }, Cmd.batch [ command, innerCmd ] )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+serialize : Bool -> Model -> EditModel -> Json.Encode.Value
+serialize final model editModel =
     Json.Encode.object
         [ ( "uuid", Json.Encode.string model.uuid )
-        , ( "order", Json.Encode.list Json.Encode.int <| List.map .id model.candidates )
-        , ( "nonces", Json.Encode.list Json.Encode.string model.nonces )
+        , ( "order", Json.Encode.list Json.Encode.int <| List.map .id editModel.candidates )
+        , ( "nonces", Json.Encode.list Json.Encode.string editModel.nonces )
         , ( "polls"
           , Json.Encode.object
-                [ ( "twoRound", Polls.TwoRoundPoll.serialize model.twoRoundPoll )
-                , ( "oneRound", Polls.OneRoundPoll.serialize model.oneRoundPoll )
-                , ( "divide", Polls.DividePoll.serialize model.dividePoll )
-                , ( "d21", Polls.D21Poll.serialize model.d21Poll )
-                , ( "doodle", Polls.DoodlePoll.serialize model.doodlePoll )
-                , ( "order", Polls.OrderPoll.serialize model.orderPoll )
-                , ( "star", Polls.StarPoll.serialize final model.starPoll )
-                , ( "emoji", Polls.EmojiPoll.serialize model.emojiPoll )
+                [ ( "twoRound", Polls.TwoRoundPoll.serialize editModel.polls.twoRoundPoll )
+                , ( "oneRound", Polls.OneRoundPoll.serialize editModel.polls.oneRoundPoll )
+                , ( "divide", Polls.DividePoll.serialize editModel.polls.dividePoll )
+                , ( "d21", Polls.D21Poll.serialize editModel.polls.d21Poll )
+                , ( "doodle", Polls.DoodlePoll.serialize editModel.polls.doodlePoll )
+                , ( "order", Polls.OrderPoll.serialize editModel.polls.orderPoll )
+                , ( "star", Polls.StarPoll.serialize final editModel.polls.starPoll )
+                , ( "emoji", Polls.EmojiPoll.serialize editModel.polls.emojiPoll )
                 ]
           )
         ]
@@ -359,12 +450,22 @@ serialize final model =
 
 view : Model -> Html Msg
 view model =
+    case model.state of
+        Editing editModel ->
+            viewEdit editModel
+
+        _ ->
+            div [] []
+
+
+viewEdit : EditModel -> Html Msg
+viewEdit editModel =
     let
         pollConfig =
-            { candidates = model.candidates, readOnly = False }
+            { candidates = editModel.candidates, readOnly = False }
 
         restoredInfo =
-            if model.showRestoredInfo then
+            if editModel.showRestoredInfo then
                 div [ class "wide" ]
                     [ div [ class "box info" ]
                         [ button [ class "box-close-button", title "Zavřít", onClick CloseRestoreBox ]
@@ -384,30 +485,30 @@ view model =
                 [ p [] [ text "Zúčastněte se prosím malého experimentu. Porovnejte různé hlasovací systémy na příkladu volby prezidenta České republiky." ]
                 ]
             ]
-        , Html.map (\inner -> TwoRoundPollMsg inner) (Polls.TwoRoundPoll.view pollConfig model.twoRoundPoll)
-        , Html.map (\inner -> OneRoundPollMsg inner) (Polls.OneRoundPoll.view pollConfig model.oneRoundPoll)
-        , Html.map (\inner -> DividePollMsg inner) (Polls.DividePoll.view pollConfig model.dividePoll)
-        , Html.map (\inner -> D21PollMsg inner) (Polls.D21Poll.view pollConfig model.d21Poll)
-        , Html.map (\inner -> DoodlePollMsg inner) (Polls.DoodlePoll.view pollConfig model.doodlePoll)
-        , Html.map (\inner -> OrderPollMsg inner) (Polls.OrderPoll.view pollConfig model.orderPoll)
-        , Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view pollConfig model.starPoll)
-        , Html.map (\inner -> EmojiPollMsg inner) (Polls.EmojiPoll.view pollConfig model.emojiPoll)
-        , summaries model
+        , Html.map (\inner -> TwoRoundPollMsg inner) (Polls.TwoRoundPoll.view pollConfig editModel.polls.twoRoundPoll)
+        , Html.map (\inner -> OneRoundPollMsg inner) (Polls.OneRoundPoll.view pollConfig editModel.polls.oneRoundPoll)
+        , Html.map (\inner -> DividePollMsg inner) (Polls.DividePoll.view pollConfig editModel.polls.dividePoll)
+        , Html.map (\inner -> D21PollMsg inner) (Polls.D21Poll.view pollConfig editModel.polls.d21Poll)
+        , Html.map (\inner -> DoodlePollMsg inner) (Polls.DoodlePoll.view pollConfig editModel.polls.doodlePoll)
+        , Html.map (\inner -> OrderPollMsg inner) (Polls.OrderPoll.view pollConfig editModel.polls.orderPoll)
+        , Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view pollConfig editModel.polls.starPoll)
+        , Html.map (\inner -> EmojiPollMsg inner) (Polls.EmojiPoll.view pollConfig editModel.polls.emojiPoll)
+        , summaries editModel
         ]
 
 
-summaries : Model -> Html Msg
-summaries model =
+summaries : EditModel -> Html Msg
+summaries editModel =
     let
         summaryList =
-            [ Polls.TwoRoundPoll.summarize model.twoRoundPoll
-            , Polls.OneRoundPoll.summarize model.oneRoundPoll
-            , Polls.DividePoll.summarize model.dividePoll
-            , Polls.D21Poll.summarize model.d21Poll
-            , Polls.DoodlePoll.summarize model.doodlePoll
-            , Polls.OrderPoll.summarize model.orderPoll
-            , Polls.StarPoll.summarize model.starPoll
-            , Polls.EmojiPoll.summarize model.emojiPoll
+            [ Polls.TwoRoundPoll.summarize editModel.polls.twoRoundPoll
+            , Polls.OneRoundPoll.summarize editModel.polls.oneRoundPoll
+            , Polls.DividePoll.summarize editModel.polls.dividePoll
+            , Polls.D21Poll.summarize editModel.polls.d21Poll
+            , Polls.DoodlePoll.summarize editModel.polls.doodlePoll
+            , Polls.OrderPoll.summarize editModel.polls.orderPoll
+            , Polls.StarPoll.summarize editModel.polls.starPoll
+            , Polls.EmojiPoll.summarize editModel.polls.emojiPoll
             ]
 
         localHtml html =
@@ -443,7 +544,7 @@ summaries model =
                 ]
 
         weightInfo =
-            div [] [ text <| String.concat [ "Síla vašeho hlasu je ", String.fromInt <| List.length model.nonces ] ]
+            div [] [ text <| String.concat [ "Síla vašeho hlasu je ", String.fromInt <| List.length editModel.nonces ] ]
 
         voteEnabled =
             List.all (\(Summary validation _) -> validation /= Error) summaryList
