@@ -460,7 +460,7 @@ view model =
             div [] [ text "Připravuji nové hlasování" ]
 
         LoadingCachedFailed ->
-            div [] [ text "Načtení uloženého hlasování selholo" ]
+            div [] [ text "Načtení uloženého hlasování selhalo" ]
 
         Saving _ ->
             div [] [ text "Načtení uloženého hlasování selholo" ]
