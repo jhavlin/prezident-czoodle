@@ -4,8 +4,8 @@ import Array
 import Browser
 import Candidates
 import FeatherIcons
-import Html exposing (Html, button, div, h1, p, section, text)
-import Html.Attributes exposing (class, disabled, title)
+import Html exposing (Html, a, button, div, h1, p, section, text)
+import Html.Attributes exposing (class, disabled, href, title)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as D
@@ -89,14 +89,13 @@ type alias ShowModel =
 
 type State
     = InitializingNew
-    | LoadingCached
     | LoadingCachedFailed
     | Editing EditModel
     | Saving EditModel
     | ShowingSavedInfo String
     | LoadingStored
+    | LoadingStoredFailed
     | ShowingStored ShowModel
-    | ShowingStoredFailed
     | InvalidUUID
 
 
@@ -145,7 +144,7 @@ init jsonFlags =
                 List.map (\i -> Array.get i Candidates.all) orderList |> List.filterMap identity
 
             decodeResult =
-                D.decodeValue pollsDecoder jsonFlags
+                D.decodeValue (pollsDecoder False) jsonFlags
         in
         case decodeResult of
             Err _ ->
@@ -169,10 +168,10 @@ storedProjectDecoder : D.Decoder Model
 storedProjectDecoder =
     let
         orderDecoder =
-            D.list D.int |> D.map (\list -> List.filterMap (\id -> Array.get id Candidates.all) list)
+            D.field "order" (D.list D.int |> D.map (\list -> List.filterMap (\id -> Array.get id Candidates.all) list))
 
         showStateDecoder =
-            D.map2 ShowModel orderDecoder pollsDecoder
+            D.map2 ShowModel orderDecoder (pollsDecoder True)
                 |> D.map (\showModel -> ShowingStored showModel)
 
         modelDecoder =
@@ -183,18 +182,18 @@ storedProjectDecoder =
     modelDecoder
 
 
-pollsDecoder : D.Decoder Polls
-pollsDecoder =
+pollsDecoder : Bool -> D.Decoder Polls
+pollsDecoder final =
     let
         inner =
             D.map8 Polls
                 (D.field "twoRound" Polls.TwoRoundPoll.deserialize)
-                (D.field "oneRound" Polls.TwoRoundPoll.deserialize)
+                (D.field "oneRound" Polls.OneRoundPoll.deserialize)
                 (D.field "divide" Polls.DividePoll.deserialize)
                 (D.field "d21" Polls.D21Poll.deserialize)
                 (D.field "doodle" Polls.DoodlePoll.deserialize)
                 (D.field "order" Polls.OrderPoll.deserialize)
-                (D.field "star" <| Polls.StarPoll.deserialize False)
+                (D.field "star" <| Polls.StarPoll.deserialize final)
                 (D.field "emoji" Polls.EmojiPoll.deserialize)
     in
     D.field "polls" inner
@@ -334,7 +333,7 @@ update cmd model =
         Load result ->
             case result of
                 Err _ ->
-                    ( model, Cmd.none )
+                    ( { model | state = LoadingStoredFailed }, Cmd.none )
 
                 Ok newModel ->
                     ( newModel, Cmd.none )
@@ -451,11 +450,39 @@ serialize final model editModel =
 view : Model -> Html Msg
 view model =
     case model.state of
+        InvalidUUID ->
+            div [ class "wide" ] [ text "Chybný identifikátor." ]
+
         Editing editModel ->
             viewEdit editModel
 
-        _ ->
-            div [] []
+        InitializingNew ->
+            div [] [ text "Připravuji nové hlasování" ]
+
+        LoadingCachedFailed ->
+            div [] [ text "Načtení uloženého hlasování selholo" ]
+
+        Saving _ ->
+            div [] [ text "Načtení uloženého hlasování selholo" ]
+
+        ShowingSavedInfo _ ->
+            div [] [ text "Uloženo" ]
+
+        LoadingStored ->
+            div [ class "wide" ] [ text "Nahrávám hlasování" ]
+
+        LoadingStoredFailed ->
+            div [] [ text "Chyba zobrazení existujícího hlasování" ]
+
+        ShowingStored showModel ->
+            div []
+                (div [ class "wide" ]
+                    [ h1 [] [ text <| String.concat [ "Zaznamenané hlasování číslo", " ", model.uuid ] ]
+                    , p [] [ text "(Již nelze upravovat.)" ]
+                    , p [] [ text "Pokud jste ještě nehlasovali, můžete ", a [ href "/" ] [ text "tak učinit zde." ] ]
+                    ]
+                    :: viewPolls { candidates = showModel.candidates, readOnly = True } showModel.polls
+                )
 
 
 viewEdit : EditModel -> Html Msg
@@ -479,22 +506,29 @@ viewEdit editModel =
                 text ""
     in
     div []
-        [ restoredInfo
-        , section [ class "intro" ]
+        ([ restoredInfo
+         , section [ class "intro" ]
             [ div [ class "wide" ]
                 [ p [] [ text "Zúčastněte se prosím malého experimentu. Porovnejte různé hlasovací systémy na příkladu volby prezidenta České republiky." ]
                 ]
             ]
-        , Html.map (\inner -> TwoRoundPollMsg inner) (Polls.TwoRoundPoll.view pollConfig editModel.polls.twoRoundPoll)
-        , Html.map (\inner -> OneRoundPollMsg inner) (Polls.OneRoundPoll.view pollConfig editModel.polls.oneRoundPoll)
-        , Html.map (\inner -> DividePollMsg inner) (Polls.DividePoll.view pollConfig editModel.polls.dividePoll)
-        , Html.map (\inner -> D21PollMsg inner) (Polls.D21Poll.view pollConfig editModel.polls.d21Poll)
-        , Html.map (\inner -> DoodlePollMsg inner) (Polls.DoodlePoll.view pollConfig editModel.polls.doodlePoll)
-        , Html.map (\inner -> OrderPollMsg inner) (Polls.OrderPoll.view pollConfig editModel.polls.orderPoll)
-        , Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view pollConfig editModel.polls.starPoll)
-        , Html.map (\inner -> EmojiPollMsg inner) (Polls.EmojiPoll.view pollConfig editModel.polls.emojiPoll)
-        , summaries editModel
-        ]
+         ]
+            ++ viewPolls pollConfig editModel.polls
+            ++ [ summaries editModel ]
+        )
+
+
+viewPolls : Polls.Common.PollConfig -> Polls -> List (Html Msg)
+viewPolls pollConfig polls =
+    [ Html.map (\inner -> TwoRoundPollMsg inner) (Polls.TwoRoundPoll.view pollConfig polls.twoRoundPoll)
+    , Html.map (\inner -> OneRoundPollMsg inner) (Polls.OneRoundPoll.view pollConfig polls.oneRoundPoll)
+    , Html.map (\inner -> DividePollMsg inner) (Polls.DividePoll.view pollConfig polls.dividePoll)
+    , Html.map (\inner -> D21PollMsg inner) (Polls.D21Poll.view pollConfig polls.d21Poll)
+    , Html.map (\inner -> DoodlePollMsg inner) (Polls.DoodlePoll.view pollConfig polls.doodlePoll)
+    , Html.map (\inner -> OrderPollMsg inner) (Polls.OrderPoll.view pollConfig polls.orderPoll)
+    , Html.map (\inner -> StarPollMsg inner) (Polls.StarPoll.view pollConfig polls.starPoll)
+    , Html.map (\inner -> EmojiPollMsg inner) (Polls.EmojiPoll.view pollConfig polls.emojiPoll)
+    ]
 
 
 summaries : EditModel -> Html Msg

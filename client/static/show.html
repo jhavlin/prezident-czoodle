@@ -34,7 +34,7 @@
         var app = Elm.Vote.init({
             node: document.getElementById('myapp'),
             flags: {
-                uuid: (window.location.hash || '').substring(1),
+                uuid: (window.location.pathname || '').substring(1),
                 readOnly: true
             },
         });
