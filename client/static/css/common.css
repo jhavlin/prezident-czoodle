@@ -197,7 +197,7 @@ section.poll .narrow {
 }
 
 a {
-    color: #4fd0ff;
+    color: #aec7fc;
 }
 
 /*
@@ -982,4 +982,48 @@ label.disabled>.d21-poll-option.negative {
 
 .summary-text {
     padding: 0.7em 0 0.7em 1em;
+}
+
+.vote-strength {
+    display: inline-block;
+    padding: 0.2em 0.5em;
+    border-radius: 0.2em;
+    color: black;
+}
+.vote-strength.weak {
+    background-color: red;
+}
+.vote-strength.good {
+    background-color: orange;
+}
+.vote-strength.strong {
+    background-color: greenyellow;
+}
+
+.vote-button-parent {
+    padding: 1em 0;
+    text-align: center;
+}
+
+.vote-button {
+    padding: 1em;
+    font-size: inherit;
+    font-weight: bold;
+    border: none;
+    border-radius: 0.5em;
+    cursor: pointer;
+}
+.vote-button:disabled {
+    color: #dddddd;
+    background: #777777;
+}
+.vote-button:not(:disabled) {
+    color: white;
+    background: #1849cc;
+}
+@media (hover: hover) {
+    .vote-button:not(:disabled):hover {
+        color: white;
+        background: #2e5cda;
+    }
 }

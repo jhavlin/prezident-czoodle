@@ -4,7 +4,7 @@ import Array
 import Browser
 import Candidates
 import FeatherIcons
-import Html exposing (Html, a, button, div, h1, p, section, text)
+import Html exposing (Html, a, br, button, div, h1, p, section, small, span, text)
 import Html.Attributes exposing (class, disabled, href, title)
 import Html.Events exposing (onClick)
 import Http
@@ -55,6 +55,9 @@ port reInit : (D.Value -> msg) -> Sub msg
 port noncesUpdated : (D.Value -> msg) -> Sub msg
 
 
+port clear : () -> Cmd msg
+
+
 
 -- MODEL
 
@@ -92,7 +95,7 @@ type State
     | LoadingCachedFailed
     | Editing EditModel
     | Saving EditModel
-    | ShowingSavedInfo String
+    | ShowingSavedInfo
     | LoadingStored
     | LoadingStoredFailed
     | ShowingStored ShowModel
@@ -102,6 +105,7 @@ type State
 type alias Model =
     { uuid : String
     , state : State
+    , baseUrl : String
     }
 
 
@@ -114,6 +118,9 @@ init jsonFlags =
         uuid =
             Result.withDefault "" <| D.decodeValue (D.field "uuid" D.string) jsonFlags
 
+        baseUrl =
+            Result.withDefault "" <| D.decodeValue (D.field "baseUrl" D.string) jsonFlags
+
         readOnly =
             Result.withDefault False <| D.decodeValue (D.field "readOnly" D.bool) jsonFlags
 
@@ -121,7 +128,7 @@ init jsonFlags =
             List.sort orderList /= (List.sort <| List.map .id <| Array.toList <| Candidates.all)
     in
     if String.length uuid /= 36 then
-        ( { uuid = uuid, state = InvalidUUID }, Cmd.none )
+        ( { uuid = uuid, state = InvalidUUID, baseUrl = baseUrl }, Cmd.none )
 
     else if readOnly then
         let
@@ -131,10 +138,10 @@ init jsonFlags =
                     , expect = Http.expectJson Load storedProjectDecoder
                     }
         in
-        ( { uuid = uuid, state = LoadingStored }, loadCmd )
+        ( { uuid = uuid, state = LoadingStored, baseUrl = baseUrl }, loadCmd )
 
     else if isNew then
-        ( { uuid = uuid, state = InitializingNew }
+        ( { uuid = uuid, state = InitializingNew, baseUrl = baseUrl }
         , Random.generate Shuffle <| RandomUtils.shuffle (Array.length Candidates.all)
         )
 
@@ -148,7 +155,7 @@ init jsonFlags =
         in
         case decodeResult of
             Err _ ->
-                ( { uuid = uuid, state = LoadingCachedFailed }, Cmd.none )
+                ( { uuid = uuid, state = LoadingCachedFailed, baseUrl = baseUrl }, Cmd.none )
 
             Ok polls ->
                 let
@@ -161,7 +168,7 @@ init jsonFlags =
                         , lastSaveError = Nothing
                         }
                 in
-                ( { uuid = uuid, state = Editing editModel }, Cmd.none )
+                ( { uuid = uuid, state = Editing editModel, baseUrl = baseUrl }, Cmd.none )
 
 
 storedProjectDecoder : D.Decoder Model
@@ -175,9 +182,10 @@ storedProjectDecoder =
                 |> D.map (\showModel -> ShowingStored showModel)
 
         modelDecoder =
-            D.map2 Model
+            D.map3 Model
                 (D.field "uuid" D.string)
                 showStateDecoder
+                (D.succeed "")
     in
     modelDecoder
 
@@ -220,6 +228,7 @@ type Msg
     | DividePollMsg Polls.DividePoll.Msg
     | EmojiPollMsg Polls.EmojiPoll.Msg
     | Vote
+    | Published (Result String ())
     | Load (Result Http.Error Model)
 
 
@@ -283,7 +292,7 @@ update cmd model =
                     , lastSaveError = Nothing
                     }
             in
-            ( { uuid = model.uuid, state = Editing editModel }, Cmd.none )
+            ( { uuid = model.uuid, state = Editing editModel, baseUrl = model.baseUrl }, Cmd.none )
 
         Store version ->
             case model.state of
@@ -315,6 +324,25 @@ update cmd model =
             updateEditModel (\editModel -> { editModel | nonces = newNonces }) model
 
         Vote ->
+            let
+                responseToResult : Http.Response String -> Result String ()
+                responseToResult response =
+                    case response of
+                        Http.BadUrl_ _ ->
+                            Err "nesprávná URL"
+
+                        Http.Timeout_ ->
+                            Err "timeout"
+
+                        Http.NetworkError_ ->
+                            Err "chyba sítě"
+
+                        Http.BadStatus_ _ body ->
+                            Err body
+
+                        Http.GoodStatus_ _ _ ->
+                            Ok ()
+            in
             case model.state of
                 Editing editModel ->
                     let
@@ -322,13 +350,30 @@ update cmd model =
                             Http.post
                                 { url = "/api/add_vote"
                                 , body = Http.jsonBody <| serialize True model editModel
-                                , expect = Http.expectWhatever (\_ -> NoOp)
+                                , expect = Http.expectStringResponse Published responseToResult
                                 }
                     in
                     ( model, cmdPost )
 
                 _ ->
                     ( model, Cmd.none )
+
+        Published result ->
+            case result of
+                Err err ->
+                    case model.state of
+                        Editing editModel ->
+                            let
+                                updatedModel =
+                                    { editModel | lastSaveError = Just err }
+                            in
+                            ( { model | state = Editing updatedModel }, Cmd.none )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+                Ok _ ->
+                    ( { model | state = ShowingSavedInfo }, clear () )
 
         Load result ->
             case result of
@@ -433,7 +478,7 @@ serialize final model editModel =
                 [ ( "twoRound", Polls.TwoRoundPoll.serialize editModel.polls.twoRoundPoll )
                 , ( "oneRound", Polls.OneRoundPoll.serialize editModel.polls.oneRoundPoll )
                 , ( "divide", Polls.DividePoll.serialize editModel.polls.dividePoll )
-                , ( "d21", Polls.D21Poll.serialize editModel.polls.d21Poll )
+                , ( "d21", Polls.D21Poll.serialize final editModel.polls.d21Poll )
                 , ( "doodle", Polls.DoodlePoll.serialize editModel.polls.doodlePoll )
                 , ( "order", Polls.OrderPoll.serialize editModel.polls.orderPoll )
                 , ( "star", Polls.StarPoll.serialize final editModel.polls.starPoll )
@@ -465,8 +510,21 @@ view model =
         Saving _ ->
             div [] [ text "Načtení uloženého hlasování selholo" ]
 
-        ShowingSavedInfo _ ->
-            div [] [ text "Uloženo" ]
+        ShowingSavedInfo ->
+            let
+                address =
+                    String.concat [ model.baseUrl, "/", model.uuid ]
+            in
+            div [ class "wide" ]
+                [ h1 [] [ text "Odhlasováno" ]
+                , p [] [ text "Zaznamenané hlasování je dostupné zde:" ]
+                , p [] [ a [ href address ] [ text address ] ]
+                , p [] [ text "Tuto adresu si můžete uložit pro pozdější kontrolu. " ]
+                , p []
+                    [ text "Můžete ji také sdílet a zveřejnit, což ovšem neznamená, "
+                    , text "že je to vždy dobrý nápad."
+                    ]
+                ]
 
         LoadingStored ->
             div [ class "wide" ] [ text "Nahrávám hlasování" ]
@@ -578,18 +636,57 @@ summaries editModel =
                 ]
 
         weightInfo =
-            div [] [ text <| String.concat [ "Síla vašeho hlasu je ", String.fromInt <| List.length editModel.nonces ] ]
+            let
+                strength =
+                    List.length editModel.nonces
+
+                strengthClass =
+                    if strength < 5 then
+                        "weak"
+
+                    else if strength < 20 then
+                        "good"
+
+                    else
+                        "strong"
+            in
+            div []
+                [ h1 [] [ text "Síla hlasu" ]
+                , p []
+                    [ text "Síla vašeho hlasu je "
+                    , span [ class "vote-strength", class strengthClass ] [ text <| String.fromInt strength ]
+                    ]
+                , p [] [ text "Hodnota vyjadřuje přibližné množstí času, které jste hlasováním strávili. Je požadována hodnota alespoň 5. Maximální hodnota je 100." ]
+                ]
 
         voteEnabled =
-            List.all (\(Summary validation _) -> validation /= Error) summaryList
+            List.all (\(Summary validation _) -> validation /= Error) summaryList && List.length editModel.nonces >= 5
+
+        errorInfo =
+            case editModel.lastSaveError of
+                Just error ->
+                    div [ class "wide" ]
+                        [ h1 [] [ text "Chyba :-(" ]
+                        , p [] [ text error ]
+                        ]
+
+                _ ->
+                    text ""
     in
     section [ class "summaries" ]
         [ div [ class "wide" ]
             (h1 [] [ text "Shrnutí" ] :: List.map showSummary summaryList)
         , div [ class "wide" ]
             [ weightInfo ]
-        , div [ class "wide" ]
-            [ button [ onClick Vote, disabled <| not voteEnabled ] [ text "Hlasovat nanečisto" ] ]
+        , div [ class "wide vote-button-parent" ]
+            [ button [ class "vote-button", onClick Vote, disabled <| not voteEnabled ]
+                [ text "Hlasovat nanečisto"
+                , br [] []
+                , br [] []
+                , small [] [ text "Prozatím můžete hlasovat opakovaně." ]
+                ]
+            ]
+        , errorInfo
         ]
 
 

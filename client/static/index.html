@@ -105,7 +105,6 @@
                         const sha = await sha256(val);
                         await new Promise(resolve => setTimeout(resolve, 1));
                         if (check(sha)) {
-                            console.log(round, i, val, sha, (Date.now() - start) / 1000);
                             base = sha;
                             results.push(nonce);
                             port.send(results);
@@ -138,25 +137,36 @@
                 order: [],
             };
         }
-        var app = Elm.Vote.init({
+
+        const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+
+        const app = Elm.Vote.init({
             node: document.getElementById('myapp'),
-            flags: lastProject,
+            flags: { baseUrl, ...lastProject },
         });
 
         let proof = prove(lastProject.uuid, app.ports.noncesUpdated, lastProject.nonces || []);
+
+        const clear = () => {
+            proof.cancel();
+            sessionStorage.removeItem('last-project');
+        };
 
         app.ports.storePolls.subscribe(function (message) {
             sessionStorage.setItem('last-project', JSON.stringify(message));
         });
         app.ports.reset.subscribe(function () {
-            proof.cancel();
-            sessionStorage.removeItem('last-project');
+            clear();
             const uuid = crypto.randomUUID();
             app.ports.reInit.send({
                 uuid,
                 order: [],
+                baseUrl,
             });
             proof = prove(uuid, app.ports.noncesUpdated, []);
+        });
+        app.ports.clear.subscribe(function () {
+            clear();
         });
     </script>
 </body>

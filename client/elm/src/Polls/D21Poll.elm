@@ -339,9 +339,40 @@ viewNegative =
         [ text "-1" ]
 
 
-serialize : Model -> Json.Encode.Value
-serialize model =
-    Polls.Common.serializeIntDict <| Dict.map (\_ v -> optionToInt v) model.values
+serialize : Bool -> Model -> Json.Encode.Value
+serialize final model =
+    let
+        mapper =
+            \_ v -> optionToInt v
+
+        mapped =
+            Dict.map mapper model.values
+    in
+    if final then
+        let
+            positiveCount =
+                Dict.values mapped |> List.filter (\v -> v > 0) |> List.length
+        in
+        if positiveCount < 2 then
+            let
+                fixed =
+                    Dict.map
+                        (\_ v ->
+                            if v < 0 then
+                                0
+
+                            else
+                                v
+                        )
+                        mapped
+            in
+            Polls.Common.serializeIntDict fixed
+
+        else
+            Polls.Common.serializeIntDict mapped
+
+    else
+        Polls.Common.serializeIntDict mapped
 
 
 deserialize : Json.Decode.Decoder Model

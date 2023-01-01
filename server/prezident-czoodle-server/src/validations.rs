@@ -12,6 +12,11 @@ fn validate_uuid(vote: &models::VoteWeb) -> Result<(), errors::MyError> {
 }
 
 fn validate_nonces(vote: &models::VoteWeb) -> Result<(), errors::MyError> {
+    if vote.nonces.len() < 5 {
+        return Result::Err(errors::MyError::ValidationError(
+            "Validation invalid - not enough nonces.".to_owned(),
+        ));
+    }
     let mut current_string = format!("{}{}", vote.uuid, "czoodle");
     for nonce in &vote.nonces {
         current_string = sha256(&format!("{}{}", current_string, nonce));
@@ -154,7 +159,7 @@ fn validate_order_poll(vote: &models::VoteWeb) -> Result<(), errors::MyError> {
     sorted.sort();
 
     for (index, value) in sorted.into_iter().enumerate() {
-        if index as i32 != value {
+        if index as i32 != value - 1 {
             return Result::Err(errors::MyError::ValidationError(
                 "Invalid order poll.".to_owned(),
             ));

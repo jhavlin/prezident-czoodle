@@ -12,6 +12,7 @@ module Polls.OrderPoll exposing
 import Array exposing (Array)
 import Candidates exposing (Candidate)
 import Component
+import Dict
 import FeatherIcons
 import Html exposing (Html, button, div, h1, h2, li, option, p, section, select, text)
 import Html.Attributes exposing (class, disabled, selected, value)
@@ -280,7 +281,22 @@ headerView =
 
 serialize : Model -> Json.Encode.Value
 serialize model =
-    Json.Encode.array Json.Encode.int <| Array.map (\m -> Maybe.withDefault -1 m) model.values
+    let
+        len =
+            Array.length Candidates.all
+
+        candidatesAndPoints =
+            Array.toList model.values
+                |> List.indexedMap (\i mId -> ( mId, len - i ))
+                |> List.filterMap (\( mId, p ) -> Maybe.map (\cId -> ( cId, p )) mId)
+                |> Dict.fromList
+
+        points =
+            Candidates.all
+                |> Array.map (\candidate -> Dict.get candidate.id candidatesAndPoints)
+                |> Array.map (Maybe.withDefault -1)
+    in
+    Json.Encode.array Json.Encode.int points
 
 
 deserialize : Json.Decode.Decoder Model
@@ -289,15 +305,21 @@ deserialize =
         len =
             Array.length Candidates.all
 
-        intToMaybe i =
-            if i >= 0 && i < len then
-                Just i
-
-            else
-                Nothing
+        pointsToOrder : Array Int -> Array (Maybe Int)
+        pointsToOrder points =
+            let
+                ordersAndCandidates =
+                    Array.toList points
+                        |> List.indexedMap (\i p -> ( i, p ))
+                        |> List.filter (\( _, p ) -> p > 0)
+                        |> List.map (\( i, p ) -> ( len - p, i ))
+                        |> Dict.fromList
+            in
+            Candidates.all
+                |> Array.indexedMap (\i _ -> Dict.get i ordersAndCandidates)
     in
     Json.Decode.map2 Model
-        (Json.Decode.array (Json.Decode.map intToMaybe Json.Decode.int))
+        (Json.Decode.map pointsToOrder <| Json.Decode.array Json.Decode.int)
         (Json.Decode.succeed Nothing)
 
 
