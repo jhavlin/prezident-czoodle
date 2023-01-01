@@ -1,5 +1,46 @@
 <html lang="en">
+<!--
 
+Vážení čtenáři zdrojového kódu,
+
+klientská část této jednoduché webové aplikace je naprogramována v jazycích Elm, JavaScript, HTML a CSS.
+
+Serverová část je napsaná v jazyku Rust a používá framework Actix Web. (A běží za serverem Nginx.)
+O data se stará databázový systém PostgreSQL.
+
+Zdrojový repositář najdete zde: https://github.com/jhavlin/prezident-czoodle
+
+Některé části vyžadují ještě nějakou péči (hlasování řazením, zobrazení uloženého hlasování),
+což zkusím doladit za běhu. Není to ideální, ale lepší, než aby aplikace byla spuštěna až po volbách :-)
+
+Během hlasování probíhá na pozadí jednoduchý potvrzovací výpočet, který nahrazuje ověření emailem
+a podobná opatření. Každý hlas je tak krytý výpočetním výkonem, spotřebovanou elektřinou a lidským
+časem. V případě podezření na pochybná hlasování lze pak lze vyhodnotit více sad výsledků, kde
+v některých budou vynechány hlasy s nízkou silou.
+
+Nejsou sbírány žádné osobní informace. Aby v datech bylo možné odhalit hlasování, která byla odeslána
+ze stejného zařízení, je ukládán hash IP adresy osolený neveřejným náhodným (ale statickým) řetězcem.
+
+Po hlasování budou data nejspíše zveřejněna, aby je případně mohli vyhodnotit i lidé, co si se
+statistikou rozumí lépe než já. Pokud tedy bude dostatečně zajímavý počet hlasů.
+
+Hlasování bude možné do konce termínu prvního kola prezidentský voleb, případně až do druhého kola.
+
+Cíle projektu:
+--------------
+
+- ✅ Naprogramovat si něco malého a zajímavého.
+- ❔ Porovnat různé hlasovací systémy. Uvidíme, jestli z dat vyplyne něco zajímavého.
+- ❌ Zaměřit se na UX a přístupnost. Vyžaduje ještě nějakou práci. Uvidím, co zvládnu.
+
+
+Přeji šťastnou ruku při volbách a vydařený rok 2023.
+
+ Jaroslav Havlín
+
+ https://github.com/jhavlin, https://twitter.com/JaroslavHavlin
+
+-->
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
