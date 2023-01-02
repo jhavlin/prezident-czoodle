@@ -4,7 +4,7 @@ import Array
 import Browser
 import Candidates
 import FeatherIcons
-import Html exposing (Html, a, button, div, h1, p, section, span, text)
+import Html exposing (Html, a, br, button, div, h1, p, section, small, span, text)
 import Html.Attributes exposing (class, disabled, href, title)
 import Html.Events exposing (onClick)
 import Http
@@ -696,7 +696,10 @@ summaries editModel =
             [ weightInfo ]
         , div [ class "wide vote-button-parent" ]
             [ button [ class "vote-button", onClick Vote, disabled <| not voteEnabled ]
-                [ text "Hlasovat"
+                [ text "Hlasovat nanečisto"
+                , br [] []
+                , br [] []
+                , small [] [ text "Prozatím můžete hlasovat opakovaně." ]
                 ]
             ]
         , errorInfo
