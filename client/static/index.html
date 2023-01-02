@@ -65,11 +65,6 @@ Přeji šťastnou ruku při volbách a vydařený rok 2023.
 </head>
 
 <body class="notranslate" translate="no">
-    <div style="background: yellow; color: black; padding: 0.5em 1em; margin-bottom: 1em;">
-        <div class="wide">
-            <strong>Testovací režim.</strong> Hlasovat je zatím možné pouze nanečisto.
-        </div>
-    </div>
     <header>
         <h1 class="header">
             <div class="logo">
@@ -81,6 +76,35 @@ Přeji šťastnou ruku při volbách a vydařený rok 2023.
     </header>
     <div class="color-separator"></div>
     <div id="myapp"></div>
+    <footer class="footer">
+        <div class="wide">
+            <h2>Pravidla</h2>
+            <ul>
+                <li>Každý smí hlasovat pouze jednou.</li>
+                <li>Hlasování bude otevřené alespoň do prvního kola prezidentský voleb.</li>
+            </ul>
+
+            <h2>Data a soukromí</h2>
+            <ul>
+                <li>Nejsou sbírány žádné osobní informace.</li>
+                <li>Hlas je potvrzen pouze ověřovacím výpočtem.</li>
+                <li>
+                    Jsou ukládány pouze hashe IP adres uživatelů doplněných neveřejným náhodným řetězcem.
+                    Není tak možné nijak identifikovat uživatele, ale pouze rozpoznat, které hlasy
+                    přišly ze stejné sítě, jako opatření pro určení podezřelých hlasů.
+                </li>
+            </ul>
+
+            <h2>Chyby a náměty</h2>
+
+            <p>Problémy a nápady hlaste prosím zde:</p>
+
+            <ul>
+                <li><a href="https://twitter.com/CzoodleCz" target="_blank">Twitter @CzoodleCz</a></li>
+                <li><a href="https://github.com/jhavlin/prezident-czoodle" target="_blank">GitHub prezident-czoodle</a></li>
+            </ul>
+        </div>
+    </footer>
     <script>
 
         const prove = (uuid, port, knownNonces) => {

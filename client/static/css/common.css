@@ -1006,7 +1006,7 @@ label.disabled>.d21-poll-option.negative {
 }
 
 .vote-button {
-    padding: 1em;
+    padding: 1.5em 2em;
     font-size: inherit;
     font-weight: bold;
     border: none;
@@ -1026,4 +1026,10 @@ label.disabled>.d21-poll-option.negative {
         color: white;
         background: #2e5cda;
     }
+}
+
+footer {
+    background: #555555;
+    color: #cccccc;
+    padding: 2em 0;
 }
