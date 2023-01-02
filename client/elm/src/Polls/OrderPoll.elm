@@ -59,8 +59,26 @@ update msg model =
 
                 updatedValues =
                     Array.set order id model.values
+
+                completedValues =
+                    case ( id, freeCandidates Candidates.all updatedValues Nothing ) of
+                        ( Just _, c :: [] ) ->
+                            -- just set an value and there is only one free candidate left
+                            let
+                                fill maybeId =
+                                    case maybeId of
+                                        Nothing ->
+                                            Just c.id
+
+                                        a ->
+                                            a
+                            in
+                            Array.map fill updatedValues
+
+                        _ ->
+                            updatedValues
             in
-            ( { model | values = updatedValues, toRevert = Nothing }, Cmd.none )
+            ( { model | values = completedValues, toRevert = Nothing }, Cmd.none )
 
         Reset ->
             ( { model | values = Array.map (\_ -> Nothing) model.values, toRevert = Just model.values }, Cmd.none )

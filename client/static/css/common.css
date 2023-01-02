@@ -475,6 +475,8 @@ a {
     position: relative;
     display: flex;
     min-width: 3em;
+    flex-shrink: 0;
+    ;
 }
 
 .order-poll-row-buttons {
@@ -499,11 +501,11 @@ a {
 
 @media (hover: hover) {
     .order-poll-row-button.up:hover>svg {
-        stroke: #daffc6;
+        stroke: #b8f896;
     }
 
     .order-poll-row-button.down:hover>svg {
-        stroke: #ffd8d8;
+        stroke: #f59999;
     }
 }
 
