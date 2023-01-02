@@ -466,9 +466,9 @@ a {
 }
 
 .order-poll-row-select>select {
-    font-size: 110%;
     width: 100%;
-    padding: 0.25em;
+    font-size: inherit;
+    padding: 0.45em 0.25em;
 }
 
 .order-poll-row-actions {
