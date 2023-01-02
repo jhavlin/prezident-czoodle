@@ -54,7 +54,7 @@ all =
           , firstName = "Marek"
           , surname = "Hilšer"
           , imgName = "marek_hilser"
-          , p3 = "Marku Holšerovi"
+          , p3 = "Marku Hilšerovi"
           , p4 = "Marka Hilšera"
           }
         , { id = 5
