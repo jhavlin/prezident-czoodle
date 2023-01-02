@@ -33,6 +33,7 @@ type Msg
     | CompleteRandomly
     | SetRandomly (List Int)
     | RevertLastAction
+    | Move { index : Int, direction : Int }
 
 
 type alias Model =
@@ -67,7 +68,7 @@ update msg model =
         CompleteRandomly ->
             let
                 n =
-                    List.length <| freeCandidates model.values Nothing
+                    List.length <| freeCandidates Candidates.all model.values Nothing
 
                 cmd =
                     Random.generate SetRandomly <| RandomUtils.decreasingRandomIntList n
@@ -77,7 +78,7 @@ update msg model =
         SetRandomly randomValues ->
             let
                 freeIdList =
-                    freeCandidates model.values Nothing |> List.map (\c -> c.id)
+                    freeCandidates Candidates.all model.values Nothing |> List.map (\c -> c.id)
 
                 fn : Maybe Int -> ( List Int, List Int, List (Maybe Int) ) -> ( List Int, List Int, List (Maybe Int) )
                 fn maybeValue ( random, remainingFree, values ) =
@@ -103,21 +104,60 @@ update msg model =
         RevertLastAction ->
             ( { model | values = Maybe.withDefault model.values model.toRevert, toRevert = Nothing }, Cmd.none )
 
+        Move { index, direction } ->
+            let
+                newPosition =
+                    index + direction
+
+                source : Maybe Int
+                source =
+                    Array.get index model.values |> Maybe.andThen identity
+
+                target : Maybe Int
+                target =
+                    Array.get newPosition model.values |> Maybe.andThen identity
+            in
+            if newPosition < 0 || newPosition >= Array.length Candidates.all then
+                ( model, Cmd.none )
+
+            else
+                case ( source, target ) of
+                    ( Just _, Just _ ) ->
+                        let
+                            newValues =
+                                model.values
+                                    |> Array.set newPosition source
+                                    |> Array.set index target
+                        in
+                        ( { model | values = newValues, toRevert = Nothing }, Cmd.none )
+
+                    ( Just _, Nothing ) ->
+                        let
+                            newValues =
+                                model.values
+                                    |> Array.set index Nothing
+                                    |> Array.set newPosition source
+                        in
+                        ( { model | values = newValues, toRevert = Nothing }, Cmd.none )
+
+                    _ ->
+                        ( model, Cmd.none )
+
 
 assignedIds : Array (Maybe Int) -> Set Int
 assignedIds values =
     Set.fromList <| List.filterMap identity <| Array.toList values
 
 
-freeCandidates : Array (Maybe Int) -> Maybe Int -> List Candidate
-freeCandidates values selfId =
-    Candidates.all
+freeCandidates : Array Candidate -> Array (Maybe Int) -> Maybe Int -> List Candidate
+freeCandidates candidates values selfId =
+    candidates
         |> Array.toList
         |> List.filter (\candidate -> Just candidate.id == selfId || (not <| Set.member candidate.id (assignedIds values)))
 
 
 view : PollConfig -> Model -> Html Msg
-view _ model =
+view pollConfig model =
     let
         assigned =
             assignedIds model.values
@@ -132,11 +172,11 @@ view _ model =
         options index selfId =
             let
                 opt c =
-                    option (selectedAttr c selfId ++ [ value <| String.fromInt c.id ]) [ text <| String.concat [ c.surname, " ", c.firstName ] ]
+                    option (selectedAttr c selfId ++ [ value <| String.fromInt c.id ]) [ text <| String.concat [ c.name ] ]
             in
             select [ onInput (\v -> SetValue { order = index, value = v }) ]
                 (option [ value "-" ] [ text "Prosím vyberte" ]
-                    :: List.map opt (freeCandidates model.values (Just selfId))
+                    :: List.map opt (freeCandidates (Array.fromList pollConfig.candidates) model.values (Just selfId))
                 )
 
         row index candidateIdMaybe =
@@ -158,13 +198,12 @@ view _ model =
                                         ]
                                 ]
 
-                unsetState =
-                    case candidateMaybe of
-                        Just _ ->
-                            "enabled"
+                enabledClass condition =
+                    if condition then
+                        "enabled"
 
-                        _ ->
-                            "disabled"
+                    else
+                        "disabled"
 
                 assignedState =
                     case candidateMaybe of
@@ -180,17 +219,36 @@ view _ model =
                 , photoOrPlaceholder
                 , div [ class "order-poll-row-select" ]
                     [ options index <| Maybe.withDefault -1 <| Maybe.map (\c -> c.id) candidateMaybe ]
-                , div [ class "order-poll-row-points", class assignedState ]
-                    [ text "("
-                    , text <| String.fromInt (Array.length Candidates.all - index)
-                    , text " b)"
-                    ]
-                , div [ class "action-unset", class unsetState ]
-                    [ FeatherIcons.x
-                        |> FeatherIcons.withSize 32
-                        |> FeatherIcons.toHtml
-                            [ SEvent.onClick <| SetValue { order = index, value = "-" }
+                , div [ class "order-poll-row-actions" ]
+                    [ div [ class "order-poll-row-buttons", class assignedState ]
+                        [ div
+                            [ class "order-poll-row-button"
+                            , class "up"
+                            , class <| enabledClass (index > 0)
                             ]
+                            [ FeatherIcons.chevronUp
+                                |> FeatherIcons.withSize 36
+                                |> FeatherIcons.toHtml
+                                    [ SEvent.onClick <| Move { index = index, direction = -1 }
+                                    ]
+                            ]
+                        , div
+                            [ class "order-poll-row-button"
+                            , class "down"
+                            , class <| enabledClass (index + 1 < Array.length Candidates.all)
+                            ]
+                            [ FeatherIcons.chevronDown
+                                |> FeatherIcons.withSize 36
+                                |> FeatherIcons.toHtml
+                                    [ SEvent.onClick <| Move { index = index, direction = 1 }
+                                    ]
+                            ]
+                        ]
+                    , div [ class "order-poll-row-points", class assignedState ]
+                        [ text "("
+                        , text <| String.fromInt (Array.length Candidates.all - index)
+                        , text " b)"
+                        ]
                     ]
                 ]
 

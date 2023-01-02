@@ -456,16 +456,7 @@ a {
     padding-right: 0.5em;
 }
 
-.order-poll-row-points {
-    font-size: 90%;
-    opacity: 0.9;
-    padding: 0 0.5em;
-    min-width: 3em;
-    text-align: right;
-}
-
-.order-poll-row-order.unassigned,
-.order-poll-row-points.unassigned {
+.order-poll-row-order.unassigned {
     color: gray;
 }
 
@@ -480,12 +471,63 @@ a {
     padding: 0.25em;
 }
 
-.order-poll-row-unset.disabled>svg {
+.order-poll-row-actions {
+    position: relative;
+    display: flex;
+    min-width: 3em;
+}
+
+.order-poll-row-buttons {
+    display: flex;
+    flex-wrap: nowrap;
+    padding: 0 0.25em;
+}
+
+.order-poll-row-buttons.unassigned {
+    visibility: hidden;
+}
+
+.order-poll-row-button {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.order-poll-row-button.disabled>svg {
     stroke: gray;
 }
 
+@media (hover: hover) {
+    .order-poll-row-button.up:hover>svg {
+        stroke: #daffc6;
+    }
+
+    .order-poll-row-button.down:hover>svg {
+        stroke: #ffd8d8;
+    }
+}
+
+.order-poll-row-points {
+    font-size: 90%;
+    color: gray;
+    padding: 0 0.5em;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: -1;
+    display: none;
+}
+
+.order-poll-row-points.unassigned {
+    display: flex;
+}
+
 .order-poll-row-photo-placeholder {
-    width: 42;
+    width: 42px;
     height: 42px;
     display: flex;
     align-items: center;
