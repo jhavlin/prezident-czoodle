@@ -114,7 +114,8 @@ section.intro {
     margin: 3em 0;
 }
 
-section.poll, section.summaries {
+section.poll,
+section.summaries {
     margin: 3em 0 5em 0;
 }
 
@@ -362,6 +363,10 @@ a {
     display: flex;
 }
 
+.star-poll-rank>span {
+    display: flex;
+}
+
 .star-poll-star {
     fill: #626262;
     stroke-width: 1;
@@ -525,6 +530,13 @@ a {
 .doodle-poll-value {
     flex: 1 1 auto;
     text-align: right;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+}
+
+.doodle-poll-value>label {
+    display: flex;
 }
 
 .doodle-poll input[type="radio"] {
@@ -542,7 +554,7 @@ a {
     border-radius: 2px;
     padding: 1px;
     text-align: center;
-    display: inline-block;
+    display: inline-flex;
     margin: 0 0.5em;
     cursor: pointer;
 }
@@ -810,12 +822,21 @@ label.disabled>.d21-poll-option.negative {
 
 .divide-poll-rank {
     display: flex;
+    align-items: center;
+}
+
+.divide-poll-rank>label {
+    display: flex;
 }
 
 .divide-poll-rank input[type="radio"] {
     position: absolute;
     z-index: -1;
     opacity: 0;
+}
+
+.divide-poll-option {
+    display: flex;
 }
 
 .divide-poll-dot {
@@ -910,10 +931,18 @@ label.disabled>.d21-poll-option.negative {
     }
 }
 
+.single-poll-value {
+    display: flex;
+}
+
 .single-poll-value input[type="radio"] {
     position: absolute;
     opacity: 0;
     z-index: -1;
+}
+
+.single-poll-option {
+    display: flex;
 }
 
 .single-poll-option svg {
@@ -970,13 +999,15 @@ label.disabled>.d21-poll-option.negative {
     padding: 0.55em 0;
 }
 
-.summary-icon > svg.valid {
+.summary-icon>svg.valid {
     stroke: greenyellow;
 }
-.summary-icon > svg.error {
+
+.summary-icon>svg.error {
     stroke: red;
 }
-.summary-icon > svg.warning {
+
+.summary-icon>svg.warning {
     stroke: orange;
 }
 
@@ -990,12 +1021,15 @@ label.disabled>.d21-poll-option.negative {
     border-radius: 0.2em;
     color: black;
 }
+
 .vote-strength.weak {
     background-color: red;
 }
+
 .vote-strength.good {
     background-color: orange;
 }
+
 .vote-strength.strong {
     background-color: greenyellow;
 }
@@ -1013,14 +1047,17 @@ label.disabled>.d21-poll-option.negative {
     border-radius: 0.5em;
     cursor: pointer;
 }
+
 .vote-button:disabled {
     color: #dddddd;
     background: #777777;
 }
+
 .vote-button:not(:disabled) {
     color: white;
     background: #1849cc;
 }
+
 @media (hover: hover) {
     .vote-button:not(:disabled):hover {
         color: white;
@@ -1030,6 +1067,6 @@ label.disabled>.d21-poll-option.negative {
 
 footer {
     background: #555555;
-    color: #cccccc;
+    color: #dddddd;
     padding: 2em 0;
 }
