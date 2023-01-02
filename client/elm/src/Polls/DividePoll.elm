@@ -227,7 +227,7 @@ creditView { freeCount } =
                 ""
 
         items =
-            List.range 1 5 |> List.map (\i -> oneItem (i > (5 - freeCount)))
+            List.range 1 5 |> List.reverse |> List.map (\i -> oneItem (i > (5 - freeCount)))
 
         oneItem isFree =
             FeatherIcons.circle |> FeatherIcons.toHtml [ SAttr.class "divide-poll-credit-item", SAttr.class <| freeClass isFree ]

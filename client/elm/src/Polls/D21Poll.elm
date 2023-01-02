@@ -229,7 +229,7 @@ creditView { positiveAssigned, negativeAssigned, negativeEnabled } =
             div [ class "d21-poll-credit-item positive", class <| freeClass free ] [ text "+1" ]
 
         positives =
-            List.range 1 maxPositive |> List.map (\i -> positiveItem (i > positiveAssigned))
+            List.range 1 maxPositive |> List.reverse |> List.map (\i -> positiveItem (i > positiveAssigned))
 
         negativeItem free =
             div [ class "d21-poll-credit-item negative", class <| freeClass free ] [ text "-1" ]
