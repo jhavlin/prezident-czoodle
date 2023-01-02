@@ -96,7 +96,23 @@ Přeji šťastnou ruku při volbách a vydařený rok 2023.
                 // convert ArrayBuffer to Array
                 const hashArray = Array.from(new Uint8Array(hashBuffer));
                 // convert bytes to hex string
-                const hashHex = hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
+                return hashArray;
+            }
+
+            function byteToHex(byte) {
+                if (byte < 16) {
+                    return '0' + byte.toString(16);
+                }
+                return byte.toString(16);
+            }
+
+            function hexStart(hashArray, len) {
+                const hashHex = hashArray.slice(0, len).map(byteToHex).join('');
+                return hashHex;
+            }
+
+            function hex(hashArray) {
+                const hashHex = hashArray.map(byteToHex).join('');
                 return hashHex;
             }
 
@@ -131,7 +147,7 @@ Přeji šťastnou ruku při volbách a vydařený rok 2023.
                 strArr.push(chars[0]);
             };
 
-            const check = hash => hash.startsWith('777')
+            const check = hash => hexStart(hash).startsWith('777')
 
             let base = uuid + 'czoodle';
 
@@ -140,7 +156,7 @@ Přeji šťastnou ruku při volbách a vydařený rok 2023.
                 const start = Date.now();
 
                 for (nonce of knownNonces) {
-                    base = await sha256(base + nonce);
+                    base = hex(await sha256(base + nonce));
                 }
                 const results = knownNonces.slice();
 
@@ -157,7 +173,7 @@ Přeji šťastnou ruku při volbách a vydařený rok 2023.
                         const sha = await sha256(val);
                         await new Promise(resolve => setTimeout(resolve, 1));
                         if (check(sha)) {
-                            base = sha;
+                            base = hex(sha);
                             results.push(nonce);
                             port.send(results);
                             break;

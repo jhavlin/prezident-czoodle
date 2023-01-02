@@ -592,6 +592,9 @@ viewPolls pollConfig polls =
 summaries : EditModel -> Html Msg
 summaries editModel =
     let
+        strengthLimit =
+            5
+
         summaryList =
             [ Polls.TwoRoundPoll.summarize editModel.polls.twoRoundPoll
             , Polls.OneRoundPoll.summarize editModel.polls.oneRoundPoll
@@ -649,18 +652,31 @@ summaries editModel =
 
                     else
                         "strong"
+
+                wait =
+                    if strength < strengthLimit then
+                        text " Čekejte, prosím."
+
+                    else
+                        text ""
             in
             div []
                 [ h1 [] [ text "Síla hlasu" ]
                 , p []
                     [ text "Síla vašeho hlasu je "
                     , span [ class "vote-strength", class strengthClass ] [ text <| String.fromInt strength ]
+                    , wait
                     ]
-                , p [] [ text "Hodnota vyjadřuje přibližné množstí času, které jste hlasováním strávili. Je požadována hodnota alespoň 5. Maximální hodnota je 100." ]
+                , p []
+                    [ text "Hodnota vyjadřuje přibližné množstí času, které jste hlasováním strávili. "
+                    , text "Je požadována hodnota alespoň "
+                    , text <| String.fromInt strengthLimit
+                    , text ". Maximální hodnota je 100."
+                    ]
                 ]
 
         voteEnabled =
-            List.all (\(Summary validation _) -> validation /= Error) summaryList && List.length editModel.nonces >= 5
+            List.all (\(Summary validation _) -> validation /= Error) summaryList && List.length editModel.nonces >= strengthLimit
 
         errorInfo =
             case editModel.lastSaveError of
