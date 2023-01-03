@@ -20,7 +20,7 @@ import Html.Events exposing (keyCode, on, onClick, onFocus, onInput)
 import Html.Keyed
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..), editableClass)
 import Svg.Attributes as SAttr
 import Svg.Events as SEvent
 import UserInputInt exposing (UserInputInt)
@@ -99,7 +99,7 @@ view pollConfig model =
             in
             li [ class "poll-row" ]
                 [ Component.candidateView candidate
-                , rowValueView { value = value, candidateId = candidate.id }
+                , rowValueView pollConfig { value = value, candidateId = candidate.id }
                 ]
 
         isCustomValue userInputInt =
@@ -129,7 +129,7 @@ view pollConfig model =
     in
     section [ class "poll" ]
         [ div [ class "wide" ]
-            [ headerView isCustomPoll model ]
+            [ headerView pollConfig isCustomPoll model ]
         , div [ class "narrow" ]
             [ Html.Keyed.ul
                 (onKeyUpHandler
@@ -142,8 +142,8 @@ view pollConfig model =
         ]
 
 
-headerView : Bool -> Model -> Html Msg
-headerView isCustomPoll model =
+headerView : PollConfig -> Bool -> Model -> Html Msg
+headerView pollConfig isCustomPoll model =
     let
         heading =
             h2 [] [ text "Hodnocení kandidátů" ]
@@ -166,14 +166,18 @@ headerView isCustomPoll model =
                 "Nelze přepnout do hvězdičkového režimu, některé hodnoty nejsou dělitelné 20"
 
         switchButton =
-            button
-                [ tabindex -1
-                , disabled isCustomPoll
-                , title tooltip
-                , onClick <| SetEditMode <| not model.editMode
-                ]
-                [ icon
-                ]
+            if pollConfig.readOnly then
+                text ""
+
+            else
+                button
+                    [ tabindex -1
+                    , disabled isCustomPoll
+                    , title tooltip
+                    , onClick <| SetEditMode <| not model.editMode
+                    ]
+                    [ icon
+                    ]
     in
     div
         []
@@ -196,8 +200,8 @@ headerView isCustomPoll model =
         ]
 
 
-rowValueView : { candidateId : Int, value : UserInputInt } -> Html Msg
-rowValueView { candidateId, value } =
+rowValueView : PollConfig -> { candidateId : Int, value : UserInputInt } -> Html Msg
+rowValueView pollConfig { candidateId, value } =
     let
         iconSize =
             32
@@ -206,6 +210,7 @@ rowValueView { candidateId, value } =
             span
                 [ title <| String.concat [ String.fromInt (points * 20), "%" ]
                 , class "star-poll-option star-poll-star"
+                , editableClass pollConfig
                 , class cls
                 ]
                 [ FeatherIcons.star
@@ -264,11 +269,18 @@ rowValueView { candidateId, value } =
                     _ ->
                         oneStarDisabled p
 
+        range =
+            if pollConfig.readOnly then
+                List.range 1 5
+
+            else
+                List.range 0 5
+
         stars =
-            List.range 0 5 |> List.map pointsToStar
+            List.map pointsToStar range
 
         starRankView =
-            div [ class "star-poll-rank" ] stars
+            div [ class "star-poll-rank", editableClass pollConfig ] stars
 
         nestedInputView =
             inputView { value = value, candidateId = candidateId }

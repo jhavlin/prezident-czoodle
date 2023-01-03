@@ -6,6 +6,7 @@ module Polls.Common exposing
     , deserializeMappedIntDict
     , deserializeMappedStringDict
     , deserializeStringDict
+    , editableClass
     , serializeIntDict
     , serializeStringDict
     )
@@ -14,6 +15,7 @@ import Array
 import Candidates
 import Dict exposing (Dict)
 import Html exposing (Html)
+import Html.Attributes exposing (class)
 import Json.Decode
 import Json.Encode
 
@@ -32,6 +34,15 @@ type Validation
 
 type Summary
     = Summary Validation (Html ())
+
+
+editableClass : PollConfig -> Html.Attribute msg
+editableClass pollConfig =
+    if pollConfig.readOnly then
+        class "read-only"
+
+    else
+        class "editable"
 
 
 serializeIntDict : Dict Int Int -> Json.Encode.Value

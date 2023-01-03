@@ -19,7 +19,7 @@ import Html.Events exposing (onClick, onInput)
 import Html.Keyed
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..), editableClass)
 
 
 type Msg
@@ -57,7 +57,7 @@ view : ViewConfig -> PollConfig -> Model -> Html Msg
 view viewConfig pollConfig model =
     let
         row candidate =
-            li [ class "poll-row", onClick <| SetValue candidate.id ]
+            li [ class "poll-row", editableClass pollConfig, onClick <| SetValue candidate.id ]
                 [ Component.candidateView candidate
                 , rowValueView viewConfig { model = model, candidate = candidate }
                 ]
@@ -66,7 +66,7 @@ view viewConfig pollConfig model =
         [ div [ class "wide" ]
             [ headerView viewConfig ]
         , div [ class "narrow" ]
-            [ Html.Keyed.ul [ class "single-poll poll-rows" ]
+            [ Html.Keyed.ul [ class "single-poll poll-rows", editableClass pollConfig ]
                 (List.map (\c -> ( viewConfig.pollClass ++ String.fromInt c.id, row c )) pollConfig.candidates)
             ]
         ]

@@ -20,7 +20,7 @@ import Html.Events exposing (onClick, onInput)
 import Html.Keyed
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..), editableClass)
 import Svg.Attributes as SAttr
 
 
@@ -72,14 +72,19 @@ view pollConfig model =
             in
             li [ class "poll-row" ]
                 [ Component.candidateView candidate
-                , rowValueView { value = value, candidateId = candidate.id, free = free }
+                , rowValueView pollConfig { value = value, candidateId = candidate.id, free = free }
                 ]
     in
     section [ class "poll" ]
         [ div [ class "wide" ]
             [ headerView ]
         , div [ class "narrow" ]
-            [ creditView { freeCount = free } ]
+            [ if pollConfig.readOnly then
+                text ""
+
+              else
+                creditView { freeCount = free }
+            ]
         , div [ class "narrow" ]
             [ Html.Keyed.ul [ class "divide-poll poll-rows" ]
                 (List.map (\c -> ( "divide-poll" ++ String.fromInt c.id, row c )) pollConfig.candidates)
@@ -112,8 +117,8 @@ headerView =
         ]
 
 
-rowValueView : { candidateId : Int, value : Int, free : Int } -> Html Msg
-rowValueView { candidateId, value, free } =
+rowValueView : PollConfig -> { candidateId : Int, value : Int, free : Int } -> Html Msg
+rowValueView pollConfig { candidateId, value, free } =
     let
         iconSize =
             32
@@ -206,11 +211,18 @@ rowValueView { candidateId, value, free } =
             else
                 oneDotDisabled p
 
+        range =
+            if pollConfig.readOnly then
+                List.range 1 5
+
+            else
+                List.range 0 5
+
         dots =
-            List.range 0 5 |> List.map pointsToDot
+            List.map pointsToDot range
 
         dotRankView =
-            div [ class "divide-poll-rank" ] dots
+            div [ class "divide-poll-rank", editableClass pollConfig ] dots
     in
     div [ class "divide-poll-value" ]
         [ dotRankView ]

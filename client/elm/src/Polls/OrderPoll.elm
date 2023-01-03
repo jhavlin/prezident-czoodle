@@ -20,7 +20,7 @@ import Html.Events exposing (onClick, onInput)
 import Html.Keyed
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..), editableClass)
 import Random
 import RandomUtils exposing (takeNthFromList)
 import Set exposing (Set)
@@ -197,6 +197,13 @@ view pollConfig model =
                     :: List.map opt (freeCandidates (Array.fromList pollConfig.candidates) model.values (Just selfId))
                 )
 
+        optionsOrStatic index selfId =
+            if pollConfig.readOnly then
+                text <| Maybe.withDefault "" <| Maybe.map .name <| Array.get selfId Candidates.all
+
+            else
+                options index selfId
+
         row index candidateIdMaybe =
             let
                 candidateMaybe =
@@ -231,14 +238,14 @@ view pollConfig model =
                         _ ->
                             "unassigned"
             in
-            li [ class "order-poll-row" ]
+            li [ class "order-poll-row", editableClass pollConfig ]
                 [ div [ class "order-poll-row-order", class assignedState ]
                     [ text <| String.fromInt (index + 1), text "." ]
                 , photoOrPlaceholder
                 , div [ class "order-poll-row-select" ]
-                    [ options index <| Maybe.withDefault -1 <| Maybe.map (\c -> c.id) candidateMaybe ]
+                    [ optionsOrStatic index <| Maybe.withDefault -1 <| Maybe.map (\c -> c.id) candidateMaybe ]
                 , div [ class "order-poll-row-actions" ]
-                    [ div [ class "order-poll-row-buttons", class assignedState ]
+                    [ div [ class "order-poll-row-buttons", class assignedState, editableClass pollConfig ]
                         [ div
                             [ class "order-poll-row-button"
                             , class "up"
@@ -262,7 +269,7 @@ view pollConfig model =
                                     ]
                             ]
                         ]
-                    , div [ class "order-poll-row-points", class assignedState ]
+                    , div [ class "order-poll-row-points", class assignedState, editableClass pollConfig ]
                         [ text "("
                         , text <| String.fromInt (Array.length Candidates.all - index)
                         , text " b)"
@@ -322,8 +329,12 @@ view pollConfig model =
                 (Array.toList model.values |> List.indexedMap (\i v -> ( "order-poll-" ++ String.fromInt i, row i v )))
             ]
         , div [ class "narrow" ]
-            [ div [ class "poll-buttons" ]
-                buttons
+            [ if pollConfig.readOnly then
+                text ""
+
+              else
+                div [ class "poll-buttons" ]
+                    buttons
             ]
         ]
 

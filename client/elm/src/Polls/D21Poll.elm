@@ -20,7 +20,7 @@ import Html.Events exposing (onInput)
 import Html.Keyed
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..), editableClass)
 import Svg.Attributes as SAttr
 
 
@@ -161,6 +161,7 @@ view pollConfig model =
             li [ class "poll-row", class <| optionToClass value ]
                 [ Component.candidateView candidate
                 , rowValueView
+                    pollConfig
                     { value = value
                     , candidateId = candidate.id
                     , positiveAssigned = positiveAssigned
@@ -174,11 +175,15 @@ view pollConfig model =
         [ div [ class "wide" ]
             [ headerView ]
         , div [ class "narrow" ]
-            [ creditView
-                { positiveAssigned = positiveAssigned
-                , negativeAssigned = negativeAssigned
-                , negativeEnabled = negativeEnabled
-                }
+            [ if pollConfig.readOnly then
+                text ""
+
+              else
+                creditView
+                    { positiveAssigned = positiveAssigned
+                    , negativeAssigned = negativeAssigned
+                    , negativeEnabled = negativeEnabled
+                    }
             ]
         , div [ class "narrow" ]
             [ Html.Keyed.ul [ class "d21-poll poll-rows" ]
@@ -254,15 +259,17 @@ creditView { positiveAssigned, negativeAssigned, negativeEnabled } =
 
 
 rowValueView :
-    { candidateId : Int
-    , value : Option
-    , positiveAssigned : Int
-    , positiveAvailable : Bool
-    , negativeAvailable : Bool
-    , negativeEnabled : Bool
-    }
+    PollConfig
+    ->
+        { candidateId : Int
+        , value : Option
+        , positiveAssigned : Int
+        , positiveAvailable : Bool
+        , negativeAvailable : Bool
+        , negativeEnabled : Bool
+        }
     -> Html Msg
-rowValueView { candidateId, value, positiveAvailable, negativeAvailable, negativeEnabled, positiveAssigned } =
+rowValueView pollConfig { candidateId, value, positiveAvailable, negativeAvailable, negativeEnabled, positiveAssigned } =
     let
         isDisabled option =
             case option of
@@ -296,7 +303,7 @@ rowValueView { candidateId, value, positiveAvailable, negativeAvailable, negativ
                     , onInput <| \_ -> SetValue candidateId option
                     ]
                     []
-                , optionView option
+                , optionView pollConfig option
                 ]
 
         options =
@@ -305,37 +312,37 @@ rowValueView { candidateId, value, positiveAvailable, negativeAvailable, negativ
     div [ class "d21-poll-value" ] options
 
 
-optionView : Option -> Html Msg
-optionView option =
+optionView : PollConfig -> Option -> Html Msg
+optionView pollConfig option =
     case option of
         Positive ->
-            viewPositive
+            viewPositive pollConfig
 
         Neutral ->
-            viewNeutral
+            viewNeutral pollConfig
 
         Negative ->
-            viewNegative
+            viewNegative pollConfig
 
 
-viewPositive : Html Msg
-viewPositive =
+viewPositive : PollConfig -> Html Msg
+viewPositive pollConfig =
     div
-        [ class <| "d21-poll-option positive" ]
+        [ class <| "d21-poll-option positive", editableClass pollConfig ]
         [ text "+1" ]
 
 
-viewNeutral : Html Msg
-viewNeutral =
+viewNeutral : PollConfig -> Html Msg
+viewNeutral pollConfig =
     div
-        [ class <| "d21-poll-option neutral" ]
+        [ class <| "d21-poll-option neutral", editableClass pollConfig ]
         [ text "-" ]
 
 
-viewNegative : Html Msg
-viewNegative =
+viewNegative : PollConfig -> Html Msg
+viewNegative pollConfig =
     div
-        [ class <| "d21-poll-option negative" ]
+        [ class <| "d21-poll-option negative", editableClass pollConfig ]
         [ text "-1" ]
 
 

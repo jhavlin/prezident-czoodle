@@ -13,7 +13,7 @@ import Array
 import Candidates
 import Component
 import Dict exposing (Dict)
-import Html exposing (Html, div, h1, h2, input, li, section, text)
+import Html exposing (Html, div, h1, h2, input, li, section, span, text)
 import Html.Attributes exposing (class, maxlength, type_)
 import Html.Events exposing (onInput)
 import Html.Keyed
@@ -50,7 +50,7 @@ view pollConfig model =
         row candidate =
             li [ class "poll-row" ]
                 [ Component.candidateView candidate
-                , rowValueView { model = model, candidate = candidate }
+                , rowValueView pollConfig { model = model, candidate = candidate }
                 ]
     in
     section [ class "poll" ]
@@ -83,8 +83,8 @@ headerView =
         ]
 
 
-rowValueView : { candidate : Candidates.Candidate, model : Model } -> Html Msg
-rowValueView { candidate, model } =
+rowValueView : PollConfig -> { candidate : Candidates.Candidate, model : Model } -> Html Msg
+rowValueView pollConfig { candidate, model } =
     let
         field =
             input
@@ -95,8 +95,19 @@ rowValueView { candidate, model } =
                 , class "emoji-poll-input"
                 ]
                 []
+
+        val =
+            span [ class "emoji-poll-value-static" ]
+                [ text <| Maybe.withDefault "" <| Dict.get candidate.id model.values ]
+
+        fieldOrValue =
+            if pollConfig.readOnly then
+                val
+
+            else
+                field
     in
-    div [ class "emoji-poll-value" ] [ field ]
+    div [ class "emoji-poll-value" ] [ fieldOrValue ]
 
 
 serialize : Model -> Json.Encode.Value

@@ -19,7 +19,7 @@ import Html.Events exposing (onInput)
 import Html.Keyed
 import Json.Decode
 import Json.Encode
-import Polls.Common exposing (PollConfig, Summary(..), Validation(..))
+import Polls.Common exposing (PollConfig, Summary(..), Validation(..), editableClass)
 import Svg exposing (circle, line, svg)
 import Svg.Attributes as SAttr
 
@@ -131,7 +131,7 @@ view pollConfig model =
             in
             li [ class "poll-row", class <| optionToClass value ]
                 [ Component.candidateView candidate
-                , rowValueView { value = value, candidateId = candidate.id }
+                , rowValueView pollConfig { value = value, candidateId = candidate.id }
                 ]
     in
     section [ class "poll" ]
@@ -174,8 +174,8 @@ headerView =
         ]
 
 
-rowValueView : { candidateId : Int, value : Option } -> Html Msg
-rowValueView { candidateId, value } =
+rowValueView : PollConfig -> { candidateId : Int, value : Option } -> Html Msg
+rowValueView pollConfig { candidateId, value } =
     let
         radio option =
             label
@@ -188,7 +188,7 @@ rowValueView { candidateId, value } =
                     , onInput <| \_ -> SetValue candidateId option
                     ]
                     []
-                , optionSvg option
+                , optionSvg pollConfig option
                 ]
 
         options =
@@ -197,23 +197,23 @@ rowValueView { candidateId, value } =
     div [ class "doodle-poll-value" ] options
 
 
-optionSvg : Option -> Html Msg
-optionSvg option =
+optionSvg : PollConfig -> Option -> Html Msg
+optionSvg pollConfig option =
     case option of
         Yes ->
-            viewYes
+            viewYes pollConfig
 
         No ->
-            viewNo
+            viewNo pollConfig
 
         IfNeeded ->
-            viewIfNeeded
+            viewIfNeeded pollConfig
 
 
-viewYes : Html Msg
-viewYes =
+viewYes : PollConfig -> Html Msg
+viewYes pollConfig =
     div
-        [ class <| "doodle-poll-option yes" ]
+        [ class <| "doodle-poll-option yes", editableClass pollConfig ]
         [ viewYesSvg ]
 
 
@@ -223,10 +223,10 @@ viewYesSvg =
         [ circle [ SAttr.cx "17", SAttr.cy "17", SAttr.r "12" ] [] ]
 
 
-viewNo : Html Msg
-viewNo =
+viewNo : PollConfig -> Html Msg
+viewNo pollConfig =
     div
-        [ class <| "doodle-poll-option no" ]
+        [ class <| "doodle-poll-option no", editableClass pollConfig ]
         [ viewNoSvg ]
 
 
@@ -238,10 +238,10 @@ viewNoSvg =
         ]
 
 
-viewIfNeeded : Html Msg
-viewIfNeeded =
+viewIfNeeded : PollConfig -> Html Msg
+viewIfNeeded pollConfig =
     div
-        [ class <| "doodle-poll-option if-needed" ]
+        [ class <| "doodle-poll-option if-needed", editableClass pollConfig ]
         [ viewIfNeededSvg ]
 
 
