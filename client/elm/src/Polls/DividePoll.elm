@@ -156,6 +156,7 @@ rowValueView pollConfig { candidateId, value, free } =
                     , class "divide-poll-option divide-poll-dot"
                     , class cls
                     , class <| offClass points
+                    , editableClass pollConfig
                     , onClick <| onClickHandler points
                     ]
                     [ FeatherIcons.circle
