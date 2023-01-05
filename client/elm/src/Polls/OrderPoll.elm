@@ -352,10 +352,9 @@ headerView =
             [ p []
                 [ text <|
                     String.concat
-                        [ "Seřaďte kandidáty podle důvěry, kterou jim přisuzujete. Nejdůvěrohodnějšího kandidáta "
-                        , "zvolte na prvním místě (získá "
+                        [ "Seřaďte kandidáty od nejlepšího (získá "
                         , String.fromInt <| Array.length Candidates.all
-                        , " bodů) a nejméně důvěryhodného kandidáta umístěte na poslední místo (získá 1 bod)."
+                        , " bodů) po nejhoršího (1 bod)."
                         ]
                 ]
             ]

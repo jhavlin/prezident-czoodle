@@ -204,7 +204,7 @@ headerView =
         , div [ class "poll-info d21-poll-info" ]
             [ p []
                 [ text "V tomto hlasování můžete udělit jeden až tři kladné hlasy, a pokud "
-                , text "použijete alespoň dva kladné hlasy, můžete přidělit také jeden záporný "
+                , text "použijete alespoň dva kladné hlasy, můžete udělit také jeden záporný "
                 , text "hlas."
                 ]
             ]

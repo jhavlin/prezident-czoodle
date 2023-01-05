@@ -186,9 +186,15 @@ headerView pollConfig isCustomPoll model =
             [ p []
                 [ text <|
                     String.concat
-                        [ "V tomto hlasování každému kandidátovi přidělíte 0 až 5 hvězdiček. "
-                        , "Jedna hvězdička představuje 20 % vaší důvěry. Můžete také přepnout do procentuálního režimu "
-                        , "a zadat hodnoty s přesností na jednotky procent. Tento režim se zapne také automaticky "
+                        [ "Přidělte každé osobnosti 0 až 5 hvězdiček. "
+                        , "Jedna hvězdička představuje 20\u{00A0}% vašeho hodnocení."
+                        ]
+                ]
+            , p []
+                [ text <|
+                    String.concat
+                        [ "Můžete také přepnout do procentuálního režimu "
+                        , "a zadat hodnoty s\u{00A0}přesností na jednotky procent. Tento režim se zapne automaticky "
                         , "při ovládání klávesnicí."
                         ]
                 ]

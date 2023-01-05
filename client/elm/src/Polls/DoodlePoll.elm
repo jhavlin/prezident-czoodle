@@ -155,14 +155,14 @@ headerView =
         [ h1 [ class "poll-heading" ] [ text "Doodle hlasování" ]
         , div [ class "poll-info doodle-poll-info" ]
             [ p []
-                [ text "V tomto hlasování u každého kandidáta uvedete, zdali si ho ve funkci "
+                [ text "U každé osobnosti uveďte, zdali si ji ve funkci "
                 , text "prezidenta přejete "
                 , text "(Ano "
                 , viewYesSvg
-                , text "), je pro vás přijatelný (Pokud nutno "
+                , text "), je pro vás přijatelná (Pokud nutno "
                 , viewIfNeededSvg
                 , text "), "
-                , text "nebo ho za prezidenta nechcete (Ne "
+                , text "nebo ji za prezidenta nechcete (Ne "
                 , viewNoSvg
                 , text ")."
                 ]

@@ -74,7 +74,7 @@ headerView =
         []
         [ h1 [ class "poll-heading" ] [ text "Bonus: Emoji Hlasování" ]
         , div [ class "poll-info emoji-poll-info" ]
-            [ text "Přiřaďte každé osobnosti emoji nebo textového smajlíka (až 3 znaky)."
+            [ text "Přiřaďte každému kandidátovi emoji nebo textového smajlíka (až 3\u{00A0}znaky)."
             ]
         , div
             [ class "poll-title"

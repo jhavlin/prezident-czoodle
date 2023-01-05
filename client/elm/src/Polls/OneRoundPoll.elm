@@ -10,7 +10,7 @@ module Polls.OneRoundPoll exposing
     )
 
 import FeatherIcons
-import Html exposing (Html, p, text)
+import Html exposing (Html, div, p, text)
 import Json.Decode
 import Json.Encode
 import Polls.Common exposing (PollConfig)
@@ -39,9 +39,12 @@ view : PollConfig -> Model -> Html Msg
 view pollConfig model =
     let
         desc =
-            p []
-                [ text "Vyberte kandidáta, kterého byste volili v\u{00A0}případě jednokolového "
-                , text "volebního systému."
+            div []
+                [ p []
+                    [ text "Vyberte osobnost, kterou byste volili v\u{00A0}případě jednokolového "
+                    , text "volebního systému."
+                    ]
+                , p [] [ text "Tedy kdyby se prezidentem stal rovnou vítěz prvního kola i bez nadpoloviční většiny hlasů." ]
                 ]
 
         viewConfig =
