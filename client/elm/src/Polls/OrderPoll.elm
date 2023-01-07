@@ -14,7 +14,7 @@ import Candidates exposing (Candidate)
 import Component
 import Dict
 import FeatherIcons
-import Html exposing (Html, button, div, h1, h2, li, option, p, section, select, text)
+import Html exposing (Html, button, div, h1, h2, li, option, p, section, select, span, text)
 import Html.Attributes exposing (class, disabled, selected, value)
 import Html.Events exposing (onClick, onInput)
 import Html.Keyed
@@ -199,7 +199,22 @@ view pollConfig model =
 
         optionsOrStatic index selfId =
             if pollConfig.readOnly then
-                text <| Maybe.withDefault "" <| Maybe.map .name <| Array.get selfId Candidates.all
+                let
+                    candidate =
+                        Array.get selfId Candidates.all
+
+                    firstName =
+                        Maybe.withDefault "" <| Maybe.map .firstName candidate
+
+                    surname =
+                        Maybe.withDefault "" <| Maybe.map .surname candidate
+                in
+                div [ class "candidate" ]
+                    [ span [ class "candidate-name" ]
+                        [ span [ class "candidate-first-name" ] [ text firstName ]
+                        , span [ class "candidate-surname" ] [ text surname ]
+                        ]
+                    ]
 
             else
                 options index selfId
