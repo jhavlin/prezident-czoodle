@@ -32,3 +32,52 @@ select
     round(sum(str_8) / (select count (*) from votes)::numeric, 2) as js,
     round(sum(str_9) / (select count (*) from votes)::numeric, 2) as tz
 from votes;
+
+--Emoji Poll
+select emj_0 as ab, emj_1 as jb, emj_2 as kd, emj_3 as pf, emj_4 as mh, emj_5 as kj, emj_6 as dn, emj_7 as pp, emj_8 as js, emj_9 as tz
+from votes
+where emj_0 != '' or emj_1 != '' or emj_2 != '' or emj_3 != '' or emj_4 != '' or emj_5 != '' or emj_6 != '' or emj_7 != '' or emj_8 != '' or emj_9 != '';
+
+
+-- Emoji Poll - ordered, joined
+select
+    t_ab.o as o,
+    t_ab.e as ab_e, t_ab.c as ab_c,
+    t_jb.e as jb_e, t_jb.c as jb_c,
+    t_kd.e as kd_e, t_kd.c as kd_c,
+    t_pf.e as pf_e, t_pf.c as pf_c,
+    t_mh.e as mh_e, t_mh.c as mh_c,
+    t_kj.e as kj_e, t_kj.c as kj_c,
+    t_dn.e as dn_e, t_dn.c as dn_c,
+    t_pp.e as pp_e, t_pp.c as pp_c,
+    t_js.e as js_e, t_js.c as js_c,
+    t_tz.e as tz_e, t_tz.c as tz_c
+from
+    (select row_number () over (order by count(*) desc) as o, emj_0 as e, count(*) as c from votes where emj_0 != '' group by e order by c desc) t_ab
+full outer join
+    (select row_number () over (order by count(*) desc) as o, emj_1 as e, count(*) as c from votes where emj_1 != '' group by e order by c desc) t_jb
+    on t_ab.o = t_jb.o
+full outer join
+    (select row_number () over (order by count(*) desc) as o, emj_2 as e, count(*) as c from votes where emj_2 != '' group by e order by c desc) t_kd
+    on t_ab.o = t_kd.o
+full outer join
+    (select row_number () over (order by count(*) desc) as o, emj_3 as e, count(*) as c from votes where emj_3 != '' group by e order by c desc) t_pf
+    on t_ab.o = t_pf.o
+full outer join
+    (select row_number () over (order by count(*) desc) as o, emj_4 as e, count(*) as c from votes where emj_4 != '' group by e order by c desc) t_mh
+    on t_ab.o = t_mh.o
+full outer join
+    (select row_number () over (order by count(*) desc) as o, emj_5 as e, count(*) as c from votes where emj_5 != '' group by e order by c desc) t_kj
+    on t_ab.o = t_kj.o
+full outer join
+    (select row_number () over (order by count(*) desc) as o, emj_6 as e, count(*) as c from votes where emj_6 != '' group by e order by c desc) t_dn
+    on t_ab.o = t_dn.o
+full outer join
+    (select row_number () over (order by count(*) desc) as o, emj_7 as e, count(*) as c from votes where emj_7 != '' group by e order by c desc) t_pp
+    on t_ab.o = t_pp.o
+full outer join
+    (select row_number () over (order by count(*) desc) as o, emj_8 as e, count(*) as c from votes where emj_8 != '' group by e order by c desc) t_js
+    on t_ab.o = t_js.o
+full outer join
+    (select row_number () over (order by count(*) desc) as o, emj_9 as e, count(*) as c from votes where emj_9 != '' group by e order by c desc) t_tz
+    on t_ab.o = t_tz.o;
