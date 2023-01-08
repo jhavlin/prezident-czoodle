@@ -11,7 +11,7 @@ module Polls.EmojiPoll exposing
 
 import Array
 import Candidates
-import Component
+import Component exposing (ariaLabel)
 import Dict exposing (Dict)
 import Html exposing (Html, div, h1, h2, input, li, section, span, text)
 import Html.Attributes exposing (class, maxlength, type_)
@@ -93,6 +93,7 @@ rowValueView pollConfig { candidate, model } =
                 , onInput <| SetValue candidate.id
                 , maxlength 3
                 , class "emoji-poll-input"
+                , ariaLabel candidate.name
                 ]
                 []
 

@@ -10,12 +10,12 @@ module Polls.D21Poll exposing
     )
 
 import Array
-import Candidates
-import Component
+import Candidates exposing (Candidate)
+import Component exposing (ariaHidden, ariaLabel)
 import Dict exposing (Dict)
 import FeatherIcons
 import Html exposing (Html, div, h1, h2, input, label, li, p, section, text)
-import Html.Attributes exposing (attribute, checked, class, disabled, name, type_, value)
+import Html.Attributes exposing (checked, class, disabled, name, type_, value)
 import Html.Events exposing (onInput)
 import Html.Keyed
 import Json.Decode
@@ -52,19 +52,6 @@ type Msg
 type alias Model =
     { values : Dict Int Option
     }
-
-
-optionToName : Option -> String
-optionToName option =
-    case option of
-        Positive ->
-            "+1"
-
-        Neutral ->
-            "0"
-
-        Negative ->
-            "-1"
 
 
 optionToValue : Option -> String
@@ -163,7 +150,7 @@ view pollConfig model =
                 , rowValueView
                     pollConfig
                     { value = value
-                    , candidateId = candidate.id
+                    , candidate = candidate
                     , positiveAssigned = positiveAssigned
                     , positiveAvailable = positiveAvailable
                     , negativeAvailable = negativeAvailable
@@ -231,13 +218,13 @@ creditView { positiveAssigned, negativeAssigned, negativeEnabled } =
                 ""
 
         positiveItem free =
-            div [ class "d21-poll-credit-item positive", class <| freeClass free ] [ text "+1" ]
+            div [ class "d21-poll-credit-item positive", class <| freeClass free, ariaHidden ] [ text "+1" ]
 
         positives =
             List.range 1 maxPositive |> List.reverse |> List.map (\i -> positiveItem (i > positiveAssigned))
 
         negativeItem free =
-            div [ class "d21-poll-credit-item negative", class <| freeClass free ] [ text "-1" ]
+            div [ class "d21-poll-credit-item negative", class <| freeClass free, ariaHidden ] [ text "-1" ]
 
         negatives =
             List.range 1 maxNegative |> List.map (\i -> negativeItem (i > negativeAssigned))
@@ -250,18 +237,21 @@ creditView { positiveAssigned, negativeAssigned, negativeEnabled } =
                 [ FeatherIcons.lock |> FeatherIcons.toHtml [ SAttr.class "d21-poll-credit-lock" ] ]
 
         divider =
-            [ div [ class "d21-poll-credit-divider" ] [] ]
+            [ div [ class "d21-poll-credit-divider", ariaHidden ] [] ]
 
         label =
-            [ div [ class "d21-poll-credit-label" ] [ text "Zbývající hlasy: " ] ]
+            [ div [ class "d21-poll-credit-label", ariaHidden ] [ text "Zbývající hlasy: " ] ]
+
+        labelText =
+            String.concat [ "Zbývající hlasy: ", "Kladných: ", String.fromInt (3 - positiveAssigned), ", Záporných:", String.fromInt (1 - negativeAssigned) ]
     in
-    div [ class "d21-poll-credit" ] (label ++ positives ++ divider ++ negatives ++ lock)
+    div [ class "d21-poll-credit", ariaLabel labelText ] (label ++ positives ++ divider ++ negatives ++ lock)
 
 
 rowValueView :
     PollConfig
     ->
-        { candidateId : Int
+        { candidate : Candidate
         , value : Option
         , positiveAssigned : Int
         , positiveAvailable : Bool
@@ -269,8 +259,11 @@ rowValueView :
         , negativeEnabled : Bool
         }
     -> Html Msg
-rowValueView pollConfig { candidateId, value, positiveAvailable, negativeAvailable, negativeEnabled, positiveAssigned } =
+rowValueView pollConfig { candidate, value, positiveAvailable, negativeAvailable, negativeEnabled, positiveAssigned } =
     let
+        candidateId =
+            candidate.id
+
         isDisabled option =
             case option of
                 Positive ->
@@ -291,9 +284,20 @@ rowValueView pollConfig { candidateId, value, positiveAvailable, negativeAvailab
             else
                 ""
 
+        labelText option =
+            case option of
+                Positive ->
+                    String.concat [ "Kladný hlas ", candidate.p3 ]
+
+                Neutral ->
+                    String.concat [ "Nic ", candidate.p3 ]
+
+                Negative ->
+                    String.concat [ "Záporný hlas ", candidate.p3 ]
+
         radio option =
             label
-                [ attribute "aria-label" <| optionToName option, class <| disabledClass option ]
+                [ class <| disabledClass option ]
                 [ input
                     [ type_ "radio"
                     , name <| String.concat [ "d21-", String.fromInt candidateId ]
@@ -301,6 +305,7 @@ rowValueView pollConfig { candidateId, value, positiveAvailable, negativeAvailab
                     , checked <| option == value
                     , disabled <| isDisabled option
                     , onInput <| \_ -> SetValue candidateId option
+                    , ariaLabel <| labelText option
                     ]
                     []
                 , optionView pollConfig option
@@ -328,21 +333,21 @@ optionView pollConfig option =
 viewPositive : PollConfig -> Html Msg
 viewPositive pollConfig =
     div
-        [ class <| "d21-poll-option positive", editableClass pollConfig ]
+        [ class <| "d21-poll-option positive", editableClass pollConfig, ariaHidden ]
         [ text "+1" ]
 
 
 viewNeutral : PollConfig -> Html Msg
 viewNeutral pollConfig =
     div
-        [ class <| "d21-poll-option neutral", editableClass pollConfig ]
+        [ class <| "d21-poll-option neutral", editableClass pollConfig, ariaHidden ]
         [ text "-" ]
 
 
 viewNegative : PollConfig -> Html Msg
 viewNegative pollConfig =
     div
-        [ class <| "d21-poll-option negative", editableClass pollConfig ]
+        [ class <| "d21-poll-option negative", editableClass pollConfig, ariaHidden ]
         [ text "-1" ]
 
 

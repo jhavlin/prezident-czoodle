@@ -10,8 +10,8 @@ module Polls.DividePoll exposing
     )
 
 import Array
-import Candidates
-import Component
+import Candidates exposing (Candidate)
+import Component exposing (ariaHidden, ariaLabel)
 import Dict exposing (Dict)
 import FeatherIcons
 import Html exposing (Html, div, h1, h2, input, label, li, p, section, text)
@@ -72,7 +72,7 @@ view pollConfig model =
             in
             li [ class "poll-row" ]
                 [ Component.candidateView candidate
-                , rowValueView pollConfig { value = value, candidateId = candidate.id, free = free }
+                , rowValueView pollConfig { value = value, candidate = candidate, free = free }
                 ]
     in
     section [ class "poll" ]
@@ -90,6 +90,18 @@ view pollConfig model =
                 (List.map (\c -> ( "divide-poll" ++ String.fromInt c.id, row c )) pollConfig.candidates)
             ]
         ]
+
+
+pointsToString : Int -> String
+pointsToString p =
+    if p == 1 then
+        "1\u{00A0}bod"
+
+    else if p > 1 && p < 5 then
+        String.concat [ String.fromInt p, "\u{00A0}", "body" ]
+
+    else
+        String.concat [ String.fromInt p, "\u{00A0}", "bodů" ]
 
 
 headerView : Html Msg
@@ -117,9 +129,12 @@ headerView =
         ]
 
 
-rowValueView : PollConfig -> { candidateId : Int, value : Int, free : Int } -> Html Msg
-rowValueView pollConfig { candidateId, value, free } =
+rowValueView : PollConfig -> { candidate : Candidate, value : Int, free : Int } -> Html Msg
+rowValueView pollConfig { candidate, value, free } =
     let
+        candidateId =
+            candidate.id
+
         iconSize =
             32
 
@@ -135,7 +150,7 @@ rowValueView pollConfig { candidateId, value, free } =
 
         onClickHandler points =
             if isDisabled points then
-                SetValue { id = candidateId, value = min points (free + value) }
+                SetValue { id = candidate.id, value = min points (free + value) }
 
             else
                 NoOp
@@ -149,6 +164,7 @@ rowValueView pollConfig { candidateId, value, free } =
                     , Html.Attributes.value <| String.fromInt points
                     , onInput <| \_ -> SetValue { id = candidateId, value = points }
                     , disabled <| isDisabled points
+                    , ariaLabel <| String.concat [ pointsToString points, " ", candidate.p3 ]
                     ]
                     []
                 , div
@@ -158,6 +174,7 @@ rowValueView pollConfig { candidateId, value, free } =
                     , class <| offClass points
                     , editableClass pollConfig
                     , onClick <| onClickHandler points
+                    , ariaHidden
                     ]
                     [ FeatherIcons.circle
                         |> FeatherIcons.withSize iconSize
@@ -188,12 +205,14 @@ rowValueView pollConfig { candidateId, value, free } =
                     , name <| String.concat [ "div", String.fromInt candidateId ]
                     , onInput <| \_ -> SetValue { id = candidateId, value = 0 }
                     , checked <| value == 0
+                    , ariaLabel <| String.concat [ "Nic ", candidate.p3 ]
                     ]
                     []
                 , div
                     [ title "0"
                     , class "divide-poll-option action-unset"
                     , class noPointState
+                    , ariaHidden
                     ]
                     [ FeatherIcons.x
                         |> FeatherIcons.withSize iconSize
@@ -223,7 +242,7 @@ rowValueView pollConfig { candidateId, value, free } =
             List.map pointsToDot range
 
         dotRankView =
-            div [ class "divide-poll-rank", editableClass pollConfig ] dots
+            div [ class "divide-poll-rank", editableClass pollConfig, ariaLabel candidate.name ] dots
     in
     div [ class "divide-poll-value" ]
         [ dotRankView ]
@@ -243,12 +262,12 @@ creditView { freeCount } =
             List.range 1 5 |> List.reverse |> List.map (\i -> oneItem (i > (5 - freeCount)))
 
         oneItem isFree =
-            FeatherIcons.circle |> FeatherIcons.toHtml [ SAttr.class "divide-poll-credit-item", SAttr.class <| freeClass isFree ]
+            FeatherIcons.circle |> FeatherIcons.toHtml [ SAttr.class "divide-poll-credit-item", SAttr.class <| freeClass isFree, ariaHidden ]
 
         label =
-            div [ class "divide-poll-credit-label" ] [ text "Zbývající hlasy: " ]
+            div [ class "divide-poll-credit-label", ariaHidden ] [ text "Zbývající hlasy: " ]
     in
-    div [ class "divide-poll-credit" ] (label :: items)
+    div [ class "divide-poll-credit", ariaLabel <| String.concat [ "Zbývající hlasy: ", String.fromInt freeCount ] ] (label :: items)
 
 
 serialize : Model -> Json.Encode.Value
@@ -276,16 +295,6 @@ summarize model =
 
     else
         let
-            pointsToString p =
-                if p == 1 then
-                    "1\u{00A0}bod"
-
-                else if p > 1 && p < 5 then
-                    String.concat [ String.fromInt p, "\u{00A0}", "body" ]
-
-                else
-                    String.concat [ String.fromInt p, "\u{00A0}", "bodů" ]
-
             items =
                 Dict.toList model.values
                     |> List.filter (\( _, v ) -> v > 0)

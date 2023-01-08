@@ -1,8 +1,18 @@
-module Component exposing (candidatePhoto, candidateView, itemsString)
+module Component exposing (ariaHidden, ariaLabel, candidatePhoto, candidateView, itemsString)
 
 import Candidates exposing (Candidate)
 import Html exposing (Html, div, img, span, text)
-import Html.Attributes exposing (class, list, src)
+import Html.Attributes exposing (attribute, class, list, src)
+
+
+ariaLabel : String -> Html.Attribute msg
+ariaLabel label =
+    attribute "aria-label" label
+
+
+ariaHidden : Html.Attribute msg
+ariaHidden =
+    attribute "aria-hidden" "true"
 
 
 itemsString : String -> String -> List String -> String
@@ -29,7 +39,7 @@ candidatePhoto candidate =
 
 candidateView : Candidate -> Html msg
 candidateView candidate =
-    div [ class "candidate" ]
+    div [ class "candidate", ariaHidden ]
         [ candidatePhoto candidate
         , span [ class "candidate-name" ]
             [ span [ class "candidate-first-name" ] [ text candidate.firstName ]

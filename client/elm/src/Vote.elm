@@ -3,6 +3,7 @@ port module Vote exposing (..)
 import Array
 import Browser
 import Candidates
+import Component exposing (ariaLabel)
 import FeatherIcons
 import Html exposing (Html, a, button, div, h1, p, section, span, text)
 import Html.Attributes exposing (class, disabled, href, title)
@@ -552,8 +553,8 @@ viewEdit editModel =
         restoredInfo =
             if editModel.showRestoredInfo then
                 div [ class "wide" ]
-                    [ div [ class "box info" ]
-                        [ button [ class "box-close-button", title "Zavřít", onClick CloseRestoreBox ]
+                    [ div [ class "box info", ariaLabel "Dialog informující o obnoveném stavu" ]
+                        [ button [ class "box-close-button", title "Zavřít", onClick CloseRestoreBox, ariaLabel "Zavřít dialog" ]
                             [ FeatherIcons.x |> FeatherIcons.withSize 18 |> FeatherIcons.toHtml [] ]
                         , text "Obnoven poslední uložený stav."
                         , button [ class "box-action-button", onClick Reset ] [ text "Zahodit a začít znovu" ]

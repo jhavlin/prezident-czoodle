@@ -11,7 +11,7 @@ module Polls.OrderPoll exposing
 
 import Array exposing (Array)
 import Candidates exposing (Candidate)
-import Component
+import Component exposing (ariaHidden)
 import Dict
 import FeatherIcons
 import Html exposing (Html, button, div, h1, h2, li, option, p, section, select, span, text)
@@ -260,7 +260,7 @@ view pollConfig model =
                 , div [ class "order-poll-row-select" ]
                     [ optionsOrStatic index <| Maybe.withDefault -1 <| Maybe.map (\c -> c.id) candidateMaybe ]
                 , div [ class "order-poll-row-actions" ]
-                    [ div [ class "order-poll-row-buttons", class assignedState, editableClass pollConfig ]
+                    [ div [ class "order-poll-row-buttons", class assignedState, editableClass pollConfig, ariaHidden ]
                         [ div
                             [ class "order-poll-row-button"
                             , class "up"

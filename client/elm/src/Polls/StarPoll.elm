@@ -10,8 +10,8 @@ module Polls.StarPoll exposing
     )
 
 import Array
-import Candidates
-import Component
+import Candidates exposing (Candidate)
+import Component exposing (ariaHidden, ariaLabel)
 import Dict exposing (Dict)
 import FeatherIcons
 import Html exposing (Attribute, Html, button, div, h1, h2, input, li, p, section, span, text)
@@ -99,7 +99,7 @@ view pollConfig model =
             in
             li [ class "poll-row" ]
                 [ Component.candidateView candidate
-                , rowValueView pollConfig { value = value, candidateId = candidate.id }
+                , rowValueView pollConfig { value = value, candidate = candidate }
                 ]
 
         isCustomValue userInputInt =
@@ -175,6 +175,7 @@ headerView pollConfig isCustomPoll model =
                     , disabled isCustomPoll
                     , title tooltip
                     , onClick <| SetEditMode <| not model.editMode
+                    , ariaHidden
                     ]
                     [ icon
                     ]
@@ -206,9 +207,12 @@ headerView pollConfig isCustomPoll model =
         ]
 
 
-rowValueView : PollConfig -> { candidateId : Int, value : UserInputInt } -> Html Msg
-rowValueView pollConfig { candidateId, value } =
+rowValueView : PollConfig -> { candidate : Candidate, value : UserInputInt } -> Html Msg
+rowValueView pollConfig { candidate, value } =
     let
+        candidateId =
+            candidate.id
+
         iconSize =
             32
 
@@ -286,10 +290,10 @@ rowValueView pollConfig { candidateId, value } =
             List.map pointsToStar range
 
         starRankView =
-            div [ class "star-poll-rank", editableClass pollConfig ] stars
+            div [ class "star-poll-rank", editableClass pollConfig, ariaHidden ] stars
 
         nestedInputView =
-            inputView { value = value, candidateId = candidateId }
+            inputView { value = value, candidate = candidate }
     in
     div [ class "star-poll-value" ]
         [ nestedInputView
@@ -297,8 +301,8 @@ rowValueView pollConfig { candidateId, value } =
         ]
 
 
-inputView : { candidateId : Int, value : UserInputInt } -> Html Msg
-inputView { candidateId, value } =
+inputView : { candidate : Candidate, value : UserInputInt } -> Html Msg
+inputView { candidate, value } =
     let
         inputField =
             input
@@ -307,8 +311,9 @@ inputView { candidateId, value } =
                 , class "star-poll-input"
                 , Html.Attributes.min "0"
                 , Html.Attributes.max "100"
-                , onInput <| SetStringValue candidateId
+                , onInput <| SetStringValue candidate.id
                 , onFocus <| SetEditMode True
+                , ariaLabel candidate.name
                 ]
                 []
 
@@ -325,6 +330,7 @@ inputView { candidateId, value } =
                                 , String.fromInt v
                                 , "%, #555 100%)"
                                 ]
+                        , ariaHidden
                         ]
                         []
 

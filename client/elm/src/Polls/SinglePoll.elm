@@ -11,10 +11,10 @@ module Polls.SinglePoll exposing
 
 import Array
 import Candidates
-import Component
+import Component exposing (ariaHidden, ariaLabel)
 import FeatherIcons
 import Html exposing (Html, div, h1, h2, input, label, li, section, text)
-import Html.Attributes exposing (attribute, checked, class, name, type_)
+import Html.Attributes exposing (checked, class, name, type_)
 import Html.Events exposing (onClick, onInput)
 import Html.Keyed
 import Json.Decode
@@ -96,13 +96,14 @@ rowValueView viewConfig { candidate, model } =
     let
         radio =
             label
-                [ attribute "aria-label" candidate.name ]
+                []
                 [ input
                     [ type_ "radio"
                     , name <| String.concat [ viewConfig.prefix ]
                     , Html.Attributes.value <| String.fromInt candidate.id
                     , checked <| candidate.id == model.value
                     , onInput <| \_ -> SetValue candidate.id
+                    , ariaLabel candidate.name
                     ]
                     []
                 , optionSvg viewConfig
@@ -113,7 +114,7 @@ rowValueView viewConfig { candidate, model } =
 
 optionSvg : ViewConfig -> Html Msg
 optionSvg viewConfig =
-    div [ class "single-poll-option" ]
+    div [ class "single-poll-option", ariaHidden ]
         [ viewConfig.icon |> FeatherIcons.withSize 32 |> FeatherIcons.toHtml [] ]
 
 
