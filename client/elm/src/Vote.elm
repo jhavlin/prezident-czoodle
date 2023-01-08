@@ -516,7 +516,7 @@ view model =
                 address =
                     String.concat [ model.baseUrl, "/", model.uuid ]
             in
-            div [ class "wide" ]
+            div [ class "wide info-content" ]
                 [ h1 [] [ text "Odhlasováno" ]
                 , p [] [ text "Zaznamenané hlasování je dostupné zde:" ]
                 , p [] [ a [ href address ] [ text address ] ]

@@ -197,6 +197,11 @@ section.poll .narrow {
     cursor: Pointer
 }
 
+.info-content {
+    margin-top: 3em;
+    margin-bottom: 5em;
+}
+
 a {
     color: #aec7fc;
 }
