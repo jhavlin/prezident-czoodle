@@ -91,16 +91,16 @@ CREATE TABLE votes (
     str_9 integer NOT NULL,
 
     -- Emoji Poll
-    emj_0 varchar(3) NOT NULL,
-    emj_1 varchar(3) NOT NULL,
-    emj_2 varchar(3) NOT NULL,
-    emj_3 varchar(3) NOT NULL,
-    emj_4 varchar(3) NOT NULL,
-    emj_5 varchar(3) NOT NULL,
-    emj_6 varchar(3) NOT NULL,
-    emj_7 varchar(3) NOT NULL,
-    emj_8 varchar(3) NOT NULL,
-    emj_9 varchar(3) NOT NULL
+    emj_0 varchar(8) NOT NULL,
+    emj_1 varchar(8) NOT NULL,
+    emj_2 varchar(8) NOT NULL,
+    emj_3 varchar(8) NOT NULL,
+    emj_4 varchar(8) NOT NULL,
+    emj_5 varchar(8) NOT NULL,
+    emj_6 varchar(8) NOT NULL,
+    emj_7 varchar(8) NOT NULL,
+    emj_8 varchar(8) NOT NULL,
+    emj_9 varchar(8) NOT NULL
 );
 
 
