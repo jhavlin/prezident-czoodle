@@ -147,6 +147,48 @@ pub async fn get_vote(client: &Client, uuid: &String) -> Result<VoteWeb, MyError
         .pop()
         .ok_or(MyError::NotFound)?;
 
+    let nonces_vec: Vec<String> = record.nonces.split(",").map(|s| s.to_string()).collect();
+
+    let order_vec: Vec<i32> = record
+        .permutation
+        .split(",")
+        .filter_map(|s| i32::from_str_radix(s, 10).ok())
+        .collect();
+
+    let uuid = record.id.to_owned();
+    let polls = vote_db_to_polls_web(record);
+
+    let vote_web = VoteWeb {
+        uuid,
+        nonces: nonces_vec,
+        order: order_vec,
+        polls,
+    };
+
+    Result::Ok(vote_web)
+}
+
+pub async fn get_valid_votes(client: &Client) -> Result<Vec<PollsWeb>, MyError> {
+    let _stmt = include_str!("../sql/get_valid_votes.sql");
+    let stmt = client.prepare(&_stmt).await.unwrap();
+
+    let records = client
+        .query(&stmt, &[])
+        .await
+        .map_err(MyError::PGError)?
+        .iter()
+        .map(|row| VoteDB::from_row_ref(row).unwrap())
+        .collect::<Vec<VoteDB>>();
+
+    let polls = records
+        .into_iter()
+        .map(|vote_db| vote_db_to_polls_web(vote_db))
+        .collect();
+
+    Result::Ok(polls)
+}
+
+fn vote_db_to_polls_web(record: VoteDB) -> PollsWeb {
     let two_round = [
         record.rd2_0,
         record.rd2_1,
@@ -265,20 +307,5 @@ pub async fn get_vote(client: &Client, uuid: &String) -> Result<VoteWeb, MyError
         emoji: emoji.to_vec(),
     };
 
-    let nonces_vec: Vec<String> = record.nonces.split(",").map(|s| s.to_string()).collect();
-
-    let order_vec: Vec<i32> = record
-        .permutation
-        .split(",")
-        .filter_map(|s| i32::from_str_radix(s, 10).ok())
-        .collect();
-
-    let vote_web = VoteWeb {
-        uuid: record.id,
-        nonces: nonces_vec,
-        order: order_vec,
-        polls,
-    };
-
-    Result::Ok(vote_web)
+    polls
 }

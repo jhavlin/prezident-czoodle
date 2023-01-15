@@ -5,7 +5,8 @@ mod errors;
 mod models;
 mod validations;
 
-use crate::{errors::MyError, models::VoteWeb};
+use crate::errors::MyError;
+use crate::models::{PollsWeb, VoteWeb};
 use ::config::Config;
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use deadpool_postgres::{Client, Pool};
@@ -58,6 +59,14 @@ pub async fn get_vote(
     Ok(HttpResponse::Ok().json(result))
 }
 
+pub async fn get_valid_votes(db_pool: web::Data<Pool>) -> Result<HttpResponse, Error> {
+    let client: Client = db_pool.get().await.map_err(MyError::PoolError)?;
+
+    let result: Vec<PollsWeb> = db::get_valid_votes(&client).await?;
+
+    Ok(HttpResponse::Ok().json(result))
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
@@ -81,6 +90,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(handler_config.clone()))
             .route("/add_vote", web::post().to(add_vote))
             .route("/get_vote/{uuid}", web::get().to(get_vote))
+            .route("/get_valid_votes", web::get().to(get_valid_votes))
     })
     .bind(config.server_addr.clone())?
     .run();
