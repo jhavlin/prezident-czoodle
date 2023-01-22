@@ -168,12 +168,12 @@ pub async fn get_vote(client: &Client, uuid: &String) -> Result<VoteWeb, MyError
     Result::Ok(vote_web)
 }
 
-pub async fn get_valid_votes(client: &Client) -> Result<Vec<PollsWeb>, MyError> {
-    let _stmt = include_str!("../sql/get_valid_votes.sql");
+async fn get_votes(client: &Client, date_before: &str) -> Result<Vec<PollsWeb>, MyError> {
+    let _stmt = include_str!("../sql/get_votes_simple.sql");
     let stmt = client.prepare(&_stmt).await.unwrap();
 
     let records = client
-        .query(&stmt, &[])
+        .query(&stmt, &[&date_before])
         .await
         .map_err(MyError::PGError)?
         .iter()
@@ -186,6 +186,14 @@ pub async fn get_valid_votes(client: &Client) -> Result<Vec<PollsWeb>, MyError> 
         .collect();
 
     Result::Ok(polls)
+}
+
+pub async fn get_valid_votes(client: &Client) -> Result<Vec<PollsWeb>, MyError> {
+    get_votes(client, "2023-01-14 13:00:00 +00:00").await
+}
+
+pub async fn get_all_votes(client: &Client) -> Result<Vec<PollsWeb>, MyError> {
+    get_votes(client, "9999-01-01").await
 }
 
 fn vote_db_to_polls_web(record: VoteDB) -> PollsWeb {

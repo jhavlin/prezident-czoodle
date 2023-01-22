@@ -67,6 +67,14 @@ pub async fn get_valid_votes(db_pool: web::Data<Pool>) -> Result<HttpResponse, E
     Ok(HttpResponse::Ok().json(result))
 }
 
+pub async fn get_all_votes(db_pool: web::Data<Pool>) -> Result<HttpResponse, Error> {
+    let client: Client = db_pool.get().await.map_err(MyError::PoolError)?;
+
+    let result: Vec<PollsWeb> = db::get_all_votes(&client).await?;
+
+    Ok(HttpResponse::Ok().json(result))
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
@@ -91,6 +99,7 @@ async fn main() -> std::io::Result<()> {
             .route("/add_vote", web::post().to(add_vote))
             .route("/get_vote/{uuid}", web::get().to(get_vote))
             .route("/get_valid_votes", web::get().to(get_valid_votes))
+            .route("/get_all_votes", web::get().to(get_all_votes))
     })
     .bind(config.server_addr.clone())?
     .run();

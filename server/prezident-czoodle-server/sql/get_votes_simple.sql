@@ -1,5 +1,5 @@
 SELECT
-    id, nonces, permutation, strength, ip_hash,
+    '' AS id, '' AS nonces, '' AS permutation, 0 AS strength, '' AS ip_hash,
     rd2_0, rd2_1, rd2_2, rd2_3, rd2_4, rd2_5, rd2_6, rd2_7, rd2_8, rd2_9,
     rd1_0, rd1_1, rd1_2, rd1_3, rd1_4, rd1_5, rd1_6, rd1_7, rd1_8, rd1_9,
     div_0, div_1, div_2, div_3, div_4, div_5, div_6, div_7, div_8, div_9,
@@ -11,4 +11,4 @@ SELECT
 FROM
     votes
 WHERE
-    voted < '2023-01-14 13:00:00 +00:00';
+    voted < CAST (CAST ($1 AS TEXT) AS TIMESTAMP);
