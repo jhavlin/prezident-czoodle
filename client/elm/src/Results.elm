@@ -25,6 +25,7 @@ import Polls.TwoRoundPoll
 import Process
 import Random
 import RandomUtils
+import Svg.Attributes
 import Task
 
 
@@ -145,21 +146,14 @@ countValues list =
 view : Model -> Html Msg
 view model =
     div []
-        [ text "Hele, výsledky"
-        , p [] [ text <| String.fromInt (List.length model.votes) ]
-        , viewOneRound (List.map .oneRound model.votes)
+        [ p [] [ text <| String.fromInt (List.length model.votes) ]
+        , viewSingle (List.map .twoRound model.votes)
+        , viewSingle (List.map .oneRound model.votes)
         ]
 
 
-idToInitials : Int -> String
-idToInitials id =
-    let
-        initials candidate =
-            String.concat
-                [ String.slice 0 1 candidate.firstName
-                , String.slice 0 1 candidate.surname
-                ]
-    in
+idToLabel : Int -> String
+idToLabel id =
     Array.get id Candidates.all |> Maybe.map .surname |> Maybe.withDefault "--"
 
 
@@ -168,32 +162,73 @@ idToColor id =
     Array.get id Candidates.all |> Maybe.map .color |> Maybe.withDefault "white"
 
 
-viewOneRound : List Int -> Html Msg
-viewOneRound ids =
+idToGradient : Int -> List String
+idToGradient id =
+    case id of
+        0 ->
+            [ "#54bf01", "white" ]
+
+        1 ->
+            [ "#964B00", "#c68B40" ]
+
+        2 ->
+            [ "#9400D3", "white" ]
+
+        3 ->
+            [ "#4444FF", "white" ]
+
+        4 ->
+            [ "skyblue", "white" ]
+
+        5 ->
+            [ "#FFFF00", "white" ]
+
+        6 ->
+            [ "pink", "white" ]
+
+        7 ->
+            [ "#4E5b31", "white" ]
+
+        8 ->
+            [ "#FF7F00", "white" ]
+
+        9 ->
+            [ "#FF0000", "white" ]
+
+        _ ->
+            [ "white" ]
+
+
+viewSingle : List Int -> Html Msg
+viewSingle ids =
     let
         counted =
             countValues ids
+
+        data =
+            Array.toList counted
+                |> List.map toFloat
+                |> List.indexedMap (\i v -> { id = idToLabel i, value = v, gradient = idToGradient i })
+                |> List.sortBy .value
+                |> List.reverse
 
         chart =
             C.chart
                 [ CA.height 500
                 , CA.width 500
-                , CA.htmlAttrs
-                    [ Html.Attributes.style "max-width" "400px"
-                    , Html.Attributes.style "margin" "40px"
-                    ]
+                , CA.margin { top = 50, bottom = 150, left = 50, right = 50 }
                 ]
-                [ C.binLabels .id [ CA.moveDown 15, CA.moveRight 5, CA.rotate 90, CA.alignRight ]
+                [ C.binLabels .id [ CA.moveDown 15, CA.moveRight 5, CA.rotate 90, CA.alignRight, CA.color "white" ]
                 , C.yLabels [ CA.alignLeft, CA.withGrid, CA.moveLeft 20 ]
                 , C.bars [ CA.margin 0.2 ]
-                    [ C.bar .value [] |> C.variation (\i d -> [ CA.color d.color ])
+                    [ C.bar .value [ CA.border "white", CA.borderWidth 1 ] |> C.variation (\i d -> [ CA.gradient d.gradient ])
                     ]
-                    (Array.toList counted |> List.map toFloat |> List.indexedMap (\i v -> { id = idToInitials i, value = v, color = idToColor i }))
+                    data
+                , C.barLabels [ CA.color "white", CA.moveUp 15 ]
                 ]
     in
-    div []
-        [ div [] (Array.toList <| Array.map (\v -> span [] [ text <| String.fromInt v, text " " ]) counted)
-        , chart
+    div [ class "chart-center" ]
+        [ div [ class "chart-container" ] [ chart ]
         ]
 
 
