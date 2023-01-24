@@ -60,6 +60,13 @@ type alias Vote =
     }
 
 
+type alias D21Counts =
+    { negatives : Float
+    , positives : Float
+    , total : Float
+    }
+
+
 type alias Model =
     { votes : List Vote
     }
@@ -147,8 +154,22 @@ view : Model -> Html Msg
 view model =
     div []
         [ p [] [ text <| String.fromInt (List.length model.votes) ]
-        , viewSingle (List.map .twoRound model.votes)
-        , viewSingle (List.map .oneRound model.votes)
+        , section [ class "wide" ]
+            [ h1 [] [ text "Dvoukolový systém" ]
+            , viewSingle (List.map .twoRound model.votes)
+            ]
+        , section [ class "wide" ]
+            [ h1 [] [ text "Jednokolový systém" ]
+            , viewSingle (List.map .oneRound model.votes)
+            ]
+        , section [ class "wide" ]
+            [ h1 [] [ text "Rozdělovací hlasování" ]
+            , viewDivide (List.map .divide model.votes)
+            ]
+        , section [ class "wide" ]
+            [ h1 [] [ text "Metoda D21" ]
+            , viewD21 (List.map .d21 model.votes)
+            ]
         ]
 
 
@@ -199,15 +220,11 @@ idToGradient id =
             [ "white" ]
 
 
-viewSingle : List Int -> Html Msg
-viewSingle ids =
+viewSimpleChart : Array Float -> Html Msg
+viewSimpleChart counted =
     let
-        counted =
-            countValues ids
-
         data =
             Array.toList counted
-                |> List.map toFloat
                 |> List.indexedMap (\i v -> { id = idToLabel i, value = v, gradient = idToGradient i })
                 |> List.sortBy .value
                 |> List.reverse
@@ -218,13 +235,109 @@ viewSingle ids =
                 , CA.width 500
                 , CA.margin { top = 50, bottom = 150, left = 50, right = 50 }
                 ]
-                [ C.binLabels .id [ CA.moveDown 15, CA.moveRight 5, CA.rotate 90, CA.alignRight, CA.color "white" ]
+                [ C.binLabels .id [ CA.moveDown 15, CA.moveRight 5, CA.rotate 90, CA.alignRight, CA.color "white", CA.fontSize 22 ]
                 , C.yLabels [ CA.alignLeft, CA.withGrid, CA.moveLeft 20 ]
                 , C.bars [ CA.margin 0.2 ]
                     [ C.bar .value [ CA.border "white", CA.borderWidth 1 ] |> C.variation (\i d -> [ CA.gradient d.gradient ])
                     ]
                     data
                 , C.barLabels [ CA.color "white", CA.moveUp 15 ]
+                ]
+    in
+    div [ class "chart-center" ]
+        [ div [ class "chart-container" ] [ chart ]
+        ]
+
+
+viewSingle : List Int -> Html Msg
+viewSingle ids =
+    let
+        counted =
+            countValues ids |> Array.map toFloat
+    in
+    viewSimpleChart counted
+
+
+viewDivide : List (List Int) -> Html Msg
+viewDivide pointsList =
+    let
+        initial =
+            Array.initialize (Array.length Candidates.all) (always 0)
+
+        fnInner : ( Int, Int ) -> Array Int -> Array Int
+        fnInner ( index, value ) acc =
+            Array.set index (value + (Maybe.withDefault 0 <| Array.get index acc)) acc
+
+        fn : List Int -> Array Int -> Array Int
+        fn points acc =
+            List.indexedMap Tuple.pair points |> List.foldl fnInner acc
+
+        counted =
+            List.foldl fn initial pointsList |> Array.map toFloat
+    in
+    viewSimpleChart counted
+
+
+viewD21 : List (List Int) -> Html Msg
+viewD21 pointsList =
+    let
+        emptyCounts =
+            { negatives = 0, positives = 0, total = 0 }
+
+        initial =
+            Array.initialize (Array.length Candidates.all) (always emptyCounts)
+
+        updateCounts : D21Counts -> Int -> D21Counts
+        updateCounts counts value =
+            if value > 0 then
+                { counts | positives = counts.positives + 1, total = counts.total + 1 }
+
+            else if value < 0 then
+                { counts | negatives = counts.negatives - 1, total = counts.total - 1 }
+
+            else
+                counts
+
+        fnInner : ( Int, Int ) -> Array D21Counts -> Array D21Counts
+        fnInner ( index, value ) acc =
+            Array.set index (updateCounts (Maybe.withDefault emptyCounts <| Array.get index acc) value) acc
+
+        fn : List Int -> Array D21Counts -> Array D21Counts
+        fn points acc =
+            List.indexedMap Tuple.pair points |> List.foldl fnInner acc
+
+        counted =
+            List.foldl fn initial pointsList
+
+        data =
+            Array.toList counted
+                |> List.indexedMap
+                    (\i v ->
+                        { id = idToLabel i
+                        , value = v
+                        , gradient = idToGradient i
+                        , positives = v.positives
+                        , negatives = v.negatives
+                        , total = v.total
+                        }
+                    )
+                |> List.sortBy .total
+                |> List.reverse
+
+        chart =
+            C.chart
+                [ CA.height 500
+                , CA.width 500
+                , CA.margin { top = 50, bottom = 150, left = 50, right = 50 }
+                ]
+                [ C.binLabels .id [ CA.moveUp 5, CA.moveLeft 10, CA.rotate 90, CA.alignLeft, CA.color "white", CA.fontSize 18 ]
+                , C.yLabels [ CA.alignLeft, CA.withGrid, CA.moveLeft 30 ]
+                , C.bars [ CA.margin 0.4, CA.spacing 0, CA.ungroup ]
+                    [ C.bar .total [ CA.border "white", CA.borderWidth 1 ] |> C.variation (\i d -> [ CA.gradient d.gradient ])
+                    , C.bar .positives [ CA.striped [ CA.spacing 3 ], CA.color "rgba(0, 255, 0, 0.3)" ]
+                    , C.bar .negatives [ CA.striped [ CA.spacing 3 ], CA.color "rgba(255, 0, 0, 0.3)" ]
+                    ]
+                    data
                 ]
     in
     div [ class "chart-center" ]
