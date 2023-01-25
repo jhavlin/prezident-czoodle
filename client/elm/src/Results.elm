@@ -183,6 +183,20 @@ idToColor id =
     Array.get id Candidates.all |> Maybe.map .color |> Maybe.withDefault "white"
 
 
+idToCandidateView : Int -> Html Msg
+idToCandidateView id =
+    let
+        candidate =
+            Array.get id Candidates.all
+    in
+    case candidate of
+        Just c ->
+            Component.candidateView c
+
+        Nothing ->
+            text ""
+
+
 idToGradient : Int -> List String
 idToGradient id =
     case id of
@@ -235,10 +249,12 @@ viewSimpleChart counted =
                 , CA.width 500
                 , CA.margin { top = 50, bottom = 150, left = 50, right = 50 }
                 ]
-                [ C.binLabels .id [ CA.moveDown 15, CA.moveRight 5, CA.rotate 90, CA.alignRight, CA.color "white", CA.fontSize 22 ]
+                [ C.binLabels .id
+                    [ CA.moveDown 15, CA.moveRight 5, CA.rotate 90, CA.alignRight, CA.color "white", CA.fontSize 18 ]
                 , C.yLabels [ CA.alignLeft, CA.withGrid, CA.moveLeft 20 ]
                 , C.bars [ CA.margin 0.2 ]
-                    [ C.bar .value [ CA.border "white", CA.borderWidth 1 ] |> C.variation (\i d -> [ CA.gradient d.gradient ])
+                    [ C.bar .value [ CA.border "white", CA.borderWidth 1 ]
+                        |> C.variation (\i d -> [ CA.gradient d.gradient ])
                     ]
                     data
                 , C.barLabels [ CA.color "white", CA.moveUp 15 ]
@@ -313,7 +329,8 @@ viewD21 pointsList =
             Array.toList counted
                 |> List.indexedMap
                     (\i v ->
-                        { id = idToLabel i
+                        { name = idToLabel i
+                        , id = i
                         , value = v
                         , gradient = idToGradient i
                         , positives = v.positives
@@ -328,20 +345,51 @@ viewD21 pointsList =
             C.chart
                 [ CA.height 500
                 , CA.width 500
-                , CA.margin { top = 50, bottom = 150, left = 50, right = 50 }
+                , CA.margin { top = 50, bottom = 50, left = 50, right = 50 }
                 ]
-                [ C.binLabels .id [ CA.moveUp 5, CA.moveLeft 10, CA.rotate 90, CA.alignLeft, CA.color "white", CA.fontSize 18 ]
+                [ C.binLabels .name
+                    [ CA.moveUp 5, CA.moveLeft 10, CA.rotate 90, CA.alignLeft, CA.color "white", CA.fontSize 18 ]
                 , C.yLabels [ CA.alignLeft, CA.withGrid, CA.moveLeft 30 ]
                 , C.bars [ CA.margin 0.4, CA.spacing 0, CA.ungroup ]
-                    [ C.bar .total [ CA.border "white", CA.borderWidth 1 ] |> C.variation (\i d -> [ CA.gradient d.gradient ])
-                    , C.bar .positives [ CA.striped [ CA.spacing 3 ], CA.color "rgba(0, 255, 0, 0.3)" ]
-                    , C.bar .negatives [ CA.striped [ CA.spacing 3 ], CA.color "rgba(255, 0, 0, 0.3)" ]
+                    [ C.bar .total [ CA.border "white", CA.gradient [ "lightgray", "darkgray" ], CA.borderWidth 1 ]
+                        |> C.named "celkem"
+                    , C.bar .positives [ CA.striped [ CA.spacing 3 ], CA.color "rgba(0, 255, 0, 0.5)" ]
+                        |> C.named "kladné"
+                    , C.bar .negatives [ CA.striped [ CA.spacing 3 ], CA.color "rgba(255, 0, 0, 0.5)" ]
+                        |> C.named "záporné"
                     ]
                     data
+                , C.legendsAt .min
+                    .min
+                    [ CA.row
+                    , CA.alignLeft
+                    , CA.moveUp 50
+                    , CA.moveRight 10
+                    ]
+                    []
                 ]
+
+        listRow datum =
+            div [ class "short-result-list-item" ]
+                [ div [ class "short-result-list-candidate" ]
+                    [ idToCandidateView datum.id ]
+                , div [ class "short-result-list-value" ]
+                    [ span [ class "result-positive" ] [ text <| String.fromFloat datum.positives ]
+                    , text " - "
+                    , span [ class "result-negative" ] [ text <| String.fromFloat -datum.negatives ]
+                    , text " = "
+                    , span [ class "result-main" ] [ text <| String.fromFloat datum.total ]
+                    ]
+                ]
+
+        list =
+            div [ class "short-result-list" ] (List.map listRow data)
     in
-    div [ class "chart-center" ]
-        [ div [ class "chart-container" ] [ chart ]
+    div []
+        [ div [ class "chart-center" ]
+            [ div [ class "chart-container" ] [ chart ]
+            ]
+        , list
         ]
 
 

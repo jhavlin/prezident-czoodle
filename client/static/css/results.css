@@ -1,0 +1,51 @@
+/*
+ * Results
+ */
+
+ .chart-container {
+    width: 500px;
+    height: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+/*
+ * Lists
+ */
+
+.short-result-list {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.short-result-list-item {
+    display: inline-flex;
+    margin: 0.5em 2em;
+    align-items: center;
+}
+
+.short-result-list-candidate {
+    width: 10em;
+}
+
+.short-result-list-value {
+    width: 8em;
+    font-size: 14pt;
+    text-align: right;
+
+}
+
+.result-positive {
+    color: green;
+}
+
+.result-negative {
+    color: red;
+}
+
+.result-main {
+    font-weight: bold;
+}
