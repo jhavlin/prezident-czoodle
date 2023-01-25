@@ -67,6 +67,13 @@ type alias D21Counts =
     }
 
 
+type alias DoodleCounts =
+    { yesCount : Float
+    , ifNeededCount : Float
+    , total : Float
+    }
+
+
 type alias Model =
     { votes : List Vote
     }
@@ -170,12 +177,18 @@ view model =
             [ h1 [] [ text "Metoda D21" ]
             , viewD21 (List.map .d21 model.votes)
             ]
+        , section [ class "wide" ]
+            [ h1 [] [ text "Doodle hlasování" ]
+            , viewDoodle (List.map .doodle model.votes)
+            ]
         ]
 
 
 idToLabel : Int -> String
 idToLabel id =
-    Array.get id Candidates.all |> Maybe.map .surname |> Maybe.withDefault "--"
+    Array.get id Candidates.all
+        |> Maybe.map (\c -> String.concat [ String.slice 0 1 c.firstName, ". ", c.surname ])
+        |> Maybe.withDefault "--"
 
 
 idToColor : Int -> String
@@ -348,7 +361,7 @@ viewD21 pointsList =
                 , CA.margin { top = 50, bottom = 50, left = 50, right = 50 }
                 ]
                 [ C.binLabels .name
-                    [ CA.moveUp 5, CA.moveLeft 10, CA.rotate 90, CA.alignLeft, CA.color "white", CA.fontSize 18 ]
+                    [ CA.moveUp 8, CA.moveLeft 10, CA.rotate 90, CA.alignLeft, CA.color "white", CA.fontSize 18 ]
                 , C.yLabels [ CA.alignLeft, CA.withGrid, CA.moveLeft 30 ]
                 , C.bars [ CA.margin 0.4, CA.spacing 0, CA.ungroup ]
                     [ C.bar .total [ CA.border "white", CA.gradient [ "lightgray", "darkgray" ], CA.borderWidth 1 ]
@@ -361,10 +374,10 @@ viewD21 pointsList =
                     data
                 , C.legendsAt .min
                     .min
-                    [ CA.row
+                    [ CA.column
                     , CA.alignLeft
-                    , CA.moveUp 50
-                    , CA.moveRight 10
+                    , CA.moveUp 105
+                    , CA.moveRight 20
                     ]
                     []
                 ]
@@ -377,6 +390,104 @@ viewD21 pointsList =
                     [ span [ class "result-positive" ] [ text <| String.fromFloat datum.positives ]
                     , text " - "
                     , span [ class "result-negative" ] [ text <| String.fromFloat -datum.negatives ]
+                    , text " = "
+                    , span [ class "result-main" ] [ text <| String.fromFloat datum.total ]
+                    ]
+                ]
+
+        list =
+            div [ class "short-result-list" ] (List.map listRow data)
+    in
+    div []
+        [ div [ class "chart-center" ]
+            [ div [ class "chart-container" ] [ chart ]
+            ]
+        , list
+        ]
+
+
+viewDoodle : List (List Int) -> Html Msg
+viewDoodle pointsList =
+    let
+        emptyCounts : DoodleCounts
+        emptyCounts =
+            { yesCount = 0, ifNeededCount = 0, total = 0 }
+
+        initial =
+            Array.initialize (Array.length Candidates.all) (always emptyCounts)
+
+        updateCounts : DoodleCounts -> Int -> DoodleCounts
+        updateCounts counts value =
+            if value == 2 then
+                { counts | yesCount = counts.yesCount + 1, total = counts.total + 1 }
+
+            else if value == 1 then
+                { counts | ifNeededCount = counts.ifNeededCount + 1, total = counts.total + 1 }
+
+            else
+                counts
+
+        fnInner : ( Int, Int ) -> Array DoodleCounts -> Array DoodleCounts
+        fnInner ( index, value ) acc =
+            Array.set index (updateCounts (Maybe.withDefault emptyCounts <| Array.get index acc) value) acc
+
+        fn : List Int -> Array DoodleCounts -> Array DoodleCounts
+        fn points acc =
+            List.indexedMap Tuple.pair points |> List.foldl fnInner acc
+
+        counted =
+            List.foldl fn initial pointsList
+
+        data =
+            Array.toList counted
+                |> List.indexedMap
+                    (\i v ->
+                        { name = idToLabel i
+                        , id = i
+                        , value = v
+                        , gradient = idToGradient i
+                        , yesCount = v.yesCount
+                        , ifNeededCount = v.ifNeededCount
+                        , total = v.total
+                        }
+                    )
+                |> List.sortBy .total
+                |> List.reverse
+
+        chart =
+            C.chart
+                [ CA.height 500
+                , CA.width 500
+                , CA.margin { top = 50, bottom = 150, left = 50, right = 50 }
+                ]
+                [ C.binLabels .name
+                    [ CA.moveDown 15, CA.moveRight 5, CA.rotate 90, CA.alignRight, CA.color "white", CA.fontSize 18 ]
+                , C.yLabels [ CA.alignLeft, CA.withGrid, CA.moveLeft 30 ]
+                , C.bars [ CA.margin 0.2, CA.spacing 0 ]
+                    [ C.stacked
+                        [ C.bar .ifNeededCount [ CA.color "orange" ] |> C.named "Ano"
+                        , C.bar .yesCount [ CA.color "green" ] |> C.named "Pokud nutno"
+                        ]
+                    ]
+                    data
+                , C.legendsAt .max
+                    .max
+                    [ CA.column
+                    , CA.alignRight
+                    , CA.moveUp 20
+                    , CA.moveLeft 10
+                    ]
+                    []
+                ]
+
+        listRow datum =
+            div [ class "short-result-list-item" ]
+                [ div [ class "short-result-list-candidate" ]
+                    [ idToCandidateView datum.id ]
+                , div [ class "short-result-list-value" ]
+                    [ span [ class "result-positive" ] [ text <| String.fromFloat datum.yesCount ]
+                    , text " + "
+                    , span [ class "result-if-needed" ] [ text <| String.fromFloat datum.ifNeededCount ]
                     , text " = "
                     , span [ class "result-main" ] [ text <| String.fromFloat datum.total ]
                     ]
