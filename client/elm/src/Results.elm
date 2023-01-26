@@ -181,6 +181,10 @@ view model =
             [ h1 [] [ text "Doodle hlasování" ]
             , viewDoodle (List.map .doodle model.votes)
             ]
+        , section [ class "wide" ]
+            [ h1 [] [ text "Hlasování řazením" ]
+            , viewOrder (List.map .order model.votes)
+            ]
         ]
 
 
@@ -267,7 +271,7 @@ viewSimpleChart counted =
                 , C.yLabels [ CA.alignLeft, CA.withGrid, CA.moveLeft 20 ]
                 , C.bars [ CA.margin 0.2 ]
                     [ C.bar .value [ CA.border "white", CA.borderWidth 1 ]
-                        |> C.variation (\i d -> [ CA.gradient d.gradient ])
+                        |> C.variation (\_ d -> [ CA.gradient d.gradient ])
                     ]
                     data
                 , C.barLabels [ CA.color "white", CA.moveUp 15 ]
@@ -502,6 +506,31 @@ viewDoodle pointsList =
             ]
         , list
         ]
+
+
+viewOrder : List (List Int) -> Html Msg
+viewOrder pointsList =
+    let
+        initial =
+            Array.initialize (Array.length Candidates.all) (always 0)
+
+        fnInner : ( Int, Int ) -> Array Int -> Array Int
+        fnInner ( index, value ) acc =
+            Array.set index (value + (Maybe.withDefault 0 <| Array.get index acc)) acc
+
+        fn : List Int -> Array Int -> Array Int
+        fn points acc =
+            List.indexedMap Tuple.pair points |> List.foldl fnInner acc
+
+        n =
+            max 1 (List.length pointsList)
+
+        counted =
+            List.foldl fn initial pointsList
+                |> Array.map toFloat
+                |> Array.map (\v -> toFloat (round ((v * 100) / toFloat n)) / 100)
+    in
+    viewSimpleChart counted
 
 
 
