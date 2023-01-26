@@ -6,6 +6,7 @@ import Candidates
 import Chart as C
 import Chart.Attributes as CA
 import Component exposing (ariaLabel)
+import Dict exposing (Dict)
 import FeatherIcons
 import Html exposing (Html, a, button, div, h1, p, section, span, text)
 import Html.Attributes exposing (class, disabled, href, title)
@@ -188,6 +189,10 @@ view model =
         , section [ class "wide" ]
             [ h1 [] [ text "Hvězdičkové hlasování" ]
             , viewStar (List.map .star model.votes)
+            ]
+        , section [ class "wide" ]
+            [ h1 [] [ text "Emoji hlasování" ]
+            , viewEmoji (List.map .emoji model.votes)
             ]
         ]
 
@@ -560,6 +565,69 @@ viewStar pointsList =
                 |> Array.map (\v -> toFloat (round (v / toFloat n)))
     in
     viewSimpleChart counted
+
+
+viewEmoji : List (List String) -> Html Msg
+viewEmoji emojisList =
+    let
+        initial =
+            Array.initialize (Array.length Candidates.all) (always Dict.empty)
+
+        updateDict : String -> Dict String Int -> Dict String Int
+        updateDict str dict =
+            let
+                updater existingMaybe =
+                    case existingMaybe of
+                        Just v ->
+                            Just (v + 1)
+
+                        Nothing ->
+                            Just 1
+            in
+            Dict.update (String.trim str) updater dict
+
+        fnInner : ( Int, String ) -> Array (Dict String Int) -> Array (Dict String Int)
+        fnInner ( index, value ) acc =
+            Array.set index (updateDict value (Maybe.withDefault Dict.empty <| Array.get index acc)) acc
+
+        fn : List String -> Array (Dict String Int) -> Array (Dict String Int)
+        fn points acc =
+            List.indexedMap Tuple.pair points |> List.foldl fnInner acc
+
+        counted =
+            List.foldl fn initial emojisList |> Array.toList |> List.indexedMap Tuple.pair
+
+        top dict =
+            Dict.toList dict
+                |> List.filter (\( k, _ ) -> not <| String.isEmpty k)
+                |> List.sortBy (\( _, v ) -> v)
+                |> List.reverse
+                |> List.take 5
+
+        topPair ( emoji, count ) =
+            span [ class "emoji-result-pair" ]
+                [ span [ class "emoji-result-symbol" ] [ text emoji ]
+                , text " "
+                , span [ class "emoji-result-count" ] [ text <| String.fromInt count ]
+                ]
+
+        showTop dict =
+            div [ class "emoji-result-list" ]
+                (List.map topPair <| top dict)
+
+        listRow ( id, dict ) =
+            div [ class "short-result-list-item" ]
+                [ div [ class "short-result-list-candidate" ]
+                    [ idToCandidateView id ]
+                , div [ class "short-result-list-value longer" ]
+                    [ showTop dict
+                    ]
+                ]
+
+        list =
+            div [ class "short-result-list" ] (List.map listRow counted)
+    in
+    list
 
 
 

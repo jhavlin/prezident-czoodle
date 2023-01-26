@@ -39,6 +39,10 @@
 
 }
 
+.short-result-list-value.longer {
+    width: auto;
+}
+
 .result-positive {
     color: #12b012;
 }
@@ -53,4 +57,32 @@
 
 .result-main {
     font-weight: bold;
+}
+
+.emoji-result-list {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+}
+
+.emoji-result-pair {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.emoji-result-symbol {
+    display: inline-block;
+    font-size: 120%;
+    width: 2.5em;
+    text-align: center;
+    padding: 0.2em 0 0.3em 0;
+}
+
+.emoji-result-count {
+    display: inline-block;
+    width: 2em;
+    color: gray;
+    font-size: 70%;
+    text-align: center;
 }
