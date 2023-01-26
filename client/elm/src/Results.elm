@@ -185,6 +185,10 @@ view model =
             [ h1 [] [ text "Hlasování řazením" ]
             , viewOrder (List.map .order model.votes)
             ]
+        , section [ class "wide" ]
+            [ h1 [] [ text "Hvězdičkové hlasování" ]
+            , viewStar (List.map .star model.votes)
+            ]
         ]
 
 
@@ -529,6 +533,31 @@ viewOrder pointsList =
             List.foldl fn initial pointsList
                 |> Array.map toFloat
                 |> Array.map (\v -> toFloat (round ((v * 100) / toFloat n)) / 100)
+    in
+    viewSimpleChart counted
+
+
+viewStar : List (List Int) -> Html Msg
+viewStar pointsList =
+    let
+        initial =
+            Array.initialize (Array.length Candidates.all) (always 0)
+
+        fnInner : ( Int, Int ) -> Array Int -> Array Int
+        fnInner ( index, value ) acc =
+            Array.set index (value + (Maybe.withDefault 0 <| Array.get index acc)) acc
+
+        fn : List Int -> Array Int -> Array Int
+        fn points acc =
+            List.indexedMap Tuple.pair points |> List.foldl fnInner acc
+
+        n =
+            max 1 (List.length pointsList)
+
+        counted =
+            List.foldl fn initial pointsList
+                |> Array.map toFloat
+                |> Array.map (\v -> toFloat (round (v / toFloat n)))
     in
     viewSimpleChart counted
 
