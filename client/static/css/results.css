@@ -8,6 +8,7 @@
 
 .chart-container {
     width: 500px;
+    height: 500px;
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
@@ -34,10 +35,9 @@ p+.short-result-list {
 }
 
 .short-result-list-item {
-    display: flex;
+    display: inline-flex;
     margin: 0.25em 2em;
     align-items: center;
-    flex-wrap: wrap;
 }
 
 .short-result-list-candidate {
@@ -53,9 +53,6 @@ p+.short-result-list {
 
 .short-result-list-value.longer {
     width: auto;
-    justify-content: end;
-    display: flex;
-    flex: 1 1 auto;
 }
 
 .result-positive {
