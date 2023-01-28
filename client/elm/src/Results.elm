@@ -206,7 +206,7 @@ view model =
                 [ text <|
                     String.concat
                         [ "Výsledek jednoduchého jednokolového systému se liší od dvoukolového systému, "
-                        , "což bych si dovolil vyhodnotit jako jeho velkou chybu. Nutí voliče hrát „na jistotu“ "
+                        , "což bych si dovolil vyhodnotit jako jeho nevýhodu. Nutí voliče hrát „na jistotu“ "
                         , "a ještě mnohem více taktizovat."
                         ]
                 ]
@@ -219,7 +219,7 @@ view model =
                     String.concat
                         [ "Přestože toto hlasování dopadlo podobně jako dvoukolový systém, alespoň na předních "
                         , "příčkách, považuji jej za poměrně špatný systém. Trestá totiž lidi za váhavost a "
-                        , "podobní kandidáti se mohou vzájemně „okrást“ o hlasy již v rámci jednoho hlasujícícho, "
+                        , "podobní kandidáti se mohou vzájemně „okrást“ o hlasy již v rámci jednoho hlasujícího, "
                         , "takže se i zde musí dosti taktizovat."
                         ]
                 ]
@@ -256,7 +256,7 @@ view model =
             , p [ class "for-valid" ]
                 [ text <|
                     String.concat
-                        [ "Na hlasování řazením je zajímavé, že Marek Hilšer opět předstihl Danuši Nerudouvou. "
+                        [ "Na hlasování řazením je zajímavé, že Marek Hilšer opět předstihl Danuši Nerudovou. "
                         , "Na základě našich nekvalitních dat by se pak dalo usuzovat, že současný volební "
                         , "systém nejvíce podhodnotil právě Marka Hilšera. (Což ovšem nemá vliv na celkového "
                         , "vítěze.)"
