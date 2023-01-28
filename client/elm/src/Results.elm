@@ -786,7 +786,7 @@ viewEmoji emojisList =
                 ]
 
         list =
-            div [ class "short-result-list" ] (List.map listRow counted)
+            div [ class "emoji-results short-result-list" ] (List.map listRow counted)
     in
     list
 

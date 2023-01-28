@@ -71,6 +71,17 @@ p+.short-result-list {
     font-weight: bold;
 }
 
+.emoji-results .short-result-list-item {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.emoji-results .short-result-list-value {
+    justify-content: end;
+    display: flex;
+    flex: 1 1 auto;
+}
+
 .emoji-result-list {
     display: flex;
     flex-direction: row;
