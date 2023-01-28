@@ -7,8 +7,9 @@ import Chart as C
 import Chart.Attributes as CA
 import Component exposing (ariaHidden, ariaLabel)
 import Dict exposing (Dict)
-import Html exposing (Html, a, div, h1, p, section, span, text)
-import Html.Attributes exposing (class, href, target)
+import Html exposing (Html, a, div, h1, input, label, p, section, span, text)
+import Html.Attributes exposing (checked, class, href, target, type_, value)
+import Html.Events exposing (onInput)
 import Http
 import Json.Decode as D
 import Polls.Common exposing (Summary(..), Validation(..))
@@ -61,12 +62,13 @@ type alias DoodleCounts =
 
 type alias Model =
     { votes : List Vote
+    , showAll : Bool
     }
 
 
 init : D.Value -> ( Model, Cmd Msg )
 init _ =
-    ( { votes = [] }, load False )
+    ( { votes = [], showAll = False }, load False )
 
 
 load : Bool -> Cmd Msg
@@ -109,6 +111,7 @@ votesDecoder =
 type Msg
     = NoOp
     | Loaded (Result Http.Error (List Vote))
+    | ToggleAll
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -124,6 +127,13 @@ update cmd model =
 
                 Err _ ->
                     ( model, Cmd.none )
+
+        ToggleAll ->
+            let
+                newAll =
+                    not model.showAll
+            in
+            ( { model | showAll = newAll }, load newAll )
 
 
 
@@ -146,6 +156,14 @@ view : Model -> Html Msg
 view model =
     div []
         [ section [ class "wide" ]
+            [ p []
+                [ label []
+                    [ input [ type_ "checkbox", value "all", onInput (always ToggleAll), checked model.showAll ] []
+                    , text " Zohlednit i hlasy zaznamenané po prvním kole voleb."
+                    ]
+                ]
+            ]
+        , section [ class "wide" ]
             [ p [ class "results-text-larger" ] [ text "Děkuji za Vaše hlasy!" ]
             , p []
                 [ text <|
