@@ -8,7 +8,6 @@
 
 .chart-container {
     width: 500px;
-    height: 500px;
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
@@ -28,6 +27,7 @@
     flex-direction: column;
     align-items: center;
     margin-bottom: 4em;
+    margin-top: 1em;
 }
 
 p+.short-result-list {
