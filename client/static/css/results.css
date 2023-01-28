@@ -2,9 +2,14 @@
  * Results
  */
 
+.results-text-larger {
+    font-size: 150%;
+}
+
 .chart-container {
     width: 500px;
     height: 500px;
+    max-width: 100%;
     margin-left: auto;
     margin-right: auto;
 }
@@ -20,6 +25,10 @@
     flex-direction: column;
     align-items: center;
     margin-bottom: 4em;
+}
+
+p + .short-result-list {
+    margin-top: 3em;
 }
 
 .short-result-list-item {
@@ -61,8 +70,8 @@
 
 .emoji-result-list {
     display: flex;
-    flex-wrap: nowrap;
     flex-direction: row;
+    flex-wrap: wrap;
 }
 
 .emoji-result-pair {

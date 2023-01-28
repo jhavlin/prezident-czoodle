@@ -5,29 +5,13 @@ import Browser
 import Candidates
 import Chart as C
 import Chart.Attributes as CA
-import Component exposing (ariaLabel)
+import Component exposing (ariaHidden, ariaLabel)
 import Dict exposing (Dict)
-import FeatherIcons
-import Html exposing (Html, a, button, div, h1, p, section, span, text)
-import Html.Attributes exposing (class, disabled, href, title)
-import Html.Events exposing (onClick)
+import Html exposing (Html, a, div, h1, p, section, span, text)
+import Html.Attributes exposing (class, href, target)
 import Http
 import Json.Decode as D
-import Json.Encode
 import Polls.Common exposing (Summary(..), Validation(..))
-import Polls.D21Poll
-import Polls.DividePoll
-import Polls.DoodlePoll
-import Polls.EmojiPoll
-import Polls.OneRoundPoll
-import Polls.OrderPoll
-import Polls.StarPoll
-import Polls.TwoRoundPoll
-import Process
-import Random
-import RandomUtils
-import Svg.Attributes
-import Task
 
 
 
@@ -161,37 +145,129 @@ countValues list =
 view : Model -> Html Msg
 view model =
     div []
-        [ p [] [ text <| String.fromInt (List.length model.votes) ]
+        [ section [ class "wide" ]
+            [ p [ class "results-text-larger" ] [ text "Děkuji za Vaše hlasy!" ]
+            , p []
+                [ text <|
+                    String.concat
+                        [ "Počet hlasů: "
+                        , String.fromInt (List.length model.votes)
+                        ]
+                ]
+            , p [ class "for-valid" ]
+                [ text <|
+                    String.concat
+                        [ "Struktura hlasů, jak uvidíte, bohužel zdaleka neodpovídá skutečným výsledkům. "
+                        , "Přesto se je zde pokusíme zpracovat, abyste neřekli, že jsem Vás odbyl :-)"
+                        ]
+                ]
+            ]
         , section [ class "wide" ]
             [ h1 [] [ text "Dvoukolový systém" ]
+            , p [ class "for-valid" ]
+                [ text <|
+                    String.concat
+                        [ "Na dvoukolovém systému nejlépe vidíme, jak moc se liší „bublina“ hlasujících na "
+                        , "prezidentském czoodlu od skutečné populace. Vyhrál Pavel Fischer, ve skutečnosti "
+                        , "čtvrtý, a Andrej Babiš zde získal pouze dva hlasy."
+                        ]
+                ]
             , viewSingle (List.map .twoRound model.votes)
             ]
         , section [ class "wide" ]
             [ h1 [] [ text "Jednokolový systém" ]
+            , p [ class "for-valid" ]
+                [ text <|
+                    String.concat
+                        [ "Výsledek jednoduchého jednokolového systému se liší od dvoukolového systému, "
+                        , "což bych si dovolil vyhodnotit jako jeho velkou chybu. Nutí voliče hrát „na jistotu“ "
+                        , "a ještě mnohem více taktizovat."
+                        ]
+                ]
             , viewSingle (List.map .oneRound model.votes)
             ]
         , section [ class "wide" ]
             [ h1 [] [ text "Rozdělovací hlasování" ]
+            , p [ class "for-valid" ]
+                [ text <|
+                    String.concat
+                        [ "Přestože toto hlasování dopadlo podobně jako dvoukolový systém, alespoň na předních "
+                        , "příčkách, považuji jej za poměrně špatný systém. Trestá totiž lidi za váhavost a "
+                        , "podobní kandidáti se mohou vzájemně „okrást“ o hlasy již v rámci jednoho hlasujícícho, "
+                        , "takže se i zde musí dosti taktizovat."
+                        ]
+                ]
             , viewDivide (List.map .divide model.votes)
             ]
         , section [ class "wide" ]
             [ h1 [] [ text "Metoda D21" ]
+            , p [ class "for-valid" ]
+                [ text <|
+                    String.concat
+                        [ "Na metodě D21 je zajímavé, že je to vedle jednokolové volby jediný hlasovací systém, ve kterém "
+                        , "zvítězil Petr Pavel. Jinak celkové pořadí výrazně neovlivnila. "
+                        , "Janečkova metoda tedy výsledku Karla Janečka nepomohla. (Připomínám však, že to vše tvrdím na základě "
+                        , "poměrně nekvalitního vzorku dat. Pří vší úctě k hlasujícím, kteří za to nemohou.)"
+                        ]
+                ]
             , viewD21 (List.map .d21 model.votes)
             ]
         , section [ class "wide" ]
             [ h1 [] [ text "Doodle hlasování" ]
+            , p [ class "for-valid" ]
+                [ text <|
+                    String.concat
+                        [ "V Doodle hlasování by hodně záleželo na tom, jakou váhu dáme hlasům „pokud nutno“. "
+                        , "Pokud bychom jim dali stejnou váhu jako hlasům „ano“ a k typu hlasu příhlíželi pouze "
+                        , "v případě rovnosti, pomohlo by to Marku Hilšerovi, který se zde dostal na třetí místo "
+                        , "před Danuši Nerudovou."
+                        ]
+                ]
             , viewDoodle (List.map .doodle model.votes)
             ]
         , section [ class "wide" ]
             [ h1 [] [ text "Hlasování řazením" ]
+            , p [ class "for-valid" ]
+                [ text <|
+                    String.concat
+                        [ "Na hlasování řazením je zajímavé, že Marek Hilšer opět předstihl Danuši Nerudouvou. "
+                        , "Na základě našich nekvalitních dat by se pak dalo usuzovat, že současný volební "
+                        , "systém nejvíce podhodnotil právě Marka Hilšera. (Což ovšem nemá vliv na celkového "
+                        , "vítěze.)"
+                        ]
+                ]
+            , p [] [ text "Graf uvádí průměrné počty bodů udělené kandidátům." ]
+            , p [] [ text "Když bude zájem, mohu hlasy vyhodnotit také metodou jednoho přenosného hlasu." ]
             , viewOrder (List.map .order model.votes)
             ]
         , section [ class "wide" ]
             [ h1 [] [ text "Hvězdičkové hlasování" ]
+            , p [ class "for-valid" ]
+                [ text <|
+                    String.concat
+                        [ "Výsledky hvězdičkové/procentuálního hlasování, ve kterém mají voliči poměrně velkou "
+                        , "volnost při hodnocení kandidátů, se příliš neliší od ostatních „přísnějších“ hlasování."
+                        ]
+                ]
+            , p [] [ text "Graf uvádí průměrné počty procent přidělené kandidátům." ]
             , viewStar (List.map .star model.votes)
             ]
         , section [ class "wide" ]
             [ h1 [] [ text "Emoji hlasování" ]
+            , p [ class "for-valid" ]
+                [ text <|
+                    String.concat
+                        [ "Nejpoužívanějšími smajlíky jsou blinkalík, různé varianty klasických smajlíků a "
+                        , "mračíků, klaun, palce nahoru a dolů, přemýšlík a srdíčko. Potěšilo, že se do Top\u{00A0}5 "
+                        , "dostal salutující smajlík pro pana Pavla."
+                        ]
+                ]
+            , p [ class "for-valid" ]
+                [ text "Výsledky bychom mohli vyhodnotit třeba tak, že protibabišovští voliči nevolili výrazně "
+                , text "noblesnější symboly než "
+                , a [ href "https://twitter.com/jiri_kubik/status/1617637913256394753", target "_blank" ] [ text "sám pan Babiš" ]
+                , text "."
+                ]
             , viewEmoji (List.map .emoji model.votes)
             ]
         ]
@@ -285,9 +361,16 @@ viewSimpleChart counted =
                     data
                 , C.barLabels [ CA.color "white", CA.moveUp 15 ]
                 ]
+
+        desc =
+            String.concat
+                [ "Graf s hodnotami: "
+                , List.map (\datum -> String.concat [ String.dropLeft 3 datum.id, " ", String.fromFloat datum.value ]) data
+                    |> String.join ", "
+                ]
     in
-    div [ class "chart-center" ]
-        [ div [ class "chart-container" ] [ chart ]
+    div [ class "chart-center", ariaLabel desc ]
+        [ div [ class "chart-container", ariaHidden ] [ chart ]
         ]
 
 
@@ -395,6 +478,25 @@ viewD21 pointsList =
                     []
                 ]
 
+        desc =
+            String.concat
+                [ "Graf s hodnotami: "
+                , List.map
+                    (\datum ->
+                        String.concat
+                            [ String.dropLeft 3 datum.name
+                            , " "
+                            , String.fromFloat datum.positives
+                            , " - "
+                            , String.fromFloat -datum.negatives
+                            , " = "
+                            , String.fromFloat datum.total
+                            ]
+                    )
+                    data
+                    |> String.join ", "
+                ]
+
         listRow datum =
             div [ class "short-result-list-item" ]
                 [ div [ class "short-result-list-candidate" ]
@@ -409,11 +511,11 @@ viewD21 pointsList =
                 ]
 
         list =
-            div [ class "short-result-list" ] (List.map listRow data)
+            div [ class "short-result-list", ariaHidden ] (List.map listRow data)
     in
     div []
-        [ div [ class "chart-center" ]
-            [ div [ class "chart-container" ] [ chart ]
+        [ div [ class "chart-center", ariaLabel desc ]
+            [ div [ class "chart-container", ariaHidden ] [ chart ]
             ]
         , list
         ]
@@ -478,8 +580,8 @@ viewDoodle pointsList =
                 , C.yLabels [ CA.alignLeft, CA.withGrid, CA.moveLeft 30 ]
                 , C.bars [ CA.margin 0.2, CA.spacing 0 ]
                     [ C.stacked
-                        [ C.bar .ifNeededCount [ CA.color "orange" ] |> C.named "Ano"
-                        , C.bar .yesCount [ CA.color "green" ] |> C.named "Pokud nutno"
+                        [ C.bar .ifNeededCount [ CA.color "orange" ] |> C.named "Pokud nutno"
+                        , C.bar .yesCount [ CA.color "green" ] |> C.named "Ano"
                         ]
                     ]
                     data
@@ -491,6 +593,25 @@ viewDoodle pointsList =
                     , CA.moveLeft 10
                     ]
                     []
+                ]
+
+        desc =
+            String.concat
+                [ "Graf s hodnotami. První číslo je počet hlasů Ano, druhé číslo je počet hlasů Pokud nutno:"
+                , List.map
+                    (\datum ->
+                        String.concat
+                            [ String.dropLeft 3 datum.name
+                            , " "
+                            , String.fromFloat datum.yesCount
+                            , " + "
+                            , String.fromFloat datum.ifNeededCount
+                            , " = "
+                            , String.fromFloat datum.total
+                            ]
+                    )
+                    data
+                    |> String.join ", "
                 ]
 
         listRow datum =
@@ -507,11 +628,11 @@ viewDoodle pointsList =
                 ]
 
         list =
-            div [ class "short-result-list" ] (List.map listRow data)
+            div [ class "short-result-list", ariaHidden ] (List.map listRow data)
     in
     div []
-        [ div [ class "chart-center" ]
-            [ div [ class "chart-container" ] [ chart ]
+        [ div [ class "chart-center", ariaLabel desc ]
+            [ div [ class "chart-container", ariaHidden ] [ chart ]
             ]
         , list
         ]
@@ -604,6 +725,16 @@ viewEmoji emojisList =
                 |> List.reverse
                 |> List.take 5
 
+        desc id topList =
+            String.concat
+                [ String.dropLeft 3 <| idToLabel id
+                , ": "
+                , String.join ", " <|
+                    List.map
+                        (\( emoji, count ) -> String.concat [ String.fromInt count, " x ", emoji ])
+                        topList
+                ]
+
         topPair ( emoji, count ) =
             span [ class "emoji-result-pair" ]
                 [ span [ class "emoji-result-symbol" ] [ text emoji ]
@@ -611,16 +742,20 @@ viewEmoji emojisList =
                 , span [ class "emoji-result-count" ] [ text <| String.fromInt count ]
                 ]
 
-        showTop dict =
+        showTop topList =
             div [ class "emoji-result-list" ]
-                (List.map topPair <| top dict)
+                (List.map topPair <| topList)
 
         listRow ( id, dict ) =
-            div [ class "short-result-list-item" ]
-                [ div [ class "short-result-list-candidate" ]
+            let
+                topList =
+                    top dict
+            in
+            div [ class "short-result-list-item", ariaLabel <| desc id topList ]
+                [ div [ class "short-result-list-candidate", ariaHidden ]
                     [ idToCandidateView id ]
-                , div [ class "short-result-list-value longer" ]
-                    [ showTop dict
+                , div [ class "short-result-list-value longer", ariaHidden ]
+                    [ showTop topList
                     ]
                 ]
 
