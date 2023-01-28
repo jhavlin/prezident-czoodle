@@ -14,6 +14,9 @@
     margin-right: auto;
 }
 
+.show-all .for-valid {
+    opacity: 40%;
+}
 
 /*
  * Lists
@@ -27,7 +30,7 @@
     margin-bottom: 4em;
 }
 
-p + .short-result-list {
+p+.short-result-list {
     margin-top: 3em;
 }
 

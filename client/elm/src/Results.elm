@@ -154,7 +154,15 @@ countValues list =
 
 view : Model -> Html Msg
 view model =
-    div []
+    let
+        attributes =
+            if model.showAll then
+                [ class "show-all" ]
+
+            else
+                []
+    in
+    div attributes
         [ section [ class "wide" ]
             [ p []
                 [ label []
