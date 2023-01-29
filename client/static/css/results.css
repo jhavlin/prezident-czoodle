@@ -17,6 +17,22 @@
     opacity: 40%;
 }
 
+.show-mode-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: black;
+    border-bottom: 1px #555555 solid;
+    box-shadow: 0 0 10px black;
+    padding: 0.5em 0;
+    z-index: 1;
+}
+
+body {
+    margin-top: 2em;
+}
+
 /*
  * Lists
  */

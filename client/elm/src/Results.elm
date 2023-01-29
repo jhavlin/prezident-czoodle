@@ -163,11 +163,11 @@ view model =
                 []
     in
     div attributes
-        [ section [ class "wide" ]
-            [ p []
+        [ section [ class "show-mode-top" ]
+            [ p [ class "wide" ]
                 [ label []
                     [ input [ type_ "checkbox", value "all", onInput (always ToggleAll), checked model.showAll ] []
-                    , text " Zohlednit i hlasy zaznamenané po prvním kole voleb."
+                    , text " Zohlednit i hlasy vložené po prvním kole."
                     ]
                 ]
             ]
