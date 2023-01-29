@@ -568,6 +568,11 @@ viewEdit editModel =
         ([ restoredInfo
          , section [ class "intro" ]
             [ div [ class "wide" ]
+                [ p [] [ a [ href "vysledky.html", class "vote-button" ] [ text "Výsledky zde" ] ]
+                ]
+            ]
+         , section [ class "intro" ]
+            [ div [ class "wide" ]
                 [ p [] [ text "Zúčastněte se prosím malého experimentu. Porovnejte různé hlasovací systémy na příkladu volby prezidenta České republiky." ]
                 ]
             ]
