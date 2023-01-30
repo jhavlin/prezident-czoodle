@@ -329,34 +329,34 @@ idToGradient : Int -> List String
 idToGradient id =
     case id of
         0 ->
-            [ "#54bf01", "white" ]
+            [ "rgb(84, 191, 1)", "white" ]
 
         1 ->
-            [ "#964B00", "#c68B40" ]
+            [ "rgb(150, 75, 0)", "rgb(198, 139, 64)" ]
 
         2 ->
-            [ "#9400D3", "white" ]
+            [ "rgb(148, 0, 211)", "white" ]
 
         3 ->
-            [ "#4444FF", "white" ]
+            [ "rgb(68, 68, 255)", "white" ]
 
         4 ->
             [ "skyblue", "white" ]
 
         5 ->
-            [ "#FFFF00", "white" ]
+            [ "rgb(255, 255, 0)", "white" ]
 
         6 ->
             [ "pink", "white" ]
 
         7 ->
-            [ "#4E5b31", "white" ]
+            [ "rgb(78, 91, 49)", "white" ]
 
         8 ->
-            [ "#FF7F00", "white" ]
+            [ "rgb(255, 127, 0)", "white" ]
 
         9 ->
-            [ "#FF0000", "white" ]
+            [ "rgb(255, 0, 0)", "white" ]
 
         _ ->
             [ "white" ]
