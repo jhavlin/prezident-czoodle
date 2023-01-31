@@ -382,7 +382,12 @@ viewSimpleChart counted =
                 , C.yLabels [ CA.alignLeft, CA.withGrid, CA.moveLeft 20 ]
                 , C.bars [ CA.margin 0.2 ]
                     [ C.bar .value [ CA.border "white", CA.borderWidth 1 ]
-                        |> C.variation (\_ d -> [ CA.gradient d.gradient ])
+                        |> C.variation
+                            (\_ d ->
+                                [ CA.gradient d.gradient
+                                , CA.color <| Maybe.withDefault "white" <| List.head d.gradient
+                                ]
+                            )
                     ]
                     data
                 , C.barLabels [ CA.color "white", CA.moveUp 15 ]
