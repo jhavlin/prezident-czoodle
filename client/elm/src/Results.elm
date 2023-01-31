@@ -384,8 +384,7 @@ viewSimpleChart counted =
                     [ C.bar .value [ CA.border "white", CA.borderWidth 1 ]
                         |> C.variation
                             (\_ d ->
-                                [ CA.gradient d.gradient
-                                , CA.color <| Maybe.withDefault "white" <| List.head d.gradient
+                                [ CA.color <| Maybe.withDefault "white" <| List.head d.gradient
                                 ]
                             )
                     ]
@@ -491,7 +490,7 @@ viewD21 pointsList =
                     [ CA.moveUp 8, CA.moveLeft 10, CA.rotate 90, CA.alignLeft, CA.color "white", CA.fontSize 18 ]
                 , C.yLabels [ CA.alignLeft, CA.withGrid, CA.moveLeft 30 ]
                 , C.bars [ CA.margin 0.4, CA.spacing 0, CA.ungroup ]
-                    [ C.bar .total [ CA.border "white", CA.gradient [ "lightgray", "darkgray" ], CA.borderWidth 1 ]
+                    [ C.bar .total [ CA.border "white", CA.color "darkgray", CA.borderWidth 1 ]
                         |> C.named "celkem"
                     , C.bar .positives [ CA.striped [ CA.spacing 3 ], CA.color "rgba(0, 255, 0, 0.5)" ]
                         |> C.named "kladné"
