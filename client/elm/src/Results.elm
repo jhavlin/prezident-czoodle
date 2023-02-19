@@ -7,7 +7,7 @@ import Chart as C
 import Chart.Attributes as CA
 import Component exposing (ariaHidden, ariaLabel)
 import Dict exposing (Dict)
-import Html exposing (Html, a, div, h1, input, label, p, section, span, text)
+import Html exposing (Html, a, div, h1, h2, input, label, p, section, span, text)
 import Html.Attributes exposing (checked, class, href, target, type_, value)
 import Html.Events exposing (onInput)
 import Http
@@ -190,6 +190,7 @@ view model =
             ]
         , section [ class "wide" ]
             [ h1 [] [ text "Dvoukolový systém" ]
+            , h2 [] [ text "První kolo" ]
             , p [ class "for-valid" ]
                 [ text <|
                     String.concat
@@ -199,6 +200,9 @@ view model =
                         ]
                 ]
             , viewSingle (List.map .twoRound model.votes)
+            , h2 [] [ text "Druhé kolo" ]
+            , p [ class "for-valid" ] [ text "Hlasy pro druhé kolo jsou odvozeny z hlasování řazením." ]
+            , viewSecondRoundResults (List.map .twoRound model.votes) (List.map .order model.votes)
             ]
         , section [ class "wide" ]
             [ h1 [] [ text "Jednokolový systém" ]
@@ -362,15 +366,9 @@ idToGradient id =
             [ "white" ]
 
 
-viewSimpleChart : Array Float -> Html Msg
-viewSimpleChart counted =
+viewSimpleChartForData : List { id : String, value : Float, gradient : List String } -> Html Msg
+viewSimpleChartForData data =
     let
-        data =
-            Array.toList counted
-                |> List.indexedMap (\i v -> { id = idToLabel i, value = v, gradient = idToGradient i })
-                |> List.sortBy .value
-                |> List.reverse
-
         chart =
             C.chart
                 [ CA.height 500
@@ -404,6 +402,18 @@ viewSimpleChart counted =
         ]
 
 
+viewSimpleChart : Array Float -> Html Msg
+viewSimpleChart counted =
+    let
+        data =
+            Array.toList counted
+                |> List.indexedMap (\i v -> { id = idToLabel i, value = v, gradient = idToGradient i })
+                |> List.sortBy .value
+                |> List.reverse
+    in
+    viewSimpleChartForData data
+
+
 viewSingle : List Int -> Html Msg
 viewSingle ids =
     let
@@ -411,6 +421,45 @@ viewSingle ids =
             countValues ids |> Array.map toFloat
     in
     viewSimpleChart counted
+
+
+viewSecondRoundResults : List Int -> List (List Int) -> Html Msg
+viewSecondRoundResults oneRound orders =
+    let
+        counted =
+            countValues oneRound
+
+        roundOneWinners =
+            Array.indexedMap Tuple.pair counted
+                |> Array.toList
+                |> List.sortBy (\i -> Tuple.second i)
+                |> List.reverse
+                |> List.take 2
+                |> List.map (\( i, c ) -> { id = i, votes = c })
+
+        countAPreferredOverB idA idB =
+            orders
+                |> List.map (\points -> Array.fromList points)
+                |> List.filter (\points -> (Maybe.withDefault 0 <| Array.get idA points) > (Maybe.withDefault 0 <| Array.get idB points))
+                |> List.length
+
+        roundTwoVotes =
+            case roundOneWinners of
+                [ a, b ] ->
+                    [ { id = a.id, votes = toFloat <| countAPreferredOverB a.id b.id }, { id = b.id, votes = toFloat <| countAPreferredOverB b.id a.id } ]
+                        |> List.sortBy .votes
+                        |> List.reverse
+
+                _ ->
+                    []
+
+        data =
+            roundTwoVotes
+                |> List.map (\v -> { id = idToLabel v.id, value = v.votes, gradient = idToGradient v.id })
+                |> List.sortBy .value
+                |> List.reverse
+    in
+    viewSimpleChartForData data
 
 
 viewDivide : List (List Int) -> Html Msg
