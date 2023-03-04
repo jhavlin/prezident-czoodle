@@ -271,6 +271,25 @@ view model =
             , viewOrder (List.map .order model.votes)
             ]
         , section [ class "wide" ]
+            [ h1 [] [ text "Metoda jednoho přenosného hlasu" ]
+            , p []
+                [ text <|
+                    String.concat
+                        [ "Toto hlasování je zobecněním současné dvoukolové volby na více kol. Na rozdíl"
+                        , " od hlasování řazením (Bordova hlasování) zachovává většinový charakter."
+                        ]
+                ]
+            , p [ class "for-valid" ]
+                [ text <|
+                    String.concat
+                        [ "Opět vyhrál Pavel Fischer. Zajímavé je, že bylo potřeba všech devět kol,"
+                        , " aby dosáhl nadpoloviční většiny hlasů."
+                        ]
+                ]
+            , p [] [ text "Používá se metoda jednoho přenosného hlasu s vyřazováním podle Bordova hlasování (Single transferable vote with Borda elimination)." ]
+            , viewSTV (List.map .order model.votes)
+            ]
+        , section [ class "wide" ]
             [ h1 [] [ text "Hvězdičkové hlasování" ]
             , p [ class "for-valid" ]
                 [ text <|
@@ -740,6 +759,120 @@ viewOrder pointsList =
                 |> Array.map (\v -> toFloat (round ((v * 100) / toFloat n)) / 100)
     in
     viewSimpleChart counted
+
+
+viewSTV : List (List Int) -> Html Msg
+viewSTV pointsList =
+    let
+        majority =
+            ((List.length pointsList |> toFloat) / 2 |> floor) + 1
+
+        round : Array Bool -> { firstPlaces : List ( Int, Int ), totalPoints : List ( Int, Int ) }
+        round active =
+            let
+                fn :
+                    List Int
+                    -> { firstPlacesDict : Dict Int Int, totalPointsDict : Dict Int Int }
+                    -> { firstPlacesDict : Dict Int Int, totalPointsDict : Dict Int Int }
+                fn votes { firstPlacesDict, totalPointsDict } =
+                    let
+                        order =
+                            List.indexedMap Tuple.pair votes
+                                |> List.filter (\( i, _ ) -> (Array.get i active |> Maybe.withDefault False) == True)
+                                |> List.sortBy Tuple.second
+                                |> List.map Tuple.first
+                                |> List.indexedMap (\i id -> ( id, i ))
+                                |> List.reverse
+
+                        winner =
+                            List.head order |> Maybe.map Tuple.first |> Maybe.withDefault -1
+
+                        increase increment current =
+                            case current of
+                                Nothing ->
+                                    Just increment
+
+                                Just v ->
+                                    Just (v + increment)
+
+                        updatedFirstPlaces =
+                            Dict.update winner (increase 1) firstPlacesDict
+
+                        updateTotalInner ( id, points ) dict =
+                            Dict.update id (increase points) dict
+
+                        updatedTotalPoints =
+                            List.foldl updateTotalInner totalPointsDict order
+                    in
+                    { totalPointsDict = updatedTotalPoints, firstPlacesDict = updatedFirstPlaces }
+
+                dicts =
+                    List.foldl fn { firstPlacesDict = Dict.empty, totalPointsDict = Dict.empty } pointsList
+            in
+            { firstPlaces = Dict.toList dicts.firstPlacesDict |> List.sortBy Tuple.second |> List.reverse
+            , totalPoints = Dict.toList dicts.totalPointsDict |> List.sortBy Tuple.second
+            }
+
+        solve : Int -> Array Bool -> List { firstPlaces : List ( Int, Int ), totalPoints : List ( Int, Int ) }
+        solve roundsLeft active =
+            let
+                results =
+                    round active
+
+                dropOut =
+                    List.head results.totalPoints |> Maybe.map Tuple.first |> Maybe.withDefault -1
+
+                updatedActive =
+                    Array.set dropOut False active
+
+                roundResult =
+                    { firstPlaces = results.firstPlaces, totalPoints = results.totalPoints }
+            in
+            if roundsLeft > 1 then
+                roundResult :: solve (roundsLeft - 1) updatedActive
+
+            else
+                [ roundResult ]
+
+        firstView ( id, points ) =
+            let
+                cls =
+                    if points >= majority then
+                        class "stv-winner"
+
+                    else
+                        class ""
+            in
+            span [ cls ] [ text <| String.concat [ idToLabel id, ": ", String.fromInt points ] ]
+
+        totalView ( id, points ) =
+            span [] [ text <| String.concat [ idToLabel id, ": ", String.fromInt points ] ]
+
+        firstPlaces roundResults =
+            List.map firstView roundResults.firstPlaces
+
+        totals roundResults =
+            List.map totalView roundResults.totalPoints
+
+        roundView index roundResults =
+            div []
+                [ div [ class "stv-round" ] [ text <| String.concat [ String.fromInt (index + 1), ". kolo " ] ]
+                , div [ class "stv-row-order" ] (List.intersperse (text ", ") <| firstPlaces roundResults)
+                , div [ class "stv-row-total" ] (List.intersperse (text ", ") <| List.reverse <| totals roundResults)
+                ]
+    in
+    div []
+        (div []
+            [ text <|
+                String.concat
+                    [ "Pro výhru je nutné získat alespoň ", String.fromInt majority, " hlasů na prvním místě v daném kole." ]
+            ]
+            :: List.indexedMap
+                (\i r -> roundView i r)
+                (solve (Array.length Candidates.all - 1)
+                    (Array.initialize (Array.length Candidates.all) (always True))
+                )
+        )
 
 
 viewStar : List (List Int) -> Html Msg

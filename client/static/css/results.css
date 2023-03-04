@@ -87,6 +87,39 @@ p+.short-result-list {
     font-weight: bold;
 }
 
+.stv-round {
+    margin-top: 1em;
+    font-weight: bold;
+}
+
+.stv-row-order {
+    margin: 0.5em 0;
+}
+
+.stv-row-total {
+    color: gray;
+    font-size: 80%;
+}
+
+
+.stv-row-order>span,
+.stv-row-total>span {
+    white-space: nowrap;
+}
+
+.stv-row-total span:last-child {
+    text-decoration: line-through;
+}
+
+.stv-winner {
+    color: #43e343;
+    font-weight: bold;
+}
+
+.stv-winner::after {
+    content: "🥇";
+}
+
 .emoji-results .short-result-list-item {
     display: flex;
     flex-wrap: wrap;
